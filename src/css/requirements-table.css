@@ -1,0 +1,11 @@
+.requirements-table td {
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+/* Make the cells containing the icon and buttons shrink */
+.requirements-table td:first-child,
+.requirements-table td:last-child {
+    width: 0.1%;
+    padding: 0.3rem 0.5rem;
+}
