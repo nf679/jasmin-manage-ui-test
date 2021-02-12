@@ -3,9 +3,6 @@ import Cookies from 'js-cookie';
 import { withScope } from './utils';
 
 
-const apiRoot = "http://localhost:8000/api";
-
-
 class HttpError extends Error {
     constructor(status, statusText, responseText) {
         super(statusText);
@@ -34,9 +31,6 @@ const sleep = (ms) => (new Promise(resolve => setTimeout(resolve, ms)));
 
 
 const apiFetch = async (url, options = {}) => {
-    if( !url ) console.trace();
-    // Add the API root to the url unless it is absolute
-    const absoluteUrl = /^https?:\/\//.test(url) ? url : (apiRoot + url);
     // Populate the required headers for the request
     const headers = {};
     // For POST/PUT/DELETE, declare the content type and include the CSRF token if present
@@ -46,15 +40,29 @@ const apiFetch = async (url, options = {}) => {
         const csrfToken = Cookies.get('csrftoken');
         if( csrfToken ) headers['X-CSRFToken'] = csrfToken;
     }
-    await sleep(2000);
     // Make the actual request, injecting the cookie credentials and headers
-    const response = await fetch(absoluteUrl, { ...options, headers, credentials: 'include' });
+    const response = await fetch(url, { ...options, headers, credentials: 'include' });
     // For a 204, just return
     if( response.status === 204 ) return;
     // Any other successful response should be JSON
     if( response.ok ) return await response.json();
-    // An error response may not be, so the HttpError accepts plain text
-    throw new HttpError(response.status, response.statusText, await response.text());
+    // An error response may not be JSON, so read the response as text
+    const responseText = await response.text();
+    // If the response indicates that the request requires authentication, redirect to auth
+    if( [401, 403].includes(response.status) ) {
+        // These responses will be JSON and should have a code
+        const code = JSON.parse(responseText).code;
+        // Some auth schemes use 401 to indicate lack of credentials, and some use
+        // 403 with a code of not_authenticated - we need to catch both
+        if( response.status === 401 || code === "not_authenticated" ) {
+            // Get the path to redirect back to from the current location
+            const currentPath = new URL(window.location.href).pathname;
+            window.location = `/auth/login/?next=${currentPath}`;
+            // Wait for the browser to redirect
+            await sleep(2000);
+        }
+    }
+    throw new HttpError(response.status, response.statusText, responseText);
 };
 
 

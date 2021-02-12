@@ -808,7 +808,7 @@ const ProvisionedSummary = ({ project, service, requirements }) => {
                 {categoryResources.map(resource => {
                     const amount = provisionedAmounts[resource.data.id] || 0;
                     return (
-                        <Col>
+                        <Col key={resource.data.id}>
                             <Card className="mb-2 text-center">
                                 <Card.Body
                                     className={`p-2 ${amount === 0 && "text-muted"}`}
