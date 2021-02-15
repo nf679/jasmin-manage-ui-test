@@ -99,6 +99,8 @@ export const ProjectCreatedAtListItem = ({ project }) => {
 
 const ProjectMetaCard = ({ project }) => {
     const notify = useNotifications();
+    const projectServices = project.nested("services");
+
     const handleClick = async () => {
         // If the submission fails, make a notification with the error
         try {
@@ -108,24 +110,31 @@ const ProjectMetaCard = ({ project }) => {
             notify({ ...notificationFromError(error), duration: 5000 });
         }
     };
+
     return (
         <div className="sticky-top pt-3">
-            <Card>
+            <Card style={{ borderWidth: '2px' }}>
                 <ListGroup variant="flush">
                     <ListGroup.Item className="text-center">
-                        <Button
-                            variant="primary"
-                            size="lg"
-                            onClick={handleClick}
-                            disabled={project.data.status !== "EDITABLE" || project.updating}
-                        >
-                            <div className="d-flex align-items-center">
-                                {project.updating &&
-                                    <Spinner as="span" animation="border" size="sm" className="mr-2" />
-                                }
-                                Submit for review
-                            </div>
-                        </Button>
+                        <ButtonGroup>
+                            <ServiceCreateButton
+                                project={project}
+                                services={projectServices}
+                            />
+                            <Button
+                                variant="primary"
+                                size="lg"
+                                onClick={handleClick}
+                                disabled={project.data.status !== "EDITABLE" || project.updating}
+                            >
+                                <div className="d-flex align-items-center">
+                                    {project.updating &&
+                                        <Spinner as="span" animation="border" size="sm" className="mr-2" />
+                                    }
+                                    Submit for review
+                                </div>
+                            </Button>
+                        </ButtonGroup>
                     </ListGroup.Item>
                     <ListGroup.Item className="markdown">
                         <ReactMarkdown children={project.data.description} />
@@ -173,7 +182,7 @@ const ServiceCreateButton = ({ project, services }) => {
             // Disable the button unless the project is editable
             disabled={project.data.status !== "EDITABLE" || project.updating}
         >
-            New service
+            Add service
         </Button>
 
         <Resource.Form.Context.Create
@@ -834,7 +843,7 @@ const ProjectServiceCard = ({ project, service }) => {
     const resources = useResources();
     const requirements = service.nested("requirements");
     return (
-        <Card className="mb-3">
+        <Card className="mb-3" style={{ borderWidth: '3px' }}>
             <Card.Header>
                 <Resource.Text resource={categories} resourceName="categories">
                     {data => {
@@ -937,14 +946,6 @@ const ProjectEdit = ({ project }) => {
                                             />
                                         </Col>
                                     ))}
-                                    <Col>
-                                        <Card className="text-center" body>
-                                            <ServiceCreateButton
-                                                project={project}
-                                                services={projectServices}
-                                            />
-                                        </Card>
-                                    </Col>
                                 </Row>
                             );
                         }}
