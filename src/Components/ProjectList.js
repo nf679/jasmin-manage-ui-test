@@ -109,7 +109,7 @@ const ProjectCard = ({ project }) => {
     // If not, use the summary count from when we loaded the projects
     const projectServices = project.nested("services");
     const numServices = projectServices.initialised ?
-        Object.keys(projectServices).length :
+        Object.keys(projectServices.data).length :
         (project.num_services || 0);
     // Same for the requirements
     const projectRequirements = projectServices.aggregate("requirements");
