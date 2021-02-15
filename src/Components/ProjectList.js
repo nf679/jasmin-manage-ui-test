@@ -105,8 +105,17 @@ const ProjectCreateButton = ({ projects }) => {
 
 
 const ProjectCard = ({ project }) => {
+    // If the services have been initialised, use an accurate count
+    // If not, use the summary count from when we loaded the projects
     const projectServices = project.nested("services");
+    const numServices = projectServices.initialised ?
+        Object.keys(projectServices).length :
+        (project.num_services || 0);
+    // Same for the requirements
     const projectRequirements = projectServices.aggregate("requirements");
+    const numRequirements = projectRequirements.initialised ?
+        Object.keys(projectRequirements.data).length :
+        (project.num_requirements || 0);
     return (
         <Card className="mb-3">
             <Card.Header>
@@ -116,28 +125,9 @@ const ProjectCard = ({ project }) => {
                 <ProjectStatusListItem project={project} />
                 <ProjectConsortiumListItem project={project} />
                 <ListGroup.Item>
-                    <Resource.Multi resources={[projectServices, projectRequirements]}>
-                        <Resource.Loading>
-                            <SpinnerWithText size="sm">Loading service info...</SpinnerWithText>
-                        </Resource.Loading>
-                        <Resource.Unavailable>
-                            <span className="text-danger">
-                                <i className="fas fa-exclamation-triangle mr-2"></i>
-                                Unable to load service information.
-                            </span>
-                        </Resource.Unavailable>
-                        <Resource.Available>
-                            {([services, requirements]) => {
-                                const numServices = Object.keys(services).length;
-                                const numRequirements = Object.keys(requirements).length;
-                                return (
-                                    "Project has " +
-                                    `${numRequirements} requirement${numRequirements !== 1  ? 's' : ''} in ` +
-                                    `${numServices} service${numServices !== 1  ? 's' : ''}.`
-                                );
-                            }}
-                        </Resource.Available>
-                    </Resource.Multi>
+                    Project has{" "}
+                    {numRequirements} requirement{numRequirements !== 1  ? 's' : ''} in{" "}
+                    {numServices} service{numServices !== 1  ? 's' : ''}
                 </ListGroup.Item>
                 <ProjectCollaboratorsListItem project={project} />
                 <ProjectCreatedAtListItem project={project} />

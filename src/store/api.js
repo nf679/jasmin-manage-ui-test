@@ -186,7 +186,7 @@ export const newResource = resourcePath => (mutate, getState, getParent) => ({
                 resourceList.forEach(resource => {
                     state.data[resource.id] = state.data.hasOwnProperty(resource.id) ?
                         // If there is an existing instance, update it with the new data
-                        Object.assign(state.data[resource.id], { data: resource }) :
+                        Object.assign(state.data[resource.id].data, resource) :
                         // If there is no existing instance, make a new one
                         newInstance(resource)(...withScope(mutate, getState, ["data", resource.id]));
                 });
@@ -246,6 +246,15 @@ export const newResource = resourcePath => (mutate, getState, getParent) => ({
         const resource = getState();
         // If there are no keys, the aggregate resource is this resource
         if( keys.length === 0 ) return resource;
+        // If this resource is not initialised, then there is nothing to aggregate
+        // But the aggregate resource should also be considered not initialised
+        if( !resource.initialised ) {
+            return {
+                ...defaultResource,
+                // Initialising the aggregate means initialising the nested resources
+                initialise: () => getState().initNested(...keys)
+            };
+        }
         // For each item in our data, use the first key to get a nested resource then
         // aggregate the remaining keys over the nested resource
         // Then collapse those resources to get the aggregate state
@@ -288,7 +297,7 @@ export const newInstance = (initialData) => (mutate, getState, getParent) => ({
     nestedResources: Object.assign(
         {},
         ...Object.entries(initialData._links)
-            .filter(([name, _]) => name !== "self")
+            .filter(([name, _]) => !["self", "_links"].includes(name))
             .map(([name, url]) => ({
                 [name]: newResource(url)(
                     // The resource requires scoped mutate and getState
@@ -311,7 +320,7 @@ export const newInstance = (initialData) => (mutate, getState, getParent) => ({
             // Update the state if the update was successful
             mutate(state => {
                 state.updating = false;
-                state.data = resource;
+                Object.assign(state.data, resource);
             });
         }
         catch(error) {
@@ -355,7 +364,7 @@ export const newInstance = (initialData) => (mutate, getState, getParent) => ({
                 // We are no longer updating
                 state.updating = false;
                 // Update the resource data
-                state.data = resource;
+                Object.assign(state.data, resource);
             });
         }
         catch(error) {

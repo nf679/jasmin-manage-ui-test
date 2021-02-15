@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Redirect, useParams } from 'react-router-dom';
 
 import Alert from 'react-bootstrap/Alert';
+import Badge from 'react-bootstrap/Badge';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Card from 'react-bootstrap/Card';
@@ -65,27 +66,123 @@ export const ProjectConsortiumListItem = ({ project }) => {
 };
 
 
-export const ProjectCollaboratorsListItem = ({ project }) => {
+const CollaboratorsList = ({ collaborators }) => {
+    const currentUser = useCurrentUser();
+    // Sort the collaborators by display name
+    // Use the username as a fallback
+    const displayName = c => c.data.user.last_name ?
+        `${c.data.user.first_name} ${c.data.user.last_name} (${c.data.user.username})` :
+        c.data.user.username;
+    const sortedCollaborators = sortByKey(Object.values(collaborators.data), displayName);
+    return (
+        <ListGroup>
+            {sortedCollaborators.map(collaborator => {
+                const createdAt = moment(collaborator.data.created_at).fromNow();
+                return (
+                    <ListGroup.Item
+                        key={collaborator.data.id}
+                        className="d-flex align-items-center"
+                    >
+                        <div className="mr-auto">
+                            <span className="d-block">
+                                {displayName(collaborator)}
+                                {collaborator.data.user.id === currentUser.data.id && (
+                                    <Badge
+                                        variant="warning"
+                                        style={{ fontSize: '90%' }}
+                                        className="ml-2"
+                                    >
+                                        You
+                                    </Badge>
+                                )}
+                            </span>
+                            <small className="text-muted">Added {createdAt}</small>
+                        </div>
+                        <Badge
+                            variant="success"
+                            style={{ fontSize: '100%' }}
+                        >
+                            {collaborator.data.role}
+                        </Badge>
+                    </ListGroup.Item>
+                );
+            })}
+        </ListGroup>
+    )
+};
+
+
+const ProjectCollaboratorsLink = ({ children, project }) => {
+    const [modalVisible, setModalVisible] = useState(false);
+    const showModal = () => setModalVisible(true);
+    const hideModal = () => setModalVisible(false);
+
+    const projectCollaborators = project.nested("collaborators");
+
+    return (<>
+        <Button variant="link" className="p-0" onClick={showModal}>
+            <strong>{children}</strong>
+        </Button>
+        <Modal show={modalVisible} onHide={hideModal}>
+            <Modal.Header>
+                <Modal.Title>Project collaborators</Modal.Title>
+            </Modal.Header>
+            <Resource resource={projectCollaborators}>
+                <Resource.Loading>
+                    <Modal.Body>
+                        <div className="d-flex justify-content-center my-5">
+                            <SpinnerWithText>Loading collaborators...</SpinnerWithText>
+                        </div>
+                    </Modal.Body>
+                </Resource.Loading>
+                <Resource.Unavailable>
+                    <Modal.Body>
+                        <Alert variant="danger">Unable to load collaborators.</Alert>
+                    </Modal.Body>
+                </Resource.Unavailable>
+                <Resource.Available>
+                    {data => <CollaboratorsList collaborators={projectCollaborators} />}
+                </Resource.Available>
+            </Resource>
+            <Modal.Footer>
+                <Button onClick={hideModal}>Cancel</Button>
+            </Modal.Footer>
+        </Modal>
+    </>);
+};
+
+
+export const ProjectCollaboratorsListItem = ({ project, modalEnabled = false }) => {
     const currentUser = useCurrentUser();
     const projectCollaborators = project.nested("collaborators");
+    // If the collaborators are loaded, use an accurate count
+    // Otherwise use the summary number from loading the project list
+    const numCollaborators = projectCollaborators.initialised ?
+        Object.keys(projectCollaborators.data).length :
+        (project.num_collaborators || 0);
+    // Same for the user's role (we can safely assume the current user has been successfully
+    // initialised higher up the component tree)
+    const userRole = projectCollaborators.initialised ?
+        Object.values(projectCollaborators.data)
+            .filter(c => c.data.user.id === currentUser.data.id)
+            .shift().data.role :
+        (project.current_user_role || "UNKNOWN ROLE");
+    // If the modal is enabled, render a link that opens it
+    // If not, render the number of collaborators as a strong
+    const CollaboratorsComponent = modalEnabled ? ProjectCollaboratorsLink : "strong";
     return (
         <ListGroup.Item>
-            <Resource.Text resource={projectCollaborators} resourceName="collaborators">
-                {data => {
-                    const collaboratorCount = Object.keys(data).length;
-                    const userRole = Object.values(data)
-                        .filter(c => c.data.user.id === currentUser.data.id)
-                        .shift().data.role;
-                    return (<>
-                        <p className="mb-2">
-                            Project has <strong>{collaboratorCount} collaborator{collaboratorCount !== 1 ? 's' : ''}</strong>.
-                        </p>
-                        <p className="mb-0">
-                            You are{' '} {/^[aeiou]/i.test(userRole) ? 'an' : 'a'}{' '} <strong>{userRole.toLowerCase()}</strong>.
-                        </p>
-                    </>)
-                }}
-            </Resource.Text>
+            <p className="mb-2">
+                Project has{" "}
+                <CollaboratorsComponent project={project}>
+                    {numCollaborators} collaborator{numCollaborators !== 1 ? 's' : ''}
+                </CollaboratorsComponent>.
+            </p>
+            <p className="mb-0">
+                You are{' '}
+                {/^[aeiou]/i.test(userRole) ? 'an' : 'a'}{' '}
+                <strong>{userRole.toLowerCase()}</strong>.
+            </p>
         </ListGroup.Item>
     );
 };
@@ -141,7 +238,7 @@ const ProjectMetaCard = ({ project }) => {
                     </ListGroup.Item>
                     <ProjectStatusListItem project={project} />
                     <ProjectConsortiumListItem project={project} />
-                    <ProjectCollaboratorsListItem project={project} />
+                    <ProjectCollaboratorsListItem project={project} modalEnabled={true} />
                     <ProjectCreatedAtListItem project={project} />
                 </ListGroup>
             </Card>
