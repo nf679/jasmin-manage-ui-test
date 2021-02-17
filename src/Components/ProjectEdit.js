@@ -159,14 +159,14 @@ export const ProjectCollaboratorsListItem = ({ project, modalEnabled = false }) 
     // Otherwise use the summary number from loading the project list
     const numCollaborators = projectCollaborators.initialised ?
         Object.keys(projectCollaborators.data).length :
-        (project.num_collaborators || 0);
+        (project.data.num_collaborators || 0);
     // Same for the user's role (we can safely assume the current user has been successfully
     // initialised higher up the component tree)
     const userRole = projectCollaborators.initialised ?
         Object.values(projectCollaborators.data)
             .filter(c => c.data.user.id === currentUser.data.id)
             .shift().data.role :
-        (project.current_user_role || "UNKNOWN ROLE");
+        (project.data.current_user_role || "UNKNOWN ROLE");
     // If the modal is enabled, render a link that opens it
     // If not, render the number of collaborators as a strong
     const CollaboratorsComponent = modalEnabled ? ProjectCollaboratorsLink : "strong";

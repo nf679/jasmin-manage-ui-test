@@ -110,12 +110,12 @@ const ProjectCard = ({ project }) => {
     const projectServices = project.nested("services");
     const numServices = projectServices.initialised ?
         Object.keys(projectServices.data).length :
-        (project.num_services || 0);
+        (project.data.num_services || 0);
     // Same for the requirements
     const projectRequirements = projectServices.aggregate("requirements");
     const numRequirements = projectRequirements.initialised ?
         Object.keys(projectRequirements.data).length :
-        (project.num_requirements || 0);
+        (project.data.num_requirements || 0);
     return (
         <Card className="mb-3">
             <Card.Header>

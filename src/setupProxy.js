@@ -18,6 +18,8 @@ const proxy = createProxyMiddleware(
     {
         target: backendUrl,
         changeOrigin: true,
+        // Make sure to add x-forward headers
+        xfwd: true,
         // Rewrite the response to replace instances of the backend URL with the dev server URL
         // This allows the UI to use the links as-is without needing CORS
         selfHandleResponse: true,
