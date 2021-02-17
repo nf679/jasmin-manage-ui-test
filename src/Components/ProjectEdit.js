@@ -806,20 +806,20 @@ const RequirementRow = ({ project, service, requirement }) => {
             <td>{requirement.data.start_date}</td>
             <td>{requirement.data.end_date}</td>
             <td>
-                <ButtonGroup size="sm">
-                    <RequirementEditButton
-                        project={project}
-                        service={service}
-                        requirement={requirement}
-                        disabled={!editable}
-                    />
-                    <RequirementDeleteButton
-                        project={project}
-                        service={service}
-                        requirement={requirement}
-                        disabled={!editable}
-                    />
-                </ButtonGroup>
+                {editable && (
+                    <ButtonGroup size="sm">
+                        <RequirementEditButton
+                            project={project}
+                            service={service}
+                            requirement={requirement}
+                        />
+                        <RequirementDeleteButton
+                            project={project}
+                            service={service}
+                            requirement={requirement}
+                        />
+                    </ButtonGroup>
+                )}
             </td>
         </tr>
     </>);
