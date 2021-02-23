@@ -12,6 +12,7 @@ import { useCurrentUser } from '../store';
 
 const ManageNavBar = () => {
     const currentUser = useCurrentUser();
+    // If the user is being impersonated, set a UI hint to indicate that
     return (
         <Navbar expand="lg" variant="dark" bg="success">
             <Navbar.Brand><Logo height={30} /></Navbar.Brand>
@@ -23,10 +24,17 @@ const ManageNavBar = () => {
                     </LinkContainer>
                 </Nav>
                 {currentUser.initialised && (
-                    <Navbar.Text>
-                        <i className="fas fa-user mr-2" />
-                        {currentUser.data.username}
-                    </Navbar.Text>
+                    currentUser.data.is_impersonated ? (
+                        <Navbar.Text className="bg-danger px-2">
+                            <i className="fas fa-fw fa-user-secret mr-1" />
+                            {currentUser.data.username}
+                        </Navbar.Text>
+                    ) : (
+                        <Navbar.Text>
+                            <i className="fas fa-fw fa-user mr-1" />
+                            {currentUser.data.username}
+                        </Navbar.Text>
+                    )
                 )}
             </Navbar.Collapse>
         </Navbar>
