@@ -1,5 +1,5 @@
 .requirements-table td {
-    vertical-align: middle;
+    vertical-align: middle !important;
     white-space: nowrap;
     height: 38px;
 }

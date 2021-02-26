@@ -1032,7 +1032,7 @@ const ProjectEdit = ({ project }) => {
                                     return [category.data.name, service.data.name];
                                 }
                             );
-                            return (
+                            return sortedServices.length > 0 ? (
                                 // Use a custom class for xxl breakpoint
                                 <Row xs={1} className="row-cols-xxl-2">
                                     {sortedServices.map(service => (
@@ -1044,6 +1044,8 @@ const ProjectEdit = ({ project }) => {
                                         </Col>
                                     ))}
                                 </Row>
+                            ) : (
+                                <Row><Col className="text-center text-muted py-5">No services yet.</Col></Row>
                             );
                         }}
                     </Resource.Available>

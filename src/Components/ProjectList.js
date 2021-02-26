@@ -15,7 +15,7 @@ import { PageHeader } from 'fwtheme-react-jasmin';
 
 import { useNotifications } from 'react-bootstrap-notify';
 
-import { useConsortia, useProjects } from '../store';
+import { useCurrentUser, useConsortia, useProjects } from '../store';
 
 import Resource from './Resource';
 import {
@@ -35,6 +35,7 @@ import {
 
 const ProjectCreateButton = ({ projects }) => {
     const notify = useNotifications();
+    const currentUser = useCurrentUser();
     const consortia = useConsortia();
 
     const [modalVisible, setModalVisible] = useState(false);
@@ -46,6 +47,9 @@ const ProjectCreateButton = ({ projects }) => {
         hideModal();
     };
 
+    // This function limits the consortia that are available to select
+    const consortiumIsAllowed = consortium => currentUser.data.is_staff || consortium.data.is_public;
+    // This function formats the options
     const formatConsortiumOption = (option, { context }) => (
         context === 'menu' ? (
             <>
@@ -85,6 +89,8 @@ const ProjectCreateButton = ({ projects }) => {
                             resourceName="consortium"
                             resourceNamePlural="consortia"
                             required
+                            // Only show allowed consortia
+                            filterResources={consortiumIsAllowed}
                             // Use a custom label renderer
                             formatOptionLabel={formatConsortiumOption}
                         />
