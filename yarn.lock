@@ -12209,13 +12209,12 @@ fsevents@^1.2.7:
 
 "react-bootstrap-notify@github:cedadev/react-bootstrap-notify":
   version: 0.1.0
-  resolution: "react-bootstrap-notify@https://github.com/cedadev/react-bootstrap-notify.git#commit=e32ae44d37c72997b819a13cfd11a15c00a6e10e"
+  resolution: "react-bootstrap-notify@https://github.com/cedadev/react-bootstrap-notify.git#commit=c2c100ec1e9e41f5532618defd196b8c46d48356"
   peerDependencies:
     react: ^17.0.1
     react-bootstrap: ^1.4.0
     react-dom: ^17.0.1
-    zustand: ^3.2.0
-  checksum: 5b4a6c1528c57018b03aaf559e2187efef45b4aa208edaf43341e6656a74b05d7dc62b2af4d79ac8303f339b28e197cd12852d2b812679ff6bfc61a711ce1a51
+  checksum: 44f40bb0f2d8c411eb7d8f85a9c8694748a7f8f53dcfd8ee2c32c9910706a03fcd39d0578063ee643d54f74552fa3d4554920979d6f7a92bcdf0347c4e9408b4
   languageName: node
   linkType: hard
 
