@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
@@ -8,7 +8,6 @@ import Spinner from 'react-bootstrap/Spinner';
 import Alert from 'react-bootstrap/Alert';
 
 import {
-    sortByKey,
     Input,
     Select,
     SpinnerWithText
@@ -19,33 +18,23 @@ const ResourceContext = createContext();
 
 
 /**
- * Higher-order component that creates a component that accepts and
- * initialises a resource.
+ * Component that makes a resource available further down the tree using a context.
  */
-export const withResource = WrappedComponent => ({ resource, ...props }) => {
-    // When the component is mounted, ensure that the resource is initialised
-    useEffect(() => {
-        // useEffect expects the return value to be a cleanup function
-        // So we can't pass an async function directly as that returns a promise
-        // Hence we have to make and call an anonymous function
-        (async () => {
-            // The error will be reported as part of the resource, so suppress it
-            try { await resource.initialise(); }
-            catch(error) { /* NOOP */ }
-        })();
-    }, []);
-    // Then return the wrapped component
-    return <WrappedComponent resource={resource} {...props} />;
+const Resource = ({ resource, children }) => {
+    // If the resource hasn't been initialised by the time it hits this component,
+    // initiate a fetch
+    // Note that because of how resources are implemented, this will not lead to a
+    // double fetch if there is already a fetch in progress
+    useEffect(
+        () => { if( !resource.initialised ) resource.fetch(); },
+        []
+    )
+    return (
+        <ResourceContext.Provider value={resource}>
+            {children}
+        </ResourceContext.Provider>
+    );
 };
-
-
-/**
- * Component that makes sure a resource is initialised and passes it down the tree
- * using a context.
- */
-const Resource = withResource(({ resource, children }) => (
-    <ResourceContext.Provider value={resource}>{children}</ResourceContext.Provider>
-));
 
 
 /**
@@ -132,7 +121,6 @@ Resource.Count = ({ resource, resourceName, resourceNamePlural = `${resourceName
  */
 Resource.Multi = ({ resources, children }) => {
     // Make a fake resource whose state is a merge of the given resources
-    // with an initialise function that just initialises all the resources
     const resource = {
         ...resources.reduce(
             (multiResource, resource) => ({
@@ -143,7 +131,8 @@ Resource.Multi = ({ resources, children }) => {
             }),
             { initialised: true, fetching: false, fetchError: null, data: [] }
         ),
-        initialise: () => Promise.all(resources.map(r => r.initialise()))
+        // Fetch is a no-op for a multi-resource
+        fetch: () => {}
     };
     // Pass the fake resource to the resource component
     return <Resource resource={resource}>{children}</Resource>;
@@ -160,9 +149,22 @@ Resource.DeleteButton = ({
     spinnerProps = {},
     ...props
 }) => {
+    // It is likely that the delete button will be unmounted when the instance is deleted
+    // So on a successful delete, we only actually need to hide the modal when the component
+    // is still mounted
+    // But to know that, we need to track the mounted state - to do this we use a ref
+    const isMounted = useRef();
+    useEffect(
+        () => {
+            isMounted.current = true;
+            return () => { isMounted.current = false; };
+        },
+        []
+    );
+
     const [modalVisible, setModalVisible] = useState(false);
     const showModal = () => setModalVisible(true);
-    const hideModal = () => setModalVisible(false);
+    const hideModal = () => { if( isMounted.current ) setModalVisible(false); };
 
     const mergedSpinnerProps = Object.assign(
         // Default spinner props
@@ -229,8 +231,6 @@ const FormDisabledContext = createContext();
 const FormInProgressContext = createContext();
 // Context to hold the form set field function
 const FormSetFieldContext = createContext();
-// Context to hold the submit function
-const FormSubmitContext = createContext();
 // Context to hold the form cancel function
 const FormCancelContext = createContext();
 
@@ -243,14 +243,13 @@ Resource.Form.Context.useErrorsContext = () => useContext(FormErrorsContext);
 Resource.Form.Context.useDisabledContext = () => useContext(FormDisabledContext);
 Resource.Form.Context.useInProgressContext = () => useContext(FormInProgressContext);
 Resource.Form.Context.useSetFieldContext = () => useContext(FormSetFieldContext);
-Resource.Form.Context.useSubmitContext = () => useContext(FormSubmitContext);
 Resource.Form.Context.useCancelContext = () => useContext(FormCancelContext);
 
 
 /**
- * Context provider for resource form state.
+ * Base component for forms that manipulate resources and instances.
  */
-Resource.Form.Context.BaseProvider = ({
+const BaseResourceForm = ({
     children,
     onChange,
     onSubmit,
@@ -259,7 +258,8 @@ Resource.Form.Context.BaseProvider = ({
     onCancel,
     initialData = {},
     // Indicates if the form should be disabled
-    disabled = false
+    disabled = false,
+    ...formProps
 }) => {
     // State for the form data
     const [formData, setFormData] = useState(initialData);
@@ -330,11 +330,11 @@ Resource.Form.Context.BaseProvider = ({
                 <FormDisabledContext.Provider value={inProgress || disabled}>
                     <FormInProgressContext.Provider value={inProgress}>
                         <FormSetFieldContext.Provider value={setField}>
-                            <FormSubmitContext.Provider value={handleSubmit}>
-                                <FormCancelContext.Provider value={handleCancel}>
+                            <FormCancelContext.Provider value={handleCancel}>
+                                <Form {...formProps} onSubmit={handleSubmit}>
                                     {children}
-                                </FormCancelContext.Provider>
-                            </FormSubmitContext.Provider>
+                                </Form>
+                            </FormCancelContext.Provider>
                         </FormSetFieldContext.Provider>
                     </FormInProgressContext.Provider>
                 </FormDisabledContext.Provider>
@@ -345,23 +345,23 @@ Resource.Form.Context.BaseProvider = ({
 
 
 /**
- * Context provider for creating a new instance of a resource.
+ * Form for creating a new instance of a resource.
  */
-Resource.Form.Context.Create = ({ children, resource, ...props }) => {
+Resource.Form.CreateForm = ({ children, resource, ...props }) => {
     // On submit, create a resource instance with the data
     const handleSubmit = async formData => await resource.create(formData);
     return (
-        <Resource.Form.Context.BaseProvider {...props} onSubmit={handleSubmit}>
+        <BaseResourceForm {...props} onSubmit={handleSubmit}>
             {children}
-        </Resource.Form.Context.BaseProvider>
+        </BaseResourceForm>
     );
 };
 
 
 /**
- * Context provider for updating a resource instance.
+ * Form for updating a resource instance.
  */
-Resource.Form.Context.Update = ({
+Resource.Form.UpdateForm = ({
     children,
     instance,
     fields,
@@ -382,42 +382,9 @@ Resource.Form.Context.Update = ({
     // On submit, update the instance with the form data
     const handleSubmit = async formData => await instance.update(formData);
     return (
-        <Resource.Form.Context.BaseProvider
-            {...props}
-            onSubmit={handleSubmit}
-            initialData={initialData}
-        >
+        <BaseResourceForm {...props} onSubmit={handleSubmit} initialData={initialData}>
             {children}
-        </Resource.Form.Context.BaseProvider>
-    );
-};
-
-
-/**
- * Renders a form for the parent resource form context.
- *
- * Must be nested inside a Resource.Form.ContextProvider.
- */
-Resource.Form.BaseForm = ({ children, ...props }) => {
-    // Return a form with submit bound to the context
-    const handleSubmit = Resource.Form.Context.useSubmitContext();
-    return <Form {...props} onSubmit={handleSubmit}>{children}</Form>;
-};
-
-
-/**
- * Renders a modal form for the current resource form context.
- *
- * Must be nested inside a Resource.Form.ContextProvider.
- */
-Resource.Form.ModalForm = ({ children, show, modalProps = {}, ...props }) => {
-    // Return a form nested inside a modal with hide bound to the cancellation
-    const handleCancel = Resource.Form.Context.useCancelContext();
-    const mergedModalProps = { backdrop: "static", keyboard: false, ...modalProps };
-    return (
-        <Modal {...mergedModalProps} show={show} onHide={handleCancel}>
-            <Resource.Form.BaseForm {...props}>{children}</Resource.Form.BaseForm>
-        </Modal>
+        </BaseResourceForm>
     );
 };
 
@@ -538,11 +505,11 @@ Resource.Form.CancelButton = ({ children, disabled, ...props }) => {
 /**
  * Renders a select control to select a resource instance.
  */
-Resource.Form.ResourceSelect = withResource(({
+Resource.Form.ResourceSelect = ({
     resource,
     resourceName,
     resourceNamePlural = `${resourceName}s`,
-    filterResources = resource => true,
+    filterResources = _ => true,
     ...props
 }) => {
     // Pass the available resources as the options
@@ -561,7 +528,7 @@ Resource.Form.ResourceSelect = withResource(({
     };
     // Render the select with the available options
     return <Select {...selectProps} options={options} />;
-});
+};
 
 
 export default Resource;

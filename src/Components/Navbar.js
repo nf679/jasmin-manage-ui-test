@@ -7,15 +7,16 @@ import { LinkContainer } from 'react-router-bootstrap';
 
 import { Logo } from 'fwtheme-react-jasmin';
 
-import { useCurrentUser } from '../store';
+import { useCurrentUser } from '../api';
 
 
 const ManageNavBar = () => {
     const currentUser = useCurrentUser();
-    // If the user is being impersonated, set a UI hint to indicate that
     return (
         <Navbar expand="lg" variant="dark" bg="success">
-            <Navbar.Brand><Logo height={30} /></Navbar.Brand>
+            <LinkContainer to="/">
+                <Navbar.Brand><Logo height={30} /></Navbar.Brand>
+            </LinkContainer>
             <Navbar.Toggle />
             <Navbar.Collapse>
                 <Nav className="mr-auto">
@@ -24,6 +25,7 @@ const ManageNavBar = () => {
                     </LinkContainer>
                 </Nav>
                 {currentUser.initialised && (
+                    // If the user is being impersonated, set a UI hint to indicate that
                     currentUser.data.is_impersonated ? (
                         <Navbar.Text className="bg-danger px-2">
                             <i className="fas fa-fw fa-user-secret mr-1" />

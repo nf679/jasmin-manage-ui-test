@@ -7711,13 +7711,6 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"immer@npm:^8.0.1":
-  version: 8.0.1
-  resolution: "immer@npm:8.0.1"
-  checksum: a8c8d531af8f968f4d5a2ec3c5eeb6dd6933c69d216b3f8c55275e34c87926d556db4e3d81f5f038e66f9886e874da4ab4f7ffe228e33d718593820e2f57b68f
-  languageName: node
-  linkType: hard
-
 "import-cwd@npm:^2.0.0":
   version: 2.1.0
   resolution: "import-cwd@npm:2.1.0"
@@ -8490,7 +8483,6 @@ fsevents@^1.2.7:
   dependencies:
     fwtheme-react-jasmin: "github:cedadev/fwtheme-react-jasmin"
     http-proxy-middleware: ^1.0.6
-    immer: ^8.0.1
     js-cookie: ^2.2.1
     moment: ^2.29.1
     react: ^17.0.1
@@ -8503,7 +8495,6 @@ fsevents@^1.2.7:
     react-router-dom: ^5.2.0
     react-scripts: ^4.0.2
     react-select: ^4.1.0
-    zustand: ^3.3.1
   languageName: unknown
   linkType: soft
 
@@ -15839,14 +15830,5 @@ resolve@1.18.1:
   version: 0.1.0
   resolution: "yocto-queue@npm:0.1.0"
   checksum: 096c3b40beb2804659539be1605a35c58eb0c85285f94b77b3e924f42ee265c1a40bf9f4153770039517146b469a964d51742395f35ca8135fc9f7e4982b785d
-  languageName: node
-  linkType: hard
-
-"zustand@npm:^3.3.1":
-  version: 3.3.1
-  resolution: "zustand@npm:3.3.1"
-  peerDependencies:
-    react: ">=16.8"
-  checksum: 17504834974ae34ee6c21692a1fe624cf15c08df69629146dab136b354ad6985f048639f06f39551f6786cefa5222b22ccb6e36a138125876519222904138111
   languageName: node
   linkType: hard

@@ -15,7 +15,7 @@ import { PageHeader } from 'fwtheme-react-jasmin';
 
 import { useNotifications } from 'react-bootstrap-notify';
 
-import { useCurrentUser, useConsortia, useProjects } from '../store';
+import { useCurrentUser, useConsortia, useProjects } from '../api';
 
 import Resource from './Resource';
 import {
@@ -64,15 +64,15 @@ const ProjectCreateButton = ({ projects }) => {
     return (<>
         <Button onClick={showModal} size="lg" variant="success">New project</Button>
 
-        <Resource.Form.Context.Create
-            resource={projects}
-            onSuccess={hideModal}
-            onError={handleError}
-            onCancel={hideModal}
-            // Disable the form if the consortia are not initialised
-            disabled={!consortia.initialised}
-        >
-            <Resource.Form.ModalForm show={modalVisible}>
+        <Modal show={modalVisible} backdrop="static" keyboard={false}>
+            <Resource.Form.CreateForm
+                resource={projects}
+                onSuccess={hideModal}
+                onError={handleError}
+                onCancel={hideModal}
+                // Disable the form if the consortia are not initialised
+                disabled={!consortia.initialised}
+            >
                 <Modal.Header>
                     <Modal.Title>Create a project</Modal.Title>
                 </Modal.Header>
@@ -104,24 +104,15 @@ const ProjectCreateButton = ({ projects }) => {
                     <Resource.Form.CancelButton>Cancel</Resource.Form.CancelButton>
                     <Resource.Form.SubmitButton>Create</Resource.Form.SubmitButton>
                 </Modal.Footer>
-            </Resource.Form.ModalForm>
-        </Resource.Form.Context.Create>
+            </Resource.Form.CreateForm>
+        </Modal>
     </>);
 };
 
 
 const ProjectCard = ({ project }) => {
-    // If the services have been initialised, use an accurate count
-    // If not, use the summary count from when we loaded the projects
-    const projectServices = project.nested("services");
-    const numServices = projectServices.initialised ?
-        Object.keys(projectServices.data).length :
-        (project.data.num_services || 0);
-    // Same for the requirements
-    const projectRequirements = projectServices.aggregate("requirements");
-    const numRequirements = projectRequirements.initialised ?
-        Object.keys(projectRequirements.data).length :
-        (project.data.num_requirements || 0);
+    const numServices = project.data.num_services || 0;
+    const numRequirements = project.data.num_requirements || 0;
     return (
         <Card className="mb-3">
             <Card.Header>
@@ -132,8 +123,8 @@ const ProjectCard = ({ project }) => {
                 <ProjectConsortiumListItem project={project} />
                 <ListGroup.Item>
                     Project has{" "}
-                    {numRequirements} requirement{numRequirements !== 1  ? 's' : ''} in{" "}
-                    {numServices} service{numServices !== 1  ? 's' : ''}
+                    <strong>{numRequirements} requirement{numRequirements !== 1  ? 's' : ''}</strong> in{" "}
+                    <strong>{numServices} service{numServices !== 1  ? 's' : ''}</strong>.
                 </ListGroup.Item>
                 <ProjectCollaboratorsListItem project={project} />
                 <ProjectCreatedAtListItem project={project} />

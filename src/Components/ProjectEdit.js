@@ -22,15 +22,14 @@ import moment from 'moment';
 
 import { useNotifications } from 'react-bootstrap-notify';
 
-import { PageHeader } from 'fwtheme-react-jasmin';
-
 import {
     useCategories,
     useConsortia,
     useCurrentUser,
-    useProjects,
+    useProject,
     useResources
-} from '../store';
+} from '../api';
+import { useResource as useRestResource } from '../rest-resource';
 
 import Resource from './Resource';
 import { sortByKey, SpinnerWithText, notificationFromError } from './utils';
@@ -112,12 +111,10 @@ const CollaboratorsList = ({ collaborators }) => {
 };
 
 
-const ProjectCollaboratorsLink = ({ children, project }) => {
+const ProjectCollaboratorsLink = ({ children, collaborators }) => {
     const [modalVisible, setModalVisible] = useState(false);
     const showModal = () => setModalVisible(true);
     const hideModal = () => setModalVisible(false);
-
-    const projectCollaborators = project.nested("collaborators");
 
     return (<>
         <Button variant="link" className="p-0" onClick={showModal}>
@@ -127,7 +124,7 @@ const ProjectCollaboratorsLink = ({ children, project }) => {
             <Modal.Header>
                 <Modal.Title>Project collaborators</Modal.Title>
             </Modal.Header>
-            <Resource resource={projectCollaborators}>
+            <Resource resource={collaborators}>
                 <Resource.Loading>
                     <Modal.Body>
                         <div className="d-flex justify-content-center my-5">
@@ -141,7 +138,7 @@ const ProjectCollaboratorsLink = ({ children, project }) => {
                     </Modal.Body>
                 </Resource.Unavailable>
                 <Resource.Available>
-                    {data => <CollaboratorsList collaborators={projectCollaborators} />}
+                    {data => <CollaboratorsList collaborators={collaborators} />}
                 </Resource.Available>
             </Resource>
             <Modal.Footer>
@@ -154,35 +151,42 @@ const ProjectCollaboratorsLink = ({ children, project }) => {
 
 export const ProjectCollaboratorsListItem = ({ project, modalEnabled = false }) => {
     const currentUser = useCurrentUser();
-    const projectCollaborators = project.nested("collaborators");
+    // Create the resource here in order to share the data, but don't initialise
+    // it until it is actually needed by the collaborators modal
+    const collaborators = useRestResource(project.data._links.collaborators, { autoFetch: false });
     // If the collaborators are loaded, use an accurate count
     // Otherwise use the summary number from loading the project list
-    const numCollaborators = projectCollaborators.initialised ?
-        Object.keys(projectCollaborators.data).length :
+    const numCollaborators = collaborators.initialised ?
+        Object.keys(collaborators.data).length :
         (project.data.num_collaborators || 0);
-    // Same for the user's role (we can safely assume the current user has been successfully
-    // initialised higher up the component tree)
-    const userRole = projectCollaborators.initialised ?
-        Object.values(projectCollaborators.data)
-            .filter(c => c.data.user.id === currentUser.data.id)
-            .shift().data.role :
-        (project.data.current_user_role || "UNKNOWN ROLE");
+    // Get the user's collaborator record
+    // Note that we can safely use data even if the collaborators are not initialised
+    // as it will just be an empty dictionary
+    const userCollaborator = Object.values(collaborators.data)
+        .filter(c => c.data.user.id === currentUser.data.id)
+        .shift();
+    // Get the user's role, either from the collaborator record (if it exists) or from the project
+    const userRole = userCollaborator ? userCollaborator.data.role : project.data.current_user_role;
     // If the modal is enabled, render a link that opens it
     // If not, render the number of collaborators as a strong
     const CollaboratorsComponent = modalEnabled ? ProjectCollaboratorsLink : "strong";
     return (
         <ListGroup.Item>
-            <p className="mb-2">
+            <p className={userRole ? "mb-2" : "mb-0"}>
                 Project has{" "}
-                <CollaboratorsComponent project={project}>
+                <CollaboratorsComponent collaborators={collaborators}>
                     {numCollaborators} collaborator{numCollaborators !== 1 ? 's' : ''}
                 </CollaboratorsComponent>.
             </p>
-            <p className="mb-0">
-                You are{' '}
-                {/^[aeiou]/i.test(userRole) ? 'an' : 'a'}{' '}
-                <strong>{userRole.toLowerCase()}</strong>.
-            </p>
+            {userRole && (
+                // Only show the user's role if they have one
+                // For example, consortium managers can view the project but do not have a role
+                <p className="mb-0">
+                    You are{' '}
+                    {/^[aeiou]/i.test(userRole) ? 'an' : 'a'}{' '}
+                    <strong>{userRole.toLowerCase()}</strong>.
+                </p>
+            )}
         </ListGroup.Item>
     );
 };
@@ -194,9 +198,8 @@ export const ProjectCreatedAtListItem = ({ project }) => {
 };
 
 
-const ProjectMetaCard = ({ project }) => {
+const ProjectMetaCard = ({ project, services }) => {
     const notify = useNotifications();
-    const projectServices = project.nested("services");
 
     const handleClick = async () => {
         // If the submission fails, make a notification with the error
@@ -216,7 +219,7 @@ const ProjectMetaCard = ({ project }) => {
                         <ButtonGroup>
                             <ServiceCreateButton
                                 project={project}
-                                services={projectServices}
+                                services={services}
                             />
                             <Button
                                 variant="primary"
@@ -282,15 +285,15 @@ const ServiceCreateButton = ({ project, services }) => {
             Add service
         </Button>
 
-        <Resource.Form.Context.Create
-            resource={services}
-            onSuccess={hideModal}
-            onError={handleError}
-            onCancel={hideModal}
-            // Disable the form if the categories are not initialised
-            disabled={!categories.initialised}
-        >
-            <Resource.Form.ModalForm show={modalVisible}>
+        <Modal show={modalVisible} backdrop="static" keyboard={false}>
+            <Resource.Form.CreateForm
+                resource={services}
+                onSuccess={hideModal}
+                onError={handleError}
+                onCancel={hideModal}
+                // Disable the form if the categories are not initialised
+                disabled={!categories.initialised}
+            >
                 <Modal.Header>
                     <Modal.Title>Create a service</Modal.Title>
                 </Modal.Header>
@@ -318,8 +321,8 @@ const ServiceCreateButton = ({ project, services }) => {
                     <Resource.Form.CancelButton>Cancel</Resource.Form.CancelButton>
                     <Resource.Form.SubmitButton>Create</Resource.Form.SubmitButton>
                 </Modal.Footer>
-            </Resource.Form.ModalForm>
-        </Resource.Form.Context.Create>
+            </Resource.Form.CreateForm>
+        </Modal>
     </>);
 };
 
@@ -380,15 +383,15 @@ const RequirementCreateButton = ({ project, service, requirements }) => {
             New requirement
         </Button>
 
-        <Resource.Form.Context.Create
-            resource={requirements}
-            onChange={setFormData}
-            onSuccess={hideModal}
-            onError={handleError}
-            onCancel={hideModal}
-            initialData={initialData}
-        >
-            <Resource.Form.ModalForm show={modalVisible}>
+        <Modal show={modalVisible} backdrop="static" keyboard={false}>
+            <Resource.Form.CreateForm
+                resource={requirements}
+                onChange={setFormData}
+                onSuccess={hideModal}
+                onError={handleError}
+                onCancel={hideModal}
+                initialData={initialData}
+            >
                 <Modal.Header>
                     <Modal.Title>Create a requirement</Modal.Title>
                 </Modal.Header>
@@ -473,8 +476,8 @@ const RequirementCreateButton = ({ project, service, requirements }) => {
                     <Resource.Form.CancelButton>Cancel</Resource.Form.CancelButton>
                     <Resource.Form.SubmitButton>Create</Resource.Form.SubmitButton>
                 </Modal.Footer>
-            </Resource.Form.ModalForm>
-        </Resource.Form.Context.Create>
+            </Resource.Form.CreateForm>
+        </Modal>
     </>);
 };
 
@@ -607,15 +610,15 @@ const RequirementEditButton = ({ project, service, requirement, disabled }) => {
             <span className="sr-only">Update requirement</span>
         </Button>
 
-        <Resource.Form.Context.Update
-            instance={requirement}
-            fields={['amount', 'start_date', 'end_date']}
-            onSuccess={hideModal}
-            onError={handleError}
-            onCancel={hideModal}
-            initialData={initialData}
-        >
-            <Resource.Form.ModalForm show={modalVisible}>
+        <Modal show={modalVisible} backdrop="static" keyboard={false}>
+            <Resource.Form.UpdateForm
+                instance={requirement}
+                fields={['amount', 'start_date', 'end_date']}
+                onSuccess={hideModal}
+                onError={handleError}
+                onCancel={hideModal}
+                initialData={initialData}
+            >
                 <Modal.Header>
                     <Modal.Title>Update requirement</Modal.Title>
                 </Modal.Header>
@@ -697,8 +700,8 @@ const RequirementEditButton = ({ project, service, requirement, disabled }) => {
                     <Resource.Form.CancelButton>Cancel</Resource.Form.CancelButton>
                     <Resource.Form.SubmitButton>Update</Resource.Form.SubmitButton>
                 </Modal.Footer>
-            </Resource.Form.ModalForm>
-        </Resource.Form.Context.Update>
+            </Resource.Form.UpdateForm>
+        </Modal>
     </>);
 };
 
@@ -782,14 +785,14 @@ const RequirementRow = ({ project, service, requirement }) => {
     const resource = resources.data[requirement.data.resource];
     const statusIcon = statusIcons[requirement.data.status];
 
-    // Once a requirement is approved, it is no longer editable
-    const editable = (
+    // A requirement can be edited when the project is editable and it is before approve
+    // in the lifecycle
+    const isEditable = (
         project.data.status === "EDITABLE" &&
-        !project.updating &&
-        statusOrdering.indexOf(requirement.data.status) < statusOrdering.indexOf('APPROVED') &&
-        !requirement.updating &&
-        !requirement.deleting
+        statusOrdering.indexOf(requirement.data.status) < statusOrdering.indexOf('APPROVED')
     );
+    // Editing is disabled when the project or the requirement itself is updating
+    const editingDisabled = project.updating || requirement.updating || requirement.deleting;
 
     return (<>
         <tr className={statusRowClassNames[requirement.data.status]}>
@@ -806,17 +809,19 @@ const RequirementRow = ({ project, service, requirement }) => {
             <td>{requirement.data.start_date}</td>
             <td>{requirement.data.end_date}</td>
             <td>
-                {editable && (
+                {isEditable && (
                     <ButtonGroup size="sm">
                         <RequirementEditButton
                             project={project}
                             service={service}
                             requirement={requirement}
+                            disabled={editingDisabled}
                         />
                         <RequirementDeleteButton
                             project={project}
                             service={service}
                             requirement={requirement}
+                            disabled={editingDisabled}
                         />
                     </ButtonGroup>
                 )}
@@ -938,7 +943,7 @@ const ProvisionedSummary = ({ project, service, requirements }) => {
 const ProjectServiceCard = ({ project, service }) => {
     const categories = useCategories();
     const resources = useResources();
-    const requirements = service.nested("requirements");
+    const requirements = useRestResource(service.data._links.requirements);
     return (
         <Card className="mb-3" style={{ borderWidth: '3px' }}>
             <Card.Header>
@@ -996,7 +1001,8 @@ const ProjectServiceCard = ({ project, service }) => {
 
 const ProjectEdit = ({ project }) => {
     const categories = useCategories();
-    const projectServices = project.nested("services");
+    // Load the project services
+    const services = useRestResource(project.data._links.services);
     return (<>
         <Row>
             <Col>
@@ -1006,14 +1012,14 @@ const ProjectEdit = ({ project }) => {
         <Row>
             {/* Use custom classes for an xxl breakpoint */}
             <Col xs={12} lg={5} xl={4} className="order-lg-1 col-xxl-3">
-                <ProjectMetaCard project={project} />
+                <ProjectMetaCard project={project} services={services} />
             </Col>
             <Col xs={12} lg={7} xl={8} className="order-lg-0 col-xxl-9 my-3">
                 {/*
                     Because we want to sort the services by category name, we need to wait for
                     the categories and project services to load before rendering.
                 */}
-                <Resource.Multi resources={[projectServices, categories]}>
+                <Resource.Multi resources={[services, categories]}>
                     <Resource.Loading>
                         <div className="d-flex justify-content-center my-5">
                             <SpinnerWithText>Loading services...</SpinnerWithText>
@@ -1056,47 +1062,39 @@ const ProjectEdit = ({ project }) => {
 };
 
 
-const ProjectDoesNotExist = ({ projectId }) => {
-    // When this component is mounted, raise a notification before redirecting
-    const notify = useNotifications();
-    useEffect(
-        () => notify({
-            level: 'warning',
-            title: 'Invalid project',
-            message: `Could not find project with id '${projectId}'.`,
-            duration: 3000
-        }),
-        []
-    );
-    return <Redirect to="/projects" />;
-};
-
-
 const ProjectEditWrapper = () => {
-    // Extract the project we are working on
-    const projects = useProjects();
+    const notify = useNotifications();
+    // Get the project id from the path
     const { id: projectId } = useParams();
+    // Request the project
+    const project = useProject(projectId);
 
-    // Wait for the projects to load before rendering the project edit view
-    return (
-        <Resource resource={projects}>
-            <Resource.Loading>
-                <div className="d-flex justify-content-center my-5">
-                    <SpinnerWithText>Loading projects...</SpinnerWithText>
-                </div>
-            </Resource.Loading>
-            <Resource.Unavailable>
-                <Alert variant="danger">Unable to load projects.</Alert>
-            </Resource.Unavailable>
-            <Resource.Available>
-                {data => (
-                    data.hasOwnProperty(projectId) ?
-                        <ProjectEdit project={data[projectId]} /> :
-                        <ProjectDoesNotExist projectId={projectId} />
-                )}
-            </Resource.Available>
-        </Resource>
+    // If the project failed to load, notify the user
+    useEffect(
+        () => {
+            if( project.fetchError ) {
+                notify(notificationFromError(project.fetchError));
+            }
+        },
+        [project.fetchError]
     );
+
+    // Make a decision on what to do based on whether the project is loaded
+    if( project.initialised ) {
+        return <ProjectEdit project={project} />;
+    }
+    else if( project.fetchError ) {
+        // Redirect the user to the project list
+        return <Redirect to="/projects" />;
+    }
+    else {
+        // The first fetch has not completed - show a spinner
+        return (
+            <div className="d-flex justify-content-center my-5">
+                <SpinnerWithText>Loading project...</SpinnerWithText>
+            </div>
+        );
+    };
 };
 
 

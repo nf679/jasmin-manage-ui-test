@@ -1,13 +1,14 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 
-import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Switch, Route, useLocation } from 'react-router-dom';
 
 import Alert from 'react-bootstrap/Alert';
 import Container from 'react-bootstrap/Container';
 
 import Notifications from 'react-bootstrap-notify';
 
-import { useCurrentUser } from '../store';
+import { Provider, useCurrentUser } from '../api';
+
 import { SpinnerWithText } from './utils';
 
 import Navbar from './Navbar';
@@ -18,57 +19,78 @@ import ProjectEdit from './ProjectEdit';
 import '../css/xxl-breakpoint.css';
 
 
-const AuthenticatedRoute = ({ children, ...props }) => {
+const AuthenticatedComponent = ({ children }) => {
     const currentUser = useCurrentUser();
-    // On the first mount, load the current user
+    const location = useLocation();
+
+    const notAuthenticated = useMemo(
+        () => (
+            // If there is a fetch in progress, wait for it to finish before deciding
+            // if the user is authenticated
+            !currentUser.fetching &&
+            // If there is no error, or there is but it is not an authentication error,
+            // then assume we are authenticated
+            // Some auth schemes use 401 to indicate lack of credentials, and some use
+            // 403 with a code of not_authenticated - we need to catch both
+            currentUser.fetchError &&
+            ([401, 403].includes(currentUser.fetchError.status)) &&
+            (
+                currentUser.fetchError.status === 401 ||
+                currentUser.fetchError.json().code === "not_authenticated"
+            )
+        ),
+        [currentUser]
+    );
+
+    // If the user is not authenticated, redirect them to the authentication
     useEffect(
         () => {
-            // useEffect expects the return value to be a cleanup function
-            // So we can't pass an async function directly as that returns a promise
-            // Hence we have to make and call an anonymous function
-            (async () => {
-                // The error will be reported as part of the resource, so suppress it
-                try { await currentUser.initialise(); }
-                catch(error) { /* NOOP */ }
-            })();
+            if( notAuthenticated ) window.location = `/auth/login/?next=${location.pathname}`;
         },
-        []
+        [notAuthenticated, location.pathname]
     );
-    return (
-        <Route
-            {...props}
-            render={({ location }) => {
-                if( currentUser.initialised ) {
-                    return children;
-                }
-                else if( currentUser.fetchError ) {
-                    return <Alert variant="danger">Error fetching current user.</Alert>
-                }
-                else {
-                    return (
-                        <div className="d-flex justify-content-center my-5">
-                            <SpinnerWithText>Initialising...</SpinnerWithText>
-                        </div>
-                    );
-                }
-            }}
-        />
-    );
+
+    if( currentUser.initialised ) {
+        return children;
+    }
+    else if( notAuthenticated ) {
+        // If we are about to redirect, don't show anything
+        return null;
+    }
+    else if( currentUser.fetchError ) {
+        return <Alert variant="danger">Error fetching current user.</Alert>
+    }
+    else {
+        return (
+            <div className="d-flex justify-content-center my-5">
+                <SpinnerWithText>Initialising...</SpinnerWithText>
+            </div>
+        );
+    }
 };
 
 
+const AuthenticatedRoute = ({ children, ...props }) => (
+    <Route {...props}>
+        <AuthenticatedComponent>{children}</AuthenticatedComponent>
+    </Route>
+);
+
+
 const App = () => (
-    <Router>
-        <Navbar />
-        <Notifications />
-        <Container fluid>
-            <Switch>
-                <AuthenticatedRoute path="/projects" exact><ProjectList /></AuthenticatedRoute>
-                <AuthenticatedRoute path="/projects/:id"><ProjectEdit /></AuthenticatedRoute>
-                <Route path="/"><Home /></Route>
-            </Switch>
-        </Container>
-    </Router>
+    <Provider>
+        <Router>
+            <Navbar />
+            <Notifications />
+            <Container fluid>
+                <Switch>
+                    <AuthenticatedRoute path="/projects" exact><ProjectList /></AuthenticatedRoute>
+                    <AuthenticatedRoute path="/projects/:id"><ProjectEdit /></AuthenticatedRoute>
+                    <Route path="/"><Home /></Route>
+                </Switch>
+            </Container>
+        </Router>
+    </Provider>
 );
 
 

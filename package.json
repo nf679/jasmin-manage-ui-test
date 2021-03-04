@@ -4,7 +4,6 @@
   "private": true,
   "dependencies": {
     "fwtheme-react-jasmin": "github:cedadev/fwtheme-react-jasmin",
-    "immer": "^8.0.1",
     "js-cookie": "^2.2.1",
     "moment": "^2.29.1",
     "react": "^17.0.1",
@@ -16,8 +15,7 @@
     "react-router-bootstrap": "^0.25.0",
     "react-router-dom": "^5.2.0",
     "react-scripts": "^4.0.2",
-    "react-select": "^4.1.0",
-    "zustand": "^3.3.1"
+    "react-select": "^4.1.0"
   },
   "devDependencies": {
     "http-proxy-middleware": "^1.0.6"
