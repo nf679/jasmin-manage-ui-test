@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { Redirect, useParams } from 'react-router-dom';
+import { Redirect, useHistory, useLocation, useParams } from 'react-router-dom';
 
 import Alert from 'react-bootstrap/Alert';
 import Badge from 'react-bootstrap/Badge';
@@ -1064,10 +1064,20 @@ const ProjectEdit = ({ project }) => {
 
 const ProjectEditWrapper = () => {
     const notify = useNotifications();
+
     // Get the project id from the path
     const { id: projectId } = useParams();
+
+    // Get the project initial data from the location state
+    const location = useLocation();
+    const history = useHistory();
+    const initialData = location.state.project;
+    // However make sure to clear it once we have used it as we don't want it to
+    // persist when the page is refreshed
+    useEffect(() => { history.replace(location.pathname, {}); }, []);
+
     // Request the project
-    const project = useProject(projectId);
+    const project = useProject(projectId, { initialData });
 
     // If the project failed to load, notify the user
     useEffect(

@@ -130,7 +130,11 @@ const ProjectCard = ({ project }) => {
                 <ProjectCreatedAtListItem project={project} />
             </ListGroup>
             <Card.Footer className="text-right">
-                <Link to={`/projects/${project.data.id}`}>
+                {/* Pass the project data as state with the link */}
+                <Link to={{
+                    pathname: `/projects/${project.data.id}`,
+                    state: { project: project.data }
+                }}>
                     <Button variant="outline-primary">Go to project</Button>
                 </Link>
             </Card.Footer>

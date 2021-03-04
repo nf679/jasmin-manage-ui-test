@@ -63,7 +63,12 @@ export const useEndpoint = (url, { initialData, autoFetch = true } = {}) => {
     // When there is a successful fetch, set data and initialised
     const onFetch = data => { setData(data); setInitialised(true); };
     // Return the public state for consumers to use
-    return { ...useOnFetch(url, { onFetch, autoFetch }), initialised, data };
+    return {
+        // Don't autofetch if we were given initial data
+        ...useOnFetch(url, { onFetch, autoFetch: !initialised && autoFetch }),
+        initialised,
+        data
+    };
 };
 
 
@@ -130,9 +135,9 @@ export const useResource = (resourceUrl, { initialData, autoFetch = true } = {})
         setInitialised(true);
     };
 
-    // Initialise the on-fetch hook that will be responsible for fetching
-    // the resource list
-    const fetchState = useOnFetch(resourceUrl, { onFetch, autoFetch });
+    // Initialise the on-fetch hook that will be responsible for fetching the resource list
+    // Don't auto-fetch if we are already initialised
+    const fetchState = useOnFetch(resourceUrl, { onFetch, autoFetch: !initialised && autoFetch });
 
     // Use a mutation to create new instances and add them to the data
     const { inProgress: creating, mutate } = useMutation(resourceUrl, 'POST');
@@ -163,7 +168,8 @@ export const useResourceInstance = (instanceUrl, { initialData, autoFetch = true
     // When there is a successful fetch, set data and initialised
     const onFetch = data => { setData(data); setInitialised(true); };
     // Initialise the fetch state
-    const fetchState = useOnFetch(instanceUrl, { onFetch, autoFetch });
+    // Don't auto-fetch if we are already initialised
+    const fetchState = useOnFetch(instanceUrl, { onFetch, autoFetch: !initialised && autoFetch });
 
     // Use mutations to update and delete the resource, updating the data as required
     const { inProgress: updating, mutateUpdate } = useMutation(instanceUrl, 'PUT');

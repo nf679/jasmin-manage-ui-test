@@ -35,7 +35,6 @@ const apiFetch = async (url, {
         const csrfToken = Cookies.get('csrftoken');
         if( csrfToken ) defaultHeaders['X-CSRFToken'] = csrfToken;
     }
-    await sleep(3000);
     // Make the actual request, injecting the cookie credentials and headers
     const response = await fetch(url, {
         method,
