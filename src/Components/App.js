@@ -15,6 +15,7 @@ import Navbar from './Navbar';
 import Home from './Home';
 import ProjectList from './ProjectList';
 import ProjectEdit from './ProjectEdit';
+import ConsortiumList from './Consortium/List';
 
 import '../css/xxl-breakpoint.css';
 
@@ -84,6 +85,7 @@ const App = () => (
             <Notifications />
             <Container fluid>
                 <Switch>
+                    <AuthenticatedRoute path="/consortia" exact><ConsortiumList /></AuthenticatedRoute>
                     <AuthenticatedRoute path="/projects" exact><ProjectList /></AuthenticatedRoute>
                     <AuthenticatedRoute path="/projects/:id"><ProjectEdit /></AuthenticatedRoute>
                     <Route path="/"><Home /></Route>

@@ -42,6 +42,12 @@ const ProjectCreateButton = ({ projects }) => {
     const showModal = () => setModalVisible(true);
     const hideModal = () => setModalVisible(false);
 
+    const handleSuccess = async () => {
+        // On success, we want to hide the modal
+        hideModal();
+        // We also force the consortia to refresh as some of the totals will have changed
+        await consortia.fetch();
+    }
     const handleError = error => {
         notify(notificationFromError(error));
         hideModal();
@@ -67,7 +73,7 @@ const ProjectCreateButton = ({ projects }) => {
         <Modal show={modalVisible} backdrop="static" keyboard={false}>
             <Resource.Form.CreateForm
                 resource={projects}
-                onSuccess={hideModal}
+                onSuccess={handleSuccess}
                 onError={handleError}
                 onCancel={hideModal}
                 // Disable the form if the consortia are not initialised
@@ -114,11 +120,11 @@ const ProjectCard = ({ project }) => {
     const numServices = project.data.num_services || 0;
     const numRequirements = project.data.num_requirements || 0;
     return (
-        <Card className="mb-3">
+        <Card className="mb-3" style={{ borderWidth: '3px' }}>
             <Card.Header>
                 <h5 className="mb-0">{project.data.name}</h5>
             </Card.Header>
-            <ListGroup variant="flush">
+            <ListGroup variant="flush" className="border-0">
                 <ProjectStatusListItem project={project} />
                 <ProjectConsortiumListItem project={project} />
                 <ListGroup.Item>

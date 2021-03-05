@@ -1071,7 +1071,7 @@ const ProjectEditWrapper = () => {
     // Get the project initial data from the location state
     const location = useLocation();
     const history = useHistory();
-    const initialData = location.state.project;
+    const initialData = location.state?.project;
     // However make sure to clear it once we have used it as we don't want it to
     // persist when the page is refreshed
     useEffect(() => { history.replace(location.pathname, {}); }, []);

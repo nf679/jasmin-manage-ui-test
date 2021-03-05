@@ -1,0 +1,114 @@
+import React, { useEffect } from 'react';
+
+import { Link } from 'react-router-dom';
+
+import Alert from 'react-bootstrap/Alert';
+import Button from 'react-bootstrap/Button';
+import Card from 'react-bootstrap/Card';
+import Col from 'react-bootstrap/Col';
+import ListGroup from 'react-bootstrap/ListGroup';
+import Row from 'react-bootstrap/Row';
+
+import { PageHeader } from 'fwtheme-react-jasmin';
+
+import { useCurrentUser, useConsortia } from '../../api';
+
+import Resource from '../Resource';
+
+import { SpinnerWithText, sortByKey } from '../utils';
+
+
+const ConsortiumCard = ({ consortium }) => {
+    const currentUser = useCurrentUser();
+
+    const numProjects = consortium.data.num_projects;
+    const numProjectsUser = consortium.data.num_projects_current_user;
+    const userIsManager = consortium.data.manager.id === currentUser.data.id;
+
+    return (
+        <Card className="mb-3" style={{ borderWidth: '3px' }}>
+            <Card.Header>
+                <h5 className="mb-0">{consortium.data.name}</h5>
+            </Card.Header>
+            <ListGroup variant="flush" className="border-0">
+                <ListGroup.Item>{consortium.data.description}</ListGroup.Item>
+                {!consortium.data.is_public && (
+                    <ListGroup.Item variant="danger">
+                        This consortium is <strong>not public</strong>.
+                    </ListGroup.Item>
+                )}
+                <ListGroup.Item>
+                    Consortium has{" "}
+                    <strong>{numProjects} project{numProjects !== 1  ? 's' : ''}</strong>.
+                </ListGroup.Item>
+                {numProjectsUser > 0 && (
+                    <ListGroup.Item variant="warning">
+                        You have{" "}
+                        <strong>{numProjectsUser} project{numProjectsUser > 1 ? 's' : ''}</strong>{" "}
+                        in this consortium.
+                    </ListGroup.Item>
+                )}
+                <ListGroup.Item variant={userIsManager ? 'success' : undefined}>
+                    {userIsManager ? (
+                        <strong>You are the consortium manager.</strong>
+                    ) : (<>
+                        Manager is{" "}
+                        <strong>{consortium.data.manager.first_name} {consortium.data.manager.last_name}</strong>.
+                    </>)}
+                </ListGroup.Item>
+            </ListGroup>
+            {userIsManager && (
+                <Card.Footer className="text-right">
+                    {/* Pass the consortium data as state with the link */}
+                    <Link to={{
+                        pathname: `/consortia/${consortium.data.id}`,
+                        state: { consortium: consortium.data }
+                    }}>
+                        <Button variant="outline-primary">Go to consortium</Button>
+                    </Link>
+                </Card.Footer>
+            )}
+        </Card>
+    );
+};
+
+
+const ConsortiumList = () => {
+    const currentUser = useCurrentUser();
+    const consortia = useConsortia();
+
+    return (
+        <>
+            <PageHeader>Consortia</PageHeader>
+            <Resource resource={consortia}>
+                <Resource.Loading>
+                    <div className="d-flex justify-content-center my-5">
+                        <SpinnerWithText>Loading consortia...</SpinnerWithText>
+                    </div>
+                </Resource.Loading>
+                <Resource.Unavailable>
+                    <Alert variant="danger">Unable to load consortia.</Alert>
+                </Resource.Unavailable>
+                <Resource.Available>
+                    {data => {
+                        // Sort the consortia so that the ones that the user manages appear first
+                        const sortedConsortia = sortByKey(
+                            Object.values(data),
+                            c => [currentUser.data.id !== c.data.manager.id, c.data.name]
+                        );
+                        return (
+                            <Row xs={1} sm={2} lg={3}>
+                                {sortedConsortia.map(c =>
+                                    <Col key={c.data.id}><ConsortiumCard consortium={c} /></Col>
+                                )}
+                            </Row>
+                        );
+                    }}
+                </Resource.Available>
+            </Resource>
+        </>
+    );
+};
+
+
+export default ConsortiumList;
