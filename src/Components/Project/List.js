@@ -15,22 +15,23 @@ import { PageHeader } from 'fwtheme-react-jasmin';
 
 import { useNotifications } from 'react-bootstrap-notify';
 
-import { useCurrentUser, useConsortia, useProjects } from '../api';
+import { Form as ResourceForm, Status } from '../../rest-resource';
 
-import Resource from './Resource';
+import { useCurrentUser, useConsortia, useProjects } from '../../api';
+
 import {
     notificationFromError,
     sortByKey,
     SpinnerWithText,
     MarkdownEditor
-} from './utils';
+} from '../utils';
 
 import {
     ProjectStatusListItem,
     ProjectConsortiumListItem,
     ProjectCollaboratorsListItem,
     ProjectCreatedAtListItem
-} from './ProjectEdit';
+} from './Edit';
 
 
 const ProjectCreateButton = ({ projects }) => {
@@ -42,12 +43,6 @@ const ProjectCreateButton = ({ projects }) => {
     const showModal = () => setModalVisible(true);
     const hideModal = () => setModalVisible(false);
 
-    const handleSuccess = async () => {
-        // On success, we want to hide the modal
-        hideModal();
-        // We also force the consortia to refresh as some of the totals will have changed
-        await consortia.fetch();
-    }
     const handleError = error => {
         notify(notificationFromError(error));
         hideModal();
@@ -67,13 +62,19 @@ const ProjectCreateButton = ({ projects }) => {
         )
     );
 
+    // Mark the markdown editor control into a resource form control
+    const MarkdownEditorControl = ResourceForm.Controls.asControl(
+        MarkdownEditor,
+        evt => evt.target.value
+    );
+
     return (<>
         <Button onClick={showModal} size="lg" variant="success">New project</Button>
 
         <Modal show={modalVisible} backdrop="static" keyboard={false}>
-            <Resource.Form.CreateForm
+            <ResourceForm.CreateInstanceForm
                 resource={projects}
-                onSuccess={handleSuccess}
+                onSuccess={hideModal}
                 onError={handleError}
                 onCancel={hideModal}
                 // Disable the form if the consortia are not initialised
@@ -85,12 +86,18 @@ const ProjectCreateButton = ({ projects }) => {
                 <Modal.Body>
                     <Form.Group controlId="name">
                         <Form.Label>Project name</Form.Label>
-                        <Resource.Form.Control placeholder="My project" required autoComplete="off" />
+                        <Form.Control
+                            as={ResourceForm.Controls.Input}
+                            placeholder="My project"
+                            required
+                            autoComplete="off"
+                        />
+                        <ResourceForm.Controls.ErrorList />
                     </Form.Group>
                     <Form.Group controlId="consortium">
                         <Form.Label>Consortium</Form.Label>
-                        <Resource.Form.Control
-                            as={Resource.Form.ResourceSelect}
+                        <Form.Control
+                            as={ResourceForm.Controls.ResourceSelect}
                             resource={consortia}
                             resourceName="consortium"
                             resourceNamePlural="consortia"
@@ -100,17 +107,19 @@ const ProjectCreateButton = ({ projects }) => {
                             // Use a custom label renderer
                             formatOptionLabel={formatConsortiumOption}
                         />
+                        <ResourceForm.Controls.ErrorList />
                     </Form.Group>
                     <Form.Group controlId="description">
                         <Form.Label>Description</Form.Label>
-                        <Resource.Form.Control as={MarkdownEditor} required />
+                        <Form.Control as={MarkdownEditorControl} required />
+                        <ResourceForm.Controls.ErrorList />
                     </Form.Group>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Resource.Form.CancelButton>Cancel</Resource.Form.CancelButton>
-                    <Resource.Form.SubmitButton>Create</Resource.Form.SubmitButton>
+                    <ResourceForm.Controls.CancelButton>Cancel</ResourceForm.Controls.CancelButton>
+                    <ResourceForm.Controls.SubmitButton>Create</ResourceForm.Controls.SubmitButton>
                 </Modal.Footer>
-            </Resource.Form.CreateForm>
+            </ResourceForm.CreateInstanceForm>
         </Modal>
     </>);
 };
@@ -136,10 +145,10 @@ const ProjectCard = ({ project }) => {
                 <ProjectCreatedAtListItem project={project} />
             </ListGroup>
             <Card.Footer className="text-right">
-                {/* Pass the project data as state with the link */}
+                {/* Pass the project data as state */}
                 <Link to={{
                     pathname: `/projects/${project.data.id}`,
-                    state: { project: project.data }
+                    state: { initialData: project.data }
                 }}>
                     <Button variant="outline-primary">Go to project</Button>
                 </Link>
@@ -152,35 +161,33 @@ const ProjectCard = ({ project }) => {
 const ProjectList = () => {
     const projects = useProjects();
 
-    return (
-        <>
-            <PageHeader>My Projects</PageHeader>
-            <Resource resource={projects}>
-                <Resource.Loading>
-                    <div className="d-flex justify-content-center my-5">
-                        <SpinnerWithText>Loading projects...</SpinnerWithText>
-                    </div>
-                </Resource.Loading>
-                <Resource.Unavailable>
-                    <Alert variant="danger">Unable to load projects.</Alert>
-                </Resource.Unavailable>
-                <Resource.Available>
-                    {data => (
-                        <Row xs={1} sm={2} lg={3}>
-                            {sortByKey(Object.values(data), p => p.data.name).map(p =>
-                                <Col key={p.data.id}><ProjectCard project={p} /></Col>
-                            )}
-                            <Col>
-                                <Card className="text-center mb-3" body>
-                                    <ProjectCreateButton projects={projects} />
-                                </Card>
-                            </Col>
-                        </Row>
-                    )}
-                </Resource.Available>
-            </Resource>
-        </>
-    );
+    return (<>
+        <PageHeader>My Projects</PageHeader>
+        <Status fetchable={projects}>
+            <Status.Loading>
+                <div className="d-flex justify-content-center my-5">
+                    <SpinnerWithText>Loading projects...</SpinnerWithText>
+                </div>
+            </Status.Loading>
+            <Status.Unavailable>
+                <Alert variant="danger">Unable to load projects.</Alert>
+            </Status.Unavailable>
+            <Status.Available>
+                {data => (
+                    <Row xs={1} sm={2} lg={3}>
+                        {sortByKey(Object.values(data), p => p.data.name).map(p =>
+                            <Col key={p.data.id}><ProjectCard project={p} /></Col>
+                        )}
+                        <Col>
+                            <Card className="text-center mb-3" body>
+                                <ProjectCreateButton projects={projects} />
+                            </Card>
+                        </Col>
+                    </Row>
+                )}
+            </Status.Available>
+        </Status>
+    </>);
 };
 
 

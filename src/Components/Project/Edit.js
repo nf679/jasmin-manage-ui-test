@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { Redirect, useHistory, useLocation, useParams } from 'react-router-dom';
+import { Redirect, useParams } from 'react-router-dom';
 
 import Alert from 'react-bootstrap/Alert';
 import Badge from 'react-bootstrap/Badge';
@@ -22,19 +22,33 @@ import moment from 'moment';
 
 import { useNotifications } from 'react-bootstrap-notify';
 
+import { PageHeader } from 'fwtheme-react-jasmin';
+
+import {
+    Form as ResourceForm,
+    InstanceDeleteButton,
+    Status,
+    useEnsureInitialised,
+    useNestedResource
+} from '../../rest-resource';
+
 import {
     useCategories,
     useConsortia,
     useCurrentUser,
     useProject,
     useResources
-} from '../api';
-import { useResource as useRestResource } from '../rest-resource';
+} from '../../api';
 
-import Resource from './Resource';
-import { sortByKey, SpinnerWithText, notificationFromError } from './utils';
+import {
+    formatAmount,
+    sortByKey,
+    useInitialDataFromLocation,
+    SpinnerWithText,
+    notificationFromError
+} from '../utils';
 
-import '../css/requirements-table.css';
+import '../../css/requirements-table.css';
 
 
 const projectStatusVariants = {
@@ -55,11 +69,22 @@ export const ProjectConsortiumListItem = ({ project }) => {
     const consortia = useConsortia();
     return (
         <ListGroup.Item>
-            <Resource.Text resource={consortia} resourceName="consortia">
-                {data => (<>
-                    Project belongs to <strong>{data[project.data.consortium].data.name}</strong>.
-                </>)}
-            </Resource.Text>
+            <Status fetchable={consortia}>
+                <Status.Loading>
+                    <SpinnerWithText size="sm">Loading consortia...</SpinnerWithText>
+                </Status.Loading>
+                <Status.Unavailable>
+                    <span className="text-danger">
+                        <i className="fas fa-exclamation-triangle mr-2"></i>
+                        Unable to load consortia.
+                    </span>
+                </Status.Unavailable>
+                <Status.Available>
+                    {data => (<>
+                        Project belongs to <strong>{data[project.data.consortium].data.name}</strong>.
+                    </>)}
+                </Status.Available>
+            </Status>
         </ListGroup.Item>
     );
 };
@@ -67,46 +92,63 @@ export const ProjectConsortiumListItem = ({ project }) => {
 
 const CollaboratorsList = ({ collaborators }) => {
     const currentUser = useCurrentUser();
-    // Sort the collaborators by display name
-    // Use the username as a fallback
+    // When this component is mounted, we want to make sure the collaborators are initialised
+    useEnsureInitialised(collaborators);
+    // Sort the collaborators by display name, using the username as a fallback
     const displayName = c => c.data.user.last_name ?
         `${c.data.user.first_name} ${c.data.user.last_name} (${c.data.user.username})` :
         c.data.user.username;
     const sortedCollaborators = sortByKey(Object.values(collaborators.data), displayName);
     return (
-        <ListGroup>
-            {sortedCollaborators.map(collaborator => {
-                const createdAt = moment(collaborator.data.created_at).fromNow();
-                return (
-                    <ListGroup.Item
-                        key={collaborator.data.id}
-                        className="d-flex align-items-center"
-                    >
-                        <div className="mr-auto">
-                            <span className="d-block">
-                                {displayName(collaborator)}
-                                {collaborator.data.user.id === currentUser.data.id && (
-                                    <Badge
-                                        variant="warning"
-                                        style={{ fontSize: '90%' }}
-                                        className="ml-2"
-                                    >
-                                        You
-                                    </Badge>
-                                )}
-                            </span>
-                            <small className="text-muted">Added {createdAt}</small>
-                        </div>
-                        <Badge
-                            variant="success"
-                            style={{ fontSize: '100%' }}
-                        >
-                            {collaborator.data.role}
-                        </Badge>
-                    </ListGroup.Item>
-                );
-            })}
-        </ListGroup>
+        <Status fetchable={collaborators}>
+            <Status.Loading>
+                <Modal.Body>
+                    <div className="d-flex justify-content-center my-5">
+                        <SpinnerWithText>Loading collaborators...</SpinnerWithText>
+                    </div>
+                </Modal.Body>
+            </Status.Loading>
+            <Status.Unavailable>
+                <Modal.Body>
+                    <Alert variant="danger">Unable to load collaborators.</Alert>
+                </Modal.Body>
+            </Status.Unavailable>
+            <Status.Available>
+                <ListGroup>
+                    {sortedCollaborators.map(collaborator => {
+                        const createdAt = moment(collaborator.data.created_at).fromNow();
+                        return (
+                            <ListGroup.Item
+                                key={collaborator.data.id}
+                                className="d-flex align-items-center"
+                            >
+                                <div className="mr-auto">
+                                    <span className="d-block">
+                                        {displayName(collaborator)}
+                                        {collaborator.data.user.id === currentUser.data.id && (
+                                            <Badge
+                                                variant="warning"
+                                                style={{ fontSize: '90%' }}
+                                                className="ml-2"
+                                            >
+                                                You
+                                            </Badge>
+                                        )}
+                                    </span>
+                                    <small className="text-muted">Added {createdAt}</small>
+                                </div>
+                                <Badge
+                                    variant="success"
+                                    style={{ fontSize: '100%' }}
+                                >
+                                    {collaborator.data.role}
+                                </Badge>
+                            </ListGroup.Item>
+                        );
+                    })}
+                </ListGroup>
+            </Status.Available>
+        </Status>
     )
 };
 
@@ -124,23 +166,7 @@ const ProjectCollaboratorsLink = ({ children, collaborators }) => {
             <Modal.Header>
                 <Modal.Title>Project collaborators</Modal.Title>
             </Modal.Header>
-            <Resource resource={collaborators}>
-                <Resource.Loading>
-                    <Modal.Body>
-                        <div className="d-flex justify-content-center my-5">
-                            <SpinnerWithText>Loading collaborators...</SpinnerWithText>
-                        </div>
-                    </Modal.Body>
-                </Resource.Loading>
-                <Resource.Unavailable>
-                    <Modal.Body>
-                        <Alert variant="danger">Unable to load collaborators.</Alert>
-                    </Modal.Body>
-                </Resource.Unavailable>
-                <Resource.Available>
-                    {data => <CollaboratorsList collaborators={collaborators} />}
-                </Resource.Available>
-            </Resource>
+            <CollaboratorsList collaborators={collaborators} />
             <Modal.Footer>
                 <Button onClick={hideModal}>Cancel</Button>
             </Modal.Footer>
@@ -153,7 +179,7 @@ export const ProjectCollaboratorsListItem = ({ project, modalEnabled = false }) 
     const currentUser = useCurrentUser();
     // Create the resource here in order to share the data, but don't initialise
     // it until it is actually needed by the collaborators modal
-    const collaborators = useRestResource(project.data._links.collaborators, { autoFetch: false });
+    const collaborators = useNestedResource(project, "collaborators", { autoFetch: false });
     // If the collaborators are loaded, use an accurate count
     // Otherwise use the summary number from loading the project list
     const numCollaborators = collaborators.initialised ?
@@ -286,7 +312,7 @@ const ServiceCreateButton = ({ project, services }) => {
         </Button>
 
         <Modal show={modalVisible} backdrop="static" keyboard={false}>
-            <Resource.Form.CreateForm
+            <ResourceForm.CreateInstanceForm
                 resource={services}
                 onSuccess={hideModal}
                 onError={handleError}
@@ -298,11 +324,10 @@ const ServiceCreateButton = ({ project, services }) => {
                     <Modal.Title>Create a service</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <Resource.Form.NonFieldErrors />
                     <Form.Group controlId="category">
                         <Form.Label>Category</Form.Label>
-                        <Resource.Form.Control
-                            as={Resource.Form.ResourceSelect}
+                        <Form.Control
+                            as={ResourceForm.Controls.ResourceSelect}
                             resource={categories}
                             resourceName="category"
                             resourceNamePlural="categories"
@@ -310,18 +335,25 @@ const ServiceCreateButton = ({ project, services }) => {
                             // Use a custom label renderer
                             formatOptionLabel={formatCategoryOption}
                         />
+                        <ResourceForm.Controls.ErrorList />
                     </Form.Group>
                     <Form.Group controlId="name">
                         <Form.Label>Service name</Form.Label>
-                        <Resource.Form.Control placeholder="myservice" required autoComplete="off" />
+                        <Form.Control
+                            as={ResourceForm.Controls.Input}
+                            placeholder="myservice"
+                            required
+                            autoComplete="off"
+                        />
                         <Form.Text>Please use a short but descriptive name.</Form.Text>
+                        <ResourceForm.Controls.ErrorList />
                     </Form.Group>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Resource.Form.CancelButton>Cancel</Resource.Form.CancelButton>
-                    <Resource.Form.SubmitButton>Create</Resource.Form.SubmitButton>
+                    <ResourceForm.Controls.CancelButton>Cancel</ResourceForm.Controls.CancelButton>
+                    <ResourceForm.Controls.SubmitButton>Create</ResourceForm.Controls.SubmitButton>
                 </Modal.Footer>
-            </Resource.Form.CreateForm>
+            </ResourceForm.CreateInstanceForm>
         </Modal>
     </>);
 };
@@ -332,12 +364,18 @@ const RequirementCreateButton = ({ project, service, requirements }) => {
     const categories = useCategories();
     const resources = useResources();
 
+    // Keep a handle on the currently selected resource
+    // We use this to determine whether to show the amount/from/until fields
+    const [selectedResourceId, setSelectedResourceId] = useState(null);
+    const selectedResource = selectedResourceId ? resources.data[selectedResourceId] : null;
+
     const [modalVisible, setModalVisible] = useState(false);
     const showModal = () => setModalVisible(true);
-    const hideModal = () => setModalVisible(false);
-
-    // We want to keep a handle on the current form state in order to know which fields to render
-    const [formData, setFormData] = useState({});
+    // Whenever the modal is hidden, also reset the selected resource
+    const hideModal = () => {
+        setModalVisible(false);
+        setSelectedResourceId(null);
+    };
 
     const handleError = error => {
         notify(notificationFromError(error));
@@ -364,10 +402,6 @@ const RequirementCreateButton = ({ project, service, requirements }) => {
         )
     );
 
-    // Get the currently selected resource
-    const selectedResourceId = formData.resource;
-    const selectedResource = selectedResourceId ? resources.data[selectedResourceId] : null;
-
     // Get the initial start and end dates for the form
     const today = moment().format("YYYY-MM-DD");
     const twoYearsFromToday = moment().add(2, 'years').format("YYYY-MM-DD");
@@ -384,9 +418,8 @@ const RequirementCreateButton = ({ project, service, requirements }) => {
         </Button>
 
         <Modal show={modalVisible} backdrop="static" keyboard={false}>
-            <Resource.Form.CreateForm
+            <ResourceForm.CreateInstanceForm
                 resource={requirements}
-                onChange={setFormData}
                 onSuccess={hideModal}
                 onError={handleError}
                 onCancel={hideModal}
@@ -396,7 +429,6 @@ const RequirementCreateButton = ({ project, service, requirements }) => {
                     <Modal.Title>Create a requirement</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <Resource.Form.NonFieldErrors />
                     <Row className="mb-3">
                         <Col xs={2}>Service</Col>
                         <Col>
@@ -407,8 +439,8 @@ const RequirementCreateButton = ({ project, service, requirements }) => {
                     </Row>
                     <Form.Group controlId="resource">
                         <Form.Label>Resource</Form.Label>
-                        <Resource.Form.Control
-                            as={Resource.Form.ResourceSelect}
+                        <Form.Control
+                            as={ResourceForm.Controls.ResourceSelect}
                             resource={resources}
                             resourceName="resource"
                             // Filter the resources to those for the category
@@ -418,7 +450,9 @@ const RequirementCreateButton = ({ project, service, requirements }) => {
                             required
                             // Use a custom label renderer
                             formatOptionLabel={formatResourceOption}
+                            onChange={setSelectedResourceId}
                         />
+                        <ResourceForm.Controls.ErrorList />
                     </Form.Group>
                     {/* Only show the other fields once a resource is selected */}
                     {!!selectedResource && (<>
@@ -427,7 +461,8 @@ const RequirementCreateButton = ({ project, service, requirements }) => {
                             {/* Show the units on the amount field if required */}
                             {selectedResource.data.units ? (
                                 <InputGroup>
-                                    <Resource.Form.Control
+                                    <Form.Control
+                                        as={ResourceForm.Controls.Input}
                                         type="number"
                                         min="1"
                                         step="1"
@@ -440,7 +475,8 @@ const RequirementCreateButton = ({ project, service, requirements }) => {
                                     </InputGroup.Append>
                                 </InputGroup>
                             ) : (
-                                <Resource.Form.Control
+                                <Form.Control
+                                    as={ResourceForm.Controls.Input}
                                     type="number"
                                     min="1"
                                     step="1"
@@ -449,34 +485,39 @@ const RequirementCreateButton = ({ project, service, requirements }) => {
                                     autoComplete="off"
                                 />
                             )}
+                            <ResourceForm.Controls.ErrorList />
                         </Form.Group>
                         <Form.Row>
                             <Form.Group as={Col} controlId="start_date">
                                 <Form.Label>From</Form.Label>
-                                <Resource.Form.Control
+                                <Form.Control
+                                    as={ResourceForm.Controls.Input}
                                     type="date"
                                     min={today}
                                     required
                                     autoComplete="off"
                                 />
+                                <ResourceForm.Controls.ErrorList />
                             </Form.Group>
                             <Form.Group as={Col} controlId="end_date">
                                 <Form.Label>Until</Form.Label>
-                                <Resource.Form.Control
+                                <Form.Control
+                                    as={ResourceForm.Controls.Input}
                                     type="date"
                                     min={today}
                                     required
                                     autoComplete="off"
                                 />
+                                <ResourceForm.Controls.ErrorList />
                             </Form.Group>
                         </Form.Row>
                     </>)}
                 </Modal.Body>
                 <Modal.Footer>
-                    <Resource.Form.CancelButton>Cancel</Resource.Form.CancelButton>
-                    <Resource.Form.SubmitButton>Create</Resource.Form.SubmitButton>
+                    <ResourceForm.Controls.CancelButton>Cancel</ResourceForm.Controls.CancelButton>
+                    <ResourceForm.Controls.SubmitButton>Create</ResourceForm.Controls.SubmitButton>
                 </Modal.Footer>
-            </Resource.Form.CreateForm>
+            </ResourceForm.CreateInstanceForm>
         </Modal>
     </>);
 };
@@ -523,55 +564,6 @@ const statusIcons = {
 };
 
 
-const sizeUnits = ['B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-const amountSuffixes = ['', 'K', 'M', 'B', 'T'];
-
-
-const formatNumber = (number, maxExponent) => {
-    // This function takes a number and returns a formatted number and exponent
-    // such that [result] * 1000^[exponent] ~= [original number]
-    let result = number, exponent = 0;
-    while( exponent < maxExponent && number > Math.pow(1000, exponent + 1) ) {
-        result = result / 1000;
-        exponent = exponent + 1;
-    }
-    // We want to truncate the result to at most one decimal place, but also indicate
-    // if there is a loss of precision using >
-    const truncatedResult = Math.floor(result * 10) / 10;
-    const isTruncated = result !== truncatedResult;
-    const formattedResult = Number.isInteger(truncatedResult) ?
-        truncatedResult :
-        truncatedResult.toFixed(1);
-    // Return the formatted result with the exponent
-    return [`${isTruncated ? '>' : ''}${formattedResult}`, exponent];
-};
-
-
-const formatSize = (amount, units) => {
-    // If the amount is zero, then use the given units
-    if( amount === 0 ) return `0 ${units}`;
-    // Work out at what unit we are starting from
-    const originalUnit = sizeUnits.indexOf(units);
-    // Get the number and exponent
-    const [formattedAmount, exponent] = formatNumber(
-        amount,
-        sizeUnits.length - originalUnit - 1
-    );
-    // Return the formatted value
-    return `${formattedAmount} ${sizeUnits[originalUnit + exponent]}`;
-};
-
-
-const formatAmount = (amount, units) => {
-    // If the amount is a size, we treat it slightly differently
-    if( sizeUnits.includes(units) ) return formatSize(amount, units);
-    // Otherwise, format the amount to reduce the number of zeros
-    const [formattedAmount, exponent] = formatNumber(amount, amountSuffixes.length - 1);
-    // Return the formatted value
-    return `${formattedAmount}${amountSuffixes[exponent]}${units ? ` ${units}`: ''}`;
-};
-
-
 const RequirementEditButton = ({ project, service, requirement, disabled }) => {
     const notify = useNotifications();
     const categories = useCategories();
@@ -611,7 +603,7 @@ const RequirementEditButton = ({ project, service, requirement, disabled }) => {
         </Button>
 
         <Modal show={modalVisible} backdrop="static" keyboard={false}>
-            <Resource.Form.UpdateForm
+            <ResourceForm.UpdateInstanceForm
                 instance={requirement}
                 fields={['amount', 'start_date', 'end_date']}
                 onSuccess={hideModal}
@@ -623,7 +615,6 @@ const RequirementEditButton = ({ project, service, requirement, disabled }) => {
                     <Modal.Title>Update requirement</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <Resource.Form.NonFieldErrors />
                     <Row className="mb-3">
                         <Col xs={2}>Service</Col>
                         <Col>
@@ -652,7 +643,8 @@ const RequirementEditButton = ({ project, service, requirement, disabled }) => {
                         {/* Show the units on the amount field if required */}
                         {resource.data.units ? (
                             <InputGroup>
-                                <Resource.Form.Control
+                                <Form.Control
+                                    as={ResourceForm.Controls.Input}
                                     type="number"
                                     min="1"
                                     step="1"
@@ -665,7 +657,8 @@ const RequirementEditButton = ({ project, service, requirement, disabled }) => {
                                 </InputGroup.Append>
                             </InputGroup>
                         ) : (
-                            <Resource.Form.Control
+                            <Form.Control
+                                as={ResourceForm.Controls.Input}
                                 type="number"
                                 min="1"
                                 step="1"
@@ -674,33 +667,38 @@ const RequirementEditButton = ({ project, service, requirement, disabled }) => {
                                 autoComplete="off"
                             />
                         )}
+                        <ResourceForm.Controls.ErrorList />
                     </Form.Group>
                     <Form.Row>
                         <Form.Group as={Col} controlId="start_date">
                             <Form.Label>From</Form.Label>
-                            <Resource.Form.Control
+                            <Form.Control
+                                as={ResourceForm.Controls.Input}
                                 type="date"
                                 min={today.format(format)}
                                 required
                                 autoComplete="off"
                             />
+                            <ResourceForm.Controls.ErrorList />
                         </Form.Group>
                         <Form.Group as={Col} controlId="end_date">
                             <Form.Label>Until</Form.Label>
-                            <Resource.Form.Control
+                            <Form.Control
+                                as={ResourceForm.Controls.Input}
                                 type="date"
                                 min={today.format(format)}
                                 required
                                 autoComplete="off"
                             />
+                            <ResourceForm.Controls.ErrorList />
                         </Form.Group>
                     </Form.Row>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Resource.Form.CancelButton>Cancel</Resource.Form.CancelButton>
-                    <Resource.Form.SubmitButton>Update</Resource.Form.SubmitButton>
+                    <ResourceForm.Controls.CancelButton>Cancel</ResourceForm.Controls.CancelButton>
+                    <ResourceForm.Controls.SubmitButton>Update</ResourceForm.Controls.SubmitButton>
                 </Modal.Footer>
-            </Resource.Form.UpdateForm>
+            </ResourceForm.UpdateInstanceForm>
         </Modal>
     </>);
 };
@@ -721,7 +719,7 @@ const RequirementDeleteButton = ({ project, service, requirement, disabled }) =>
     const statusIcon = statusIcons[requirement.data.status];
 
     return (
-        <Resource.DeleteButton
+        <InstanceDeleteButton
             instance={requirement}
             onError={handleError}
             title="Delete requirement"
@@ -775,7 +773,7 @@ const RequirementDeleteButton = ({ project, service, requirement, disabled }) =>
                     </Col>
                 </Row>
             </Modal.Body>
-        </Resource.DeleteButton>
+        </InstanceDeleteButton>
     );
 };
 
@@ -925,7 +923,7 @@ const ProvisionedSummary = ({ project, service, requirements }) => {
                                     className={`p-2 ${amount === 0 && "text-muted"}`}
                                     style={{ fontSize: '1.2rem' }}
                                 >
-                                    <strong>{formatAmount(amount, resource.data.units)}</strong>
+                                    <strong>{formatAmount(amount, resource.data.units, 1)}</strong>
                                 </Card.Body>
                                 <Card.Footer className="text-center px-2 py-1">
                                     <strong>{resource.data.short_name || resource.data.name}</strong>
@@ -943,35 +941,46 @@ const ProvisionedSummary = ({ project, service, requirements }) => {
 const ProjectServiceCard = ({ project, service }) => {
     const categories = useCategories();
     const resources = useResources();
-    const requirements = useRestResource(service.data._links.requirements);
+    const requirements = useNestedResource(service, "requirements");
     return (
         <Card className="mb-3" style={{ borderWidth: '3px' }}>
             <Card.Header>
-                <Resource.Text resource={categories} resourceName="categories">
-                    {data => {
-                        const category = data[service.data.category];
-                        return (
-                            <>
-                                <strong>{category.data.name}</strong>
-                                {" / "}
-                                {service.data.name}
-                            </>
-                        );
-                    }}
-                </Resource.Text>
+                <Status fetchable={categories}>
+                    <Status.Loading>
+                        <SpinnerWithText size="sm">Loading categories...</SpinnerWithText>
+                    </Status.Loading>
+                    <Status.Unavailable>
+                        <span className="text-danger">
+                            <i className="fas fa-exclamation-triangle mr-2"></i>
+                            Unable to load categories.
+                        </span>
+                    </Status.Unavailable>
+                    <Status.Available>
+                        {data => {
+                            const category = data[service.data.category];
+                            return (
+                                <>
+                                    <strong>{category.data.name}</strong>
+                                    {" / "}
+                                    {service.data.name}
+                                </>
+                            );
+                        }}
+                    </Status.Available>
+                </Status>
             </Card.Header>
             {/*
                 We need the resources to order the requirements, so wait for both to load.
             */}
-            <Resource.Multi resources={[requirements, resources]}>
-                <Resource.Loading>
+            <Status.Many fetchables={[requirements, resources]}>
+                <Status.Loading>
                     <ListGroup variant="flush">
                         <ListGroup.Item>
                             <SpinnerWithText size="sm">Loading requirements...</SpinnerWithText>
                         </ListGroup.Item>
                     </ListGroup>
-                </Resource.Loading>
-                <Resource.Unavailable>
+                </Status.Loading>
+                <Status.Unavailable>
                     <ListGroup variant="flush">
                         <ListGroup.Item>
                             <span className="text-danger">
@@ -980,8 +989,8 @@ const ProjectServiceCard = ({ project, service }) => {
                             </span>
                         </ListGroup.Item>
                     </ListGroup>
-                </Resource.Unavailable>
-                <Resource.Available>
+                </Status.Unavailable>
+                <Status.Available>
                     <ProvisionedSummary
                         project={project}
                         service={service}
@@ -992,8 +1001,8 @@ const ProjectServiceCard = ({ project, service }) => {
                         service={service}
                         requirements={requirements}
                     />
-                </Resource.Available>
-            </Resource.Multi>
+                </Status.Available>
+            </Status.Many>
         </Card>
     );
 };
@@ -1002,13 +1011,9 @@ const ProjectServiceCard = ({ project, service }) => {
 const ProjectEdit = ({ project }) => {
     const categories = useCategories();
     // Load the project services
-    const services = useRestResource(project.data._links.services);
+    const services = useNestedResource(project, "services");
     return (<>
-        <Row>
-            <Col>
-                <h1 className="border-bottom mt-4">{project.data.name}</h1>
-            </Col>
-        </Row>
+        <PageHeader>{project.data.name}</PageHeader>
         <Row>
             {/* Use custom classes for an xxl breakpoint */}
             <Col xs={12} lg={5} xl={4} className="order-lg-1 col-xxl-3">
@@ -1019,16 +1024,16 @@ const ProjectEdit = ({ project }) => {
                     Because we want to sort the services by category name, we need to wait for
                     the categories and project services to load before rendering.
                 */}
-                <Resource.Multi resources={[services, categories]}>
-                    <Resource.Loading>
+                <Status.Many fetchables={[services, categories]}>
+                    <Status.Loading>
                         <div className="d-flex justify-content-center my-5">
                             <SpinnerWithText>Loading services...</SpinnerWithText>
                         </div>
-                    </Resource.Loading>
-                    <Resource.Unavailable>
+                    </Status.Loading>
+                    <Status.Unavailable>
                         <Alert variant="danger">Unable to load services.</Alert>
-                    </Resource.Unavailable>
-                    <Resource.Available>
+                    </Status.Unavailable>
+                    <Status.Available>
                         {([serviceData, categoryData]) => {
                             const sortedServices = sortByKey(
                                 Object.values(serviceData),
@@ -1054,8 +1059,8 @@ const ProjectEdit = ({ project }) => {
                                 <Row><Col className="text-center text-muted py-5">No services yet.</Col></Row>
                             );
                         }}
-                    </Resource.Available>
-                </Resource.Multi>
+                    </Status.Available>
+                </Status.Many>
             </Col>
         </Row>
     </>);
@@ -1065,18 +1070,11 @@ const ProjectEdit = ({ project }) => {
 const ProjectEditWrapper = () => {
     const notify = useNotifications();
 
-    // Get the project id from the path
+    // Get the project that was specified in the params
     const { id: projectId } = useParams();
-
-    // Get the project initial data from the location state
-    const location = useLocation();
-    const history = useHistory();
-    const initialData = location.state?.project;
-    // However make sure to clear it once we have used it as we don't want it to
-    // persist when the page is refreshed
-    useEffect(() => { history.replace(location.pathname, {}); }, []);
-
-    // Request the project
+    // Get any initial data specified in the location state
+    const initialData = useInitialDataFromLocation();
+    // Initialise the project
     const project = useProject(projectId, { initialData });
 
     // If the project failed to load, notify the user
@@ -1089,22 +1087,21 @@ const ProjectEditWrapper = () => {
         [project.fetchError]
     );
 
-    // Make a decision on what to do based on whether the project is loaded
-    if( project.initialised ) {
-        return <ProjectEdit project={project} />;
-    }
-    else if( project.fetchError ) {
-        // Redirect the user to the project list
-        return <Redirect to="/projects" />;
-    }
-    else {
-        // The first fetch has not completed - show a spinner
-        return (
-            <div className="d-flex justify-content-center my-5">
-                <SpinnerWithText>Loading project...</SpinnerWithText>
-            </div>
-        );
-    };
+    return (
+        <Status fetchable={project}>
+            <Status.Loading>
+                <div className="d-flex justify-content-center my-5">
+                    <SpinnerWithText>Loading project...</SpinnerWithText>
+                </div>
+            </Status.Loading>
+            <Status.Unavailable>
+                <Redirect to="/projects" />
+            </Status.Unavailable>
+            <Status.Available>
+                <ProjectEdit project={project} />
+            </Status.Available>
+        </Status>
+    );
 };
 
 

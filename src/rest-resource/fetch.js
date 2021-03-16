@@ -20,13 +20,8 @@ class HttpError extends Error {
 const sleep = (ms) => (new Promise(resolve => setTimeout(resolve, ms)));
 
 
-const apiFetch = async (url, {
-    method = 'GET',
-    headers = {},
-    data,
-    body,
-    ...options
-} = {}) => {
+const apiFetch = async (url, options) => {
+    const { method = 'GET', headers = {}, data, body, ...rest } = options || {};
     // Populate the required headers for the request
     const defaultHeaders = {};
     // For POST/PUT/DELETE, declare the content type and include the CSRF token if present
@@ -45,7 +40,7 @@ const apiFetch = async (url, {
         // Always include credentials
         credentials: 'include',
         // Forward any other options that were supplied
-        ...options
+        ...rest
     });
     // For a 204, just return
     if( response.status === 204 ) return;

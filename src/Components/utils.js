@@ -1,16 +1,83 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-import Col from 'react-bootstrap/Col';
-import Row from 'react-bootstrap/Row';
-import Spinner from 'react-bootstrap/Spinner';
-import Tabs from 'react-bootstrap/Tabs';
-import Tab from 'react-bootstrap/Tab';
+import { useHistory, useLocation } from 'react-router-dom';
 
-import ReactSelect from 'react-select';
+import classNames from 'classnames';
+
+import Nav from 'react-bootstrap/Nav';
+import Spinner from 'react-bootstrap/Spinner';
 
 import ReactMarkdown from 'react-markdown';
 
 import '../css/form-controls.css';
+
+
+const base1000SizeUnits = ['B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+const base1024SizeUnits = ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
+const amountSuffixes = ['', 'K', 'M', 'B', 'T'];
+
+
+// This function takes a number and returns a formatted number and exponent
+// such that [result] * 1000^[exponent] ~= [original number]
+// If "decimalPlaces" is given, the result is truncated to the specified number
+// of decimal places if required, and the result becomes potentially approximate
+// as a result
+// If "decimalPlaces" is not given, the result is not truncated
+// A different base can also be specified if required (e.g. 1024 for GiB)
+const formatNumber = (number, maxExponent, decimalPlaces, base = 1000) => {
+    let result = number, exponent = 0;
+    while( exponent < maxExponent && number > Math.pow(base, exponent + 1) ) {
+        result = result / base;
+        exponent = exponent + 1;
+    }
+    let isTruncated = false, formattedResult = result;
+    if( decimalPlaces ) {
+        const factor = Math.pow(10, decimalPlaces);
+        const truncatedResult = Math.floor(result * factor) / factor;
+        isTruncated = result !== truncatedResult;
+        formattedResult = Number.isInteger(truncatedResult) ?
+            truncatedResult :
+            truncatedResult.toFixed(decimalPlaces);
+    }
+    // Return the formatted result with the exponent
+    // Indicate whether truncation has taken place using >
+    return [`${isTruncated ? '>' : ''}${formattedResult}`, exponent];
+};
+
+
+const formatSize = (amount, originalUnits, unitsList, base, decimalPlaces) => {
+    // If the amount is zero, then use the given units
+    if( amount === 0 ) return `0 ${originalUnits}`;
+    // Work out at what unit we are starting from
+    const originalUnitsIndex = unitsList.indexOf(originalUnits);
+    // Get the number and exponent
+    const [formattedAmount, exponent] = formatNumber(
+        amount,
+        // We can only go as far as the units in the list
+        unitsList.length - originalUnitsIndex - 1,
+        decimalPlaces,
+        base
+    );
+    // Return the formatted value
+    return `${formattedAmount} ${unitsList[originalUnitsIndex + exponent]}`;
+};
+
+
+export const formatAmount = (amount, units, decimalPlaces) => {
+    // If the amount is a size, either base 1000 or 1024, we treat it slightly differently
+    if( base1000SizeUnits.includes(units) )
+        return formatSize(amount, units, base1000SizeUnits, 1000, decimalPlaces);
+    if( base1024SizeUnits.includes(units) )
+        return formatSize(amount, units, base1024SizeUnits, 1024, decimalPlaces);
+    // Otherwise, format the amount to reduce the number of zeros
+    const [formattedAmount, exponent] = formatNumber(
+        amount,
+        amountSuffixes.length - 1,
+        decimalPlaces
+    );
+    // Return the formatted value
+    return `${formattedAmount}${amountSuffixes[exponent]}${units ? ` ${units}`: ''}`;
+};
 
 
 /**
@@ -24,14 +91,9 @@ export const sortByKey = (data, keyFn) => [...data].sort(
 );
 
 
-export const SpinnerWithText = ({ children, justify = 'start', ...spinnerProps }) => (
-    <div className={`d-flex align-items-center justify-content-${justify}`}>
-        <Spinner className="mr-2" animation="border" {...spinnerProps} />
-        <span>{children}</span>
-    </div>
-);
-
-
+/**
+ * Function that produces a notification from an error object.
+ */
 export const notificationFromError = error => {
     let title, message;
     if( error.name === "HttpError" ) {
@@ -57,130 +119,81 @@ export const notificationFromError = error => {
 
 
 /**
- * Wrapper for a form control that calls the onChange handler with the new value
- * instead of an event.
+ * Hook for using the initial state from the location.
+ *
+ * Ensures that the initial state is cleared from the browser history, otherwise it
+ * stays there and gets used the next time the page is loaded, even though it might
+ * be out of date.
  */
-export const Control = ({
-    // The change handler, which will receive the value
-    onChange,
-    // The component that will be rendered
-    as: Component,
-    // This function extracts a value from the change event for the component
-    // It receives the arguments that are passed to the onChange handler
-    valueFromChangeEvent,
-    ...props
-}) => {
-    const handleChange = (...args) => onChange(valueFromChangeEvent(...args));
-    return <Component {...props} onChange={handleChange} />;
+export const useInitialDataFromLocation = () => {
+    const { pathname, state } = useLocation();
+    const { initialData, ...newState } = state || {};
+    const history = useHistory();
+    const initialDataRef = useRef(initialData);
+    useEffect(() => { history.replace(pathname, newState); }, []);
+    return initialDataRef.current;
 };
 
 
 /**
- * Wrapper for an input that calls the onChange handler with the new value
- * instead of an event.
+ * Component that shows a spinner with some text, aligned using flex.
  */
-export const Input = props => {
-    const extractValue = event => event.target.value;
-    return <Control {...props} as="input" valueFromChangeEvent={extractValue} />;
-};
+export const SpinnerWithText = ({ children, justify = 'start', ...spinnerProps }) => (
+    <div className={`d-flex align-items-center justify-content-${justify}`}>
+        <Spinner className="mr-2" animation="border" {...spinnerProps} />
+        <span>{children}</span>
+    </div>
+);
 
 
 /**
- * Wrapper for a textarea that calls the onChange handler with the new value
- * instead of an event.
+ * Form control for a markdown editor.
  */
-export const TextArea = props => {
-    const extractValue = event => event.target.value;
-    return <Control {...props} as="textarea" valueFromChangeEvent={extractValue} />;
-};
-
-
-/**
- * Provides a markdown editor that can be used as a Bootstrap form control.
- */
-export const MarkdownEditor = ({ value, ...props }) => {
+export const MarkdownEditor = ({ value, className, onFocus, ...props }) => {
     const [selectedTab, setSelectedTab] = useState("write");
-    return (
-        <div className="markdown-editor">
-            <Tabs activeKey={selectedTab} onSelect={setSelectedTab}>
-                <Tab eventKey="write" title="Write">
-                    <TextArea value={value} rows={5} {...props} />
-                    <small className="form-text text-muted">
-                        This field may contain <a href="https://www.markdownguide.org/" target="_blank">Markdown</a>.
-                    </small>
-                </Tab>
-                <Tab eventKey="preview" title="Preview">
-                    <ReactMarkdown source={value} />
-                </Tab>
-            </Tabs>
-        </div>
-    );
-};
-
-
-const noop = () => {/* NOOP */};
-
-
-/**
- * Wrapper for react-select that lets it behave a bit more like a normal select.
- */
-export const Select = ({
-    options,
-    value,
-    onChange,
-    disabled,
-    required,
-    getOptionLabel = option => option.label,
-    getOptionValue = option => option.value,
-    className = '',
-    ...props
-}) => {
-    // Store the current value as internal state
-    const [state, setState] = useState(value || '');
-    // When the value changes, use it to set the state
-    useEffect(() => { setState(value); }, [value]);
-    // Maintain a reference to the select that we will use to correctly maintain focus
-    const selectRef = useRef(null);
-    // When the select is changed, update the internal state and call the handler
-    const handleSelectChange = option => {
-        const optionValue = getOptionValue(option);
-        setState(optionValue);
-        onChange(optionValue);
+    // The textarea is always visible, so that it can receive focus as part of form validation
+    // However when the preview tab is active, we tweak the styles so that it is visually hidden
+    const textareaStyles = selectedTab === "write" ?
+        {} :
+        {
+            opacity: 0,
+            height: 0,
+            padding: 0,
+            border: '1px solid transparent'
+        };
+    // When the textarea receives focus, switch to the write tab
+    const handleReceiveFocus = (...args) => {
+        setSelectedTab("write");
+        if( onFocus ) onFocus(...args);
     };
-    // Sort the options by the label
-    const sortedOptions = sortByKey(options, getOptionLabel);
-    // Select the option that corresponds to the given value
-    const selectedOption = sortedOptions.find(opt => getOptionValue(opt) === value);
-    // Render the select with a hidden text input that implements required
     return (
-        <div className={`${className} rich-select`}>
-            <ReactSelect
+        <div className={classNames("markdown-editor", className)}>
+            <Nav variant="tabs" activeKey={selectedTab} onSelect={setSelectedTab}>
+                <Nav.Item>
+                    <Nav.Link eventKey="write">Write</Nav.Link>
+                </Nav.Item>
+                <Nav.Item>
+                    <Nav.Link eventKey="preview">Preview</Nav.Link>
+                </Nav.Item>
+            </Nav>
+            <textarea
+                value={value}
+                rows={5}
+                className={className}
+                style={textareaStyles}
+                onFocus={handleReceiveFocus}
                 {...props}
-                options={sortedOptions}
-                value={selectedOption}
-                onChange={handleSelectChange}
-                ref={selectRef}
-                isDisabled={disabled}
-                getOptionLabel={getOptionLabel}
-                getOptionValue={getOptionValue}
             />
-            <input
-                tabIndex={-1}
-                autoComplete="off"
-                style={{
-                    opacity: 0,
-                    width: "100%",
-                    height: 0,
-                    position: "absolute"
-                }}
-                value={state}
-                onChange={noop}
-                // When the text input is focussed as part of the required validation,
-                // pass the focus onto the select
-                onFocus={() => selectRef.current.focus()}
-                required={required}
-                disabled={disabled}
-            />
+            <div className={classNames(
+                'markdown-editor-preview',
+                { 'd-none': selectedTab !== "preview" }
+            )}>
+                <ReactMarkdown source={value || "Nothing to preview."} />
+            </div>
+            <small className="form-text text-muted">
+                This field may contain{" "}
+                <a href="https://www.markdownguide.org/" target="_blank">Markdown</a>.
+            </small>
         </div>
     );
 };

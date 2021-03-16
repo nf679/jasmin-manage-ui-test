@@ -8481,6 +8481,7 @@ fsevents@^1.2.7:
   version: 0.0.0-use.local
   resolution: "jasmin-manage-ui@workspace:."
   dependencies:
+    classnames: ^2.2.6
     fwtheme-react-jasmin: "github:cedadev/fwtheme-react-jasmin"
     http-proxy-middleware: ^1.0.6
     js-cookie: ^2.2.1

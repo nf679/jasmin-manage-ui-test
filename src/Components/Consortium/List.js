@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 
 import { Link } from 'react-router-dom';
 
@@ -11,9 +11,9 @@ import Row from 'react-bootstrap/Row';
 
 import { PageHeader } from 'fwtheme-react-jasmin';
 
-import { useCurrentUser, useConsortia } from '../../api';
+import { Status, useEnsureRefreshed } from '../../rest-resource';
 
-import Resource from '../Resource';
+import { useCurrentUser, useConsortia } from '../../api';
 
 import { SpinnerWithText, sortByKey } from '../utils';
 
@@ -24,6 +24,9 @@ const ConsortiumCard = ({ consortium }) => {
     const numProjects = consortium.data.num_projects;
     const numProjectsUser = consortium.data.num_projects_current_user;
     const userIsManager = consortium.data.manager.id === currentUser.data.id;
+    const managerName = consortium.data.manager.last_name ?
+        `${consortium.data.manager.first_name} ${consortium.data.manager.last_name}` :
+        consortium.data.manager.username;
 
     return (
         <Card className="mb-3" style={{ borderWidth: '3px' }}>
@@ -52,18 +55,13 @@ const ConsortiumCard = ({ consortium }) => {
                     {userIsManager ? (
                         <strong>You are the consortium manager.</strong>
                     ) : (<>
-                        Manager is{" "}
-                        <strong>{consortium.data.manager.first_name} {consortium.data.manager.last_name}</strong>.
+                        Manager is <strong>{managerName}</strong>.
                     </>)}
                 </ListGroup.Item>
             </ListGroup>
             {userIsManager && (
                 <Card.Footer className="text-right">
-                    {/* Pass the consortium data as state with the link */}
-                    <Link to={{
-                        pathname: `/consortia/${consortium.data.id}`,
-                        state: { consortium: consortium.data }
-                    }}>
+                    <Link to={`/consortia/${consortium.data.id}`}>
                         <Button variant="outline-primary">Go to consortium</Button>
                     </Link>
                 </Card.Footer>
@@ -77,19 +75,21 @@ const ConsortiumList = () => {
     const currentUser = useCurrentUser();
     const consortia = useConsortia();
 
-    return (
-        <>
-            <PageHeader>Consortia</PageHeader>
-            <Resource resource={consortia}>
-                <Resource.Loading>
-                    <div className="d-flex justify-content-center my-5">
-                        <SpinnerWithText>Loading consortia...</SpinnerWithText>
-                    </div>
-                </Resource.Loading>
-                <Resource.Unavailable>
+    // Make sure the consortia are refreshed each time
+    const refreshing = useEnsureRefreshed(consortia);
+
+    return (<>
+        <PageHeader>Consortia</PageHeader>
+        {refreshing ? (
+            <div className="d-flex justify-content-center my-5">
+                <SpinnerWithText>Loading consortia...</SpinnerWithText>
+            </div>
+        ) : (
+            <Status fetchable={consortia}>
+                <Status.Unavailable>
                     <Alert variant="danger">Unable to load consortia.</Alert>
-                </Resource.Unavailable>
-                <Resource.Available>
+                </Status.Unavailable>
+                <Status.Available>
                     {data => {
                         // Sort the consortia so that the ones that the user manages appear first
                         const sortedConsortia = sortByKey(
@@ -104,10 +104,10 @@ const ConsortiumList = () => {
                             </Row>
                         );
                     }}
-                </Resource.Available>
-            </Resource>
-        </>
-    );
+                </Status.Available>
+            </Status>
+        )}
+    </>);
 };
 
 

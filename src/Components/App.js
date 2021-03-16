@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo } from 'react';
 
-import { BrowserRouter as Router, Switch, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Switch, useLocation } from 'react-router-dom';
 
 import Alert from 'react-bootstrap/Alert';
 import Container from 'react-bootstrap/Container';
@@ -13,9 +13,10 @@ import { SpinnerWithText } from './utils';
 
 import Navbar from './Navbar';
 import Home from './Home';
-import ProjectList from './ProjectList';
-import ProjectEdit from './ProjectEdit';
+import ProjectList from './Project/List';
+import ProjectEdit from './Project/Edit';
 import ConsortiumList from './Consortium/List';
+import ConsortiumDetail from './Consortium/Detail';
 
 import '../css/xxl-breakpoint.css';
 
@@ -85,10 +86,11 @@ const App = () => (
             <Notifications />
             <Container fluid>
                 <Switch>
+                    <Route path="/" exact><Home /></Route>
                     <AuthenticatedRoute path="/consortia" exact><ConsortiumList /></AuthenticatedRoute>
+                    <AuthenticatedRoute path="/consortia/:id"><ConsortiumDetail /></AuthenticatedRoute>
                     <AuthenticatedRoute path="/projects" exact><ProjectList /></AuthenticatedRoute>
                     <AuthenticatedRoute path="/projects/:id"><ProjectEdit /></AuthenticatedRoute>
-                    <Route path="/"><Home /></Route>
                 </Switch>
             </Container>
         </Router>
