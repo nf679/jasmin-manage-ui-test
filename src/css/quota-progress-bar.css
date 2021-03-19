@@ -1,0 +1,31 @@
+.quota-progress-bar {
+    position: relative;
+    padding: 3px 0;
+}
+
+.quota-progress-bar .progress-bar {
+    cursor: pointer;
+}
+
+/* When the main progress bar is hovered over, fade all the bars */
+.quota-progress-bar:hover .progress-bar,
+.quota-progress-bar:hover .indicator-line {
+    opacity: 0.4;
+}
+
+/* Make the hovered bar full opacity again */
+.quota-progress-bar .progress-bar:hover,
+.quota-progress-bar .indicator-line:hover {
+    opacity: 1.0 !important;
+}
+
+.quota-progress-bar .indicator-line {
+    position: absolute;
+    cursor: pointer;
+    margin-left: -3px;
+    width: 6px;
+    height: 100%;
+    background-color: #cb001b;
+    z-index: 1000;
+    top: 0;
+}

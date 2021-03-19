@@ -14,10 +14,11 @@ import { SpinnerWithText } from './utils';
 import Navbar from './Navbar';
 import Home from './Home';
 import ProjectList from './Project/List';
-import ProjectEdit from './Project/Edit';
+import ProjectDetail from './Project/Detail';
 import ConsortiumList from './Consortium/List';
 import ConsortiumDetail from './Consortium/Detail';
 
+import '../css/notifications.css';
 import '../css/xxl-breakpoint.css';
 
 
@@ -65,7 +66,7 @@ const AuthenticatedComponent = ({ children }) => {
     else {
         return (
             <div className="d-flex justify-content-center my-5">
-                <SpinnerWithText>Initialising...</SpinnerWithText>
+                <SpinnerWithText iconSize="lg" textSize="lg">Initialising...</SpinnerWithText>
             </div>
         );
     }
@@ -90,7 +91,7 @@ const App = () => (
                     <AuthenticatedRoute path="/consortia" exact><ConsortiumList /></AuthenticatedRoute>
                     <AuthenticatedRoute path="/consortia/:id"><ConsortiumDetail /></AuthenticatedRoute>
                     <AuthenticatedRoute path="/projects" exact><ProjectList /></AuthenticatedRoute>
-                    <AuthenticatedRoute path="/projects/:id"><ProjectEdit /></AuthenticatedRoute>
+                    <AuthenticatedRoute path="/projects/:id"><ProjectDetail /></AuthenticatedRoute>
                 </Switch>
             </Container>
         </Router>

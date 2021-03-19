@@ -76,37 +76,38 @@ const ConsortiumList = () => {
     const consortia = useConsortia();
 
     // Make sure the consortia are refreshed each time
-    const refreshing = useEnsureRefreshed(consortia);
+    const refreshedConsortia = useEnsureRefreshed(consortia);
 
     return (<>
         <PageHeader>Consortia</PageHeader>
-        {refreshing ? (
-            <div className="d-flex justify-content-center my-5">
-                <SpinnerWithText>Loading consortia...</SpinnerWithText>
-            </div>
-        ) : (
-            <Status fetchable={consortia}>
-                <Status.Unavailable>
-                    <Alert variant="danger">Unable to load consortia.</Alert>
-                </Status.Unavailable>
-                <Status.Available>
-                    {data => {
-                        // Sort the consortia so that the ones that the user manages appear first
-                        const sortedConsortia = sortByKey(
-                            Object.values(data),
-                            c => [currentUser.data.id !== c.data.manager.id, c.data.name]
-                        );
-                        return (
-                            <Row xs={1} sm={2} lg={3}>
-                                {sortedConsortia.map(c =>
-                                    <Col key={c.data.id}><ConsortiumCard consortium={c} /></Col>
-                                )}
-                            </Row>
-                        );
-                    }}
-                </Status.Available>
-            </Status>
-        )}
+        <Status fetchable={refreshedConsortia}>
+            <Status.Loading>
+                <div className="d-flex justify-content-center my-5">
+                    <SpinnerWithText iconSize="lg" textSize="120%">
+                        Loading consortia...
+                    </SpinnerWithText>
+                </div>
+            </Status.Loading>
+            <Status.Unavailable>
+                <Alert variant="danger">Unable to load consortia.</Alert>
+            </Status.Unavailable>
+            <Status.Available>
+                {data => {
+                    // Sort the consortia so that the ones that the user manages appear first
+                    const sortedConsortia = sortByKey(
+                        Object.values(data),
+                        c => [currentUser.data.id !== c.data.manager.id, c.data.name]
+                    );
+                    return (
+                        <Row xs={1} sm={2} lg={3}>
+                            {sortedConsortia.map(c =>
+                                <Col key={c.data.id}><ConsortiumCard consortium={c} /></Col>
+                            )}
+                        </Row>
+                    );
+                }}
+            </Status.Available>
+        </Status>
     </>);
 };
 

@@ -1,4 +1,5 @@
-// Export the delete button and status components directly
+// Export the button and status components directly
+export * from './InstanceActionButton';
 export * from './InstanceDeleteButton';
 export * from './Status';
 

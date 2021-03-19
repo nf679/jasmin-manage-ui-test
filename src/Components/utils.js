@@ -5,7 +5,6 @@ import { useHistory, useLocation } from 'react-router-dom';
 import classNames from 'classnames';
 
 import Nav from 'react-bootstrap/Nav';
-import Spinner from 'react-bootstrap/Spinner';
 
 import ReactMarkdown from 'react-markdown';
 
@@ -26,7 +25,7 @@ const amountSuffixes = ['', 'K', 'M', 'B', 'T'];
 // A different base can also be specified if required (e.g. 1024 for GiB)
 const formatNumber = (number, maxExponent, decimalPlaces, base = 1000) => {
     let result = number, exponent = 0;
-    while( exponent < maxExponent && number > Math.pow(base, exponent + 1) ) {
+    while( exponent < maxExponent && number >= Math.pow(base, exponent + 1) ) {
         result = result / base;
         exponent = exponent + 1;
     }
@@ -94,18 +93,18 @@ export const sortByKey = (data, keyFn) => [...data].sort(
 /**
  * Function that produces a notification from an error object.
  */
-export const notificationFromError = error => {
+export const notificationFromError = (error, duration = 5000) => {
     let title, message;
     if( error.name === "HttpError" ) {
         title = error.statusText;
         // Extract the most useful information from the error for the message
-        // For 4xx errors, the server should always return valid JSON
-        // For 5xx errors, all bets are off so just use the response text
-        if( error.status >= 400 && error.status < 500 ) {
+        // If the error is JSON, use the structured representation
+        // If not, just use the response text
+        try {
             const errorObj = error.json();
             message = errorObj.detail || JSON.stringify(errorObj);
         }
-        else {
+        catch(parseError) {
             message = error.responseText;
         }
     }
@@ -114,7 +113,7 @@ export const notificationFromError = error => {
         title = error.name;
         message = error.message;
     }
-    return { level: 'danger', title, message };
+    return { level: 'danger', title, message, duration };
 };
 
 
@@ -135,13 +134,31 @@ export const useInitialDataFromLocation = () => {
 };
 
 
+const textSizes = { xs: '70%', sm: '80%', lg: '130%', xl: '150%' };
+
 /**
- * Component that shows a spinner with some text, aligned using flex.
+ * Component that shows a spinner with some text.
  */
-export const SpinnerWithText = ({ children, justify = 'start', ...spinnerProps }) => (
-    <div className={`d-flex align-items-center justify-content-${justify}`}>
-        <Spinner className="mr-2" animation="border" {...spinnerProps} />
-        <span>{children}</span>
+export const SpinnerWithText = ({
+    children,
+    // Controls the size of the icon RELATIVE TO THE TEXT
+    iconSize,
+    // Controls the size of the text INCLUDING THE ICON
+    textSize = '100%',
+    style,
+    ...props
+}) => (
+    <div style={{ fontSize: textSizes[textSize] || textSize, ...style }} {...props}>
+        <i
+            className={classNames(
+                "fas",
+                "fa-spin",
+                "fa-sync-alt",
+                "mr-2",
+                { [`fa-${iconSize}`]: !!iconSize }
+            )}
+        />
+        {children}
     </div>
 );
 

@@ -1,12 +1,35 @@
 .requirements-table td {
     vertical-align: middle !important;
-    white-space: nowrap;
-    height: 38px;
+    white-space: nowrap !important;
+    height: 38px !important;
 }
 
 /* Make the cells containing the icon and buttons shrink */
 .requirements-table td:first-child,
 .requirements-table td:last-child {
-    width: 0.1%;
-    padding: 0.3rem 0.5rem;
+    width: 0.1% !important;
+    padding: 0.3rem 0.5rem !important;
+}
+
+.requirements-table tr.status-requested {
+    color: #535353 !important;
+}
+.requirements-table tr.status-rejected {
+    color: #580e18 !important;
+    background-color: #e7bfc4 !important;
+}
+.requirements-table tr.status-approved {
+    color: #366428 !important;
+    background-color: #d4edcd !important;
+}
+.requirements-table tr.status-awaiting-provisioning {
+    color: #853700 !important;
+    background-color: #ffd5b8 !important;
+}
+.requirements-table tr.status-provisioned {
+    color: #103081 !important;
+    /* background-color: #c0d2fd !important; */
+}
+.requirements-table tr.status-decommissioned {
+    color: #95a5a6 !important;
 }

@@ -1,67 +1,98 @@
 import React, { useEffect } from 'react';
 
-import { Redirect, useParams } from 'react-router-dom';
+import {
+    Redirect,
+    Route,
+    Switch,
+    useLocation,
+    useParams,
+    useRouteMatch
+} from 'react-router-dom';
 
 import Badge from 'react-bootstrap/Badge';
 import Col from 'react-bootstrap/Col';
 import Nav from 'react-bootstrap/Nav';
 import Row from 'react-bootstrap/Row';
-import Tab from 'react-bootstrap/Tab';
+
+import { LinkContainer } from 'react-router-bootstrap';
 
 import { useNotifications } from 'react-bootstrap-notify';
 
 import { PageHeader } from 'fwtheme-react-jasmin';
 
-import { Status } from '../../rest-resource';
+import { Status, useNestedResource } from '../../rest-resource';
 
 import { useConsortia, useConsortium } from '../../api';
 
 import { SpinnerWithText, notificationFromError } from '../utils';
 
 import OverviewPane from './OverviewPane';
+import ProjectsPane from './ProjectsPane';
 
 
-const ConsortiumProjects = ({ consortium }) => {
-    return "Consortium projects";
-};
+const ConsortiumDetail = ({ consortium }) => {
+    // We don't want to be reloading resources as the user flips between tabs
+    // So load both nested resources here
+    const projects = useNestedResource(consortium, "projects");
+    const quotas = useNestedResource(consortium, "quotas");
 
+    const { pathname } = useLocation();
+    const { path, url } = useRouteMatch();
 
-const ConsortiumDetail = ({ consortium }) => (<>
-    <PageHeader>
-        <div className="d-flex align-items-center">
-            <span>{consortium.data.name}</span>
-            <Badge
-                variant={consortium.data.is_public ? "success" : "danger"}
-                className="ml-4"
-                style={{ fontSize: '60%' }}
-            >
-                {consortium.data.is_public ? "Public" : "Not Public"}
-            </Badge>
-        </div>
-    </PageHeader>
-    <Row>
-        <Col>
-            <Tab.Container defaultActiveKey="overview">
-                <Nav variant="tabs" className="mb-3">
+    // Count the number of projects that are under review
+    // If we do this before the projects have loaded, we get zero
+    const numProjectsUnderReview = Object.values(projects.data)
+        .filter(p => p.data.status === "UNDER_REVIEW")
+        .length;
+
+    return (<>
+        <PageHeader>
+            <div className="d-flex align-items-center">
+                <span>{consortium.data.name}</span>
+                <Badge
+                    variant={consortium.data.is_public ? "success" : "danger"}
+                    className="ml-4"
+                    style={{ fontSize: '60%' }}
+                >
+                    {consortium.data.is_public ? "Public" : "Not Public"}
+                </Badge>
+            </div>
+        </PageHeader>
+        <Row>
+            <Col>
+                <Nav variant="tabs" className="mb-3" activeKey={pathname}>
                     <Nav.Item>
-                        <Nav.Link eventKey="overview">Overview</Nav.Link>
+                        <LinkContainer to={url} exact>
+                            <Nav.Link>Overview</Nav.Link>
+                        </LinkContainer>
                     </Nav.Item>
                     <Nav.Item>
-                        <Nav.Link eventKey="projects">Projects</Nav.Link>
+                        <LinkContainer to={`${url}/projects`}>
+                            <Nav.Link>
+                                <div className="d-flex align-items-center">
+                                    <span>Projects</span>
+                                    {numProjectsUnderReview > 0 && (
+                                        <Badge pill className="ml-2" variant="danger">
+                                            {numProjectsUnderReview}
+                                        </Badge>
+                                    )}
+                                </div>
+                            </Nav.Link>
+                        </LinkContainer>
                     </Nav.Item>
                 </Nav>
-                <Tab.Content>
-                    <Tab.Pane eventKey="overview">
-                        <OverviewPane consortium={consortium} />
-                    </Tab.Pane>
-                    <Tab.Pane eventKey="projects">
-                        <ConsortiumProjects consortium={consortium} />
-                    </Tab.Pane>
-                </Tab.Content>
-            </Tab.Container>
-        </Col>
-    </Row>
-</>);
+                <Switch>
+                    <Route exact path={path}>
+                        <OverviewPane quotas={quotas} />
+                    </Route>
+                    <Route path={`${path}/projects`}>
+                        <ProjectsPane projects={projects} />
+                    </Route>
+                </Switch>
+            </Col>
+        </Row>
+    </>);
+};
 
 
 const ConsortiumDetailWrapper = () => {
@@ -89,7 +120,9 @@ const ConsortiumDetailWrapper = () => {
         <Status fetchable={consortium}>
             <Status.Loading>
                 <div className="d-flex justify-content-center my-5">
-                    <SpinnerWithText>Loading consortium...</SpinnerWithText>
+                    <SpinnerWithText iconSize="lg" textSize="lg">
+                        Loading consortium...
+                    </SpinnerWithText>
                 </div>
             </Status.Loading>
             <Status.Unavailable>

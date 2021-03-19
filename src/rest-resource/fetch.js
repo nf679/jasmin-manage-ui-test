@@ -23,7 +23,7 @@ const sleep = (ms) => (new Promise(resolve => setTimeout(resolve, ms)));
 const apiFetch = async (url, options) => {
     const { method = 'GET', headers = {}, data, body, ...rest } = options || {};
     // Populate the required headers for the request
-    const defaultHeaders = {};
+    const defaultHeaders = { 'Accept': 'application/json' };
     // For POST/PUT/DELETE, declare the content type and include the CSRF token if present
     if( ['POST', 'PUT', 'DELETE'].includes(method.toUpperCase()) ) {
         defaultHeaders['Content-Type'] = 'application/json';

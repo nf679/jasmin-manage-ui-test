@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
@@ -31,7 +31,7 @@ import {
     ProjectConsortiumListItem,
     ProjectCollaboratorsListItem,
     ProjectCreatedAtListItem
-} from './Edit';
+} from './CardItems';
 
 
 const ProjectCreateButton = ({ projects }) => {
@@ -42,6 +42,14 @@ const ProjectCreateButton = ({ projects }) => {
     const [modalVisible, setModalVisible] = useState(false);
     const showModal = () => setModalVisible(true);
     const hideModal = () => setModalVisible(false);
+
+    const history = useHistory();
+
+    // When a project is created, redirect to it
+    // We don't need to hide the modal as we will be redirected
+    const handleSuccess = projectData => {
+        history.push(`/projects/${projectData.id}`, { initialData: projectData });
+    };
 
     const handleError = error => {
         notify(notificationFromError(error));
@@ -74,7 +82,7 @@ const ProjectCreateButton = ({ projects }) => {
         <Modal show={modalVisible} backdrop="static" keyboard={false}>
             <ResourceForm.CreateInstanceForm
                 resource={projects}
-                onSuccess={hideModal}
+                onSuccess={handleSuccess}
                 onError={handleError}
                 onCancel={hideModal}
                 // Disable the form if the consortia are not initialised
@@ -166,7 +174,7 @@ const ProjectList = () => {
         <Status fetchable={projects}>
             <Status.Loading>
                 <div className="d-flex justify-content-center my-5">
-                    <SpinnerWithText>Loading projects...</SpinnerWithText>
+                    <SpinnerWithText iconSize="lg" textSize="120%">Loading projects...</SpinnerWithText>
                 </div>
             </Status.Loading>
             <Status.Unavailable>

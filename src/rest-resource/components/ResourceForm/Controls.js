@@ -5,7 +5,6 @@ import classNames from 'classnames';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import BootstrapFormContext from 'react-bootstrap/FormContext';
-import Spinner from 'react-bootstrap/Spinner';
 
 import ReactSelect from 'react-select';
 
@@ -269,7 +268,7 @@ export const ErrorList = ({
 // shown when the form action is in-progress
 const DefaultSubmitButtonComponent = ({ children, inProgress, ...props }) => (
     <Button {...props} variant="success">
-        {inProgress && <Spinner as="span" animation="border" size="sm" className="mr-2" />}
+        {inProgress && <i className="fas fa-spin fa-sync-alt mr-2" />}
         {children}
     </Button>
 );

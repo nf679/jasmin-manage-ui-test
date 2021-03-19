@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
-import Spinner from 'react-bootstrap/Spinner';
 
 
 // Default delete button component is a Bootstrap button
@@ -23,11 +22,11 @@ const DefaultModalComponent = ({ children, ...props }) => (
 
 
 // Default actions component is a Bootstrap modal footer
-const DefaultActionsComponent = ({ disabled, onCancel, onConfirm }) => (
+const DefaultActionsComponent = ({ inProgress, onCancel, onConfirm }) => (
     <Modal.Footer>
-        <Button onClick={onCancel} disabled={disabled}>Cancel</Button>
-        <Button onClick={onConfirm} variant="danger" disabled={disabled}>
-            {disabled && <Spinner as="span" animation="border" size="sm" className="mr-2" />}
+        <Button onClick={onCancel} disabled={inProgress}>Cancel</Button>
+        <Button onClick={onConfirm} variant="danger" disabled={inProgress}>
+            {inProgress && <i className="fas fa-spin fa-sync-alt mr-2" />}
             Delete
         </Button>
     </Modal.Footer>
@@ -86,7 +85,7 @@ export const InstanceDeleteButton = ({
         <ModalComponent show={modalVisible}>
             {children}
             <ActionsComponent
-                disabled={instance.deleting}
+                inProgress={instance.deleting}
                 onCancel={hideModal}
                 onConfirm={handleConfirm}
             />

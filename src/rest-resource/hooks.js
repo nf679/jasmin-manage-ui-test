@@ -43,19 +43,33 @@ export const useEnsureInitialised = fetchable => {
 
 
 /**
+ * This hook allows access to the state from the previous render.
+ */
+const usePreviousState = state => {
+    // This is accomplished by updating a ref after the render
+    const ref = useRef();
+    useEffect(() => { ref.current = state; });
+    return ref.current;
+};
+
+
+/**
  * Hook that can be used to ensure that a fetchable is refreshed when a component is mounted.
  */
 export const useEnsureRefreshed = fetchable => {
-    // This hook tracks the refreshing state in a way that is initially true
-    // This is because the fetchable is not marked dirty until *after* the initial render,
-    // which means relying on "fetchable.fetching" will result in a flicker where it is not
-    // fetching on first render
-    const [isInitialRender, setIsInitialRender] = useState(true);
-    const { fetching, dirty, markDirty } = fetchable;
-    // When the component is first mounted, mark the fetchable as dirty to trigger a refresh
-    useEffect(() => { markDirty(); setIsInitialRender(false); }, []);
-    // Return true until the fetchable is done fetching
-    return isInitialRender || dirty || fetching;
+    const [refreshed, setIsRefreshed] = useState(false);
+    const { initialised, fetching, markDirty } = fetchable;
+    // When the component is mounted, mark the fetchable as dirty to trigger a refresh
+    useEffect(() => { markDirty(); }, []);
+    // When fetching goes from true to false, consider the fetchable refreshed
+    // It is still possible that there may have been an error, which is fine
+    const fetchingPrev = usePreviousState(fetching);
+    useEffect(
+        () => { if( fetchingPrev && !fetching ) setIsRefreshed(true); },
+        [fetchingPrev, fetching]
+    );
+    // Return a fetchable that is not considered initialised until the refresh is complete
+    return { ...fetchable, initialised: initialised && refreshed };
 };
 
 
@@ -82,7 +96,9 @@ const endpointMethods = (
     setState,
     // Allow a transformation to be applied to the data before it is stored
     // By default, we do nothing
-    transformData = data => data
+    transformData = data => data,
+    // Allow additional reset state to be applied
+    resetExtraState = {}
 ) => ({
     // This function fetches new data from the endpoint
     fetch: () => {
@@ -127,8 +143,18 @@ const endpointMethods = (
         // Return the abort function to allow the fetch to be cancelled from outside
         return () => controller.abort();
     },
-    // This data marks the endpoint as dirty, causing the useFetchPoint hook to re-fetch data
-    markDirty: () => { setState(state => ({ ...state, dirty: true })); }
+    // This function marks the endpoint as dirty, causing the useFetchPoint hook to re-fetch data
+    markDirty: () => setState(state => ({ ...state, dirty: true })),
+    // This function resets the endpoint, clearing all the data and triggering a re-fetch
+    reset: () => setState(state => ({
+        ...state,
+        initialised: false,
+        dirty: true,
+        fetching: false,
+        fetchError: null,
+        data: undefined,
+        ...resetExtraState
+    }))
 });
 
 
@@ -194,17 +220,17 @@ const resourceMethods = (url, setState) => {
             setState,
             // The state as returned by the endpoint will be a raw array of instance data
             // We need to convert that into a map of id => resource instance
-            instanceList => {
-                return Object.assign(
-                    {},
-                    ...instanceList.map(instanceData => ({
-                        [instanceData.id]: {
-                            ...instanceInitialState({ initialData: instanceData }),
-                            ...scopedInstanceMethods(instanceData)
-                        }
-                    }))
-                );
-            }
+            instanceList => Object.assign(
+                {},
+                ...instanceList.map(instanceData => ({
+                    [instanceData.id]: {
+                        ...instanceInitialState({ initialData: instanceData }),
+                        ...scopedInstanceMethods(instanceData)
+                    }
+                }))
+            ),
+            // On a reset, make sure data gets reset to an object
+            { data: {} }
         ),
         create: async data => {
             // Make the create as in progress
@@ -224,6 +250,7 @@ const resourceMethods = (url, setState) => {
                         }
                     }
                 }));
+                return instanceData;
             }
             catch(error) {
                 // On failure, mark the create as over before re-throwing the error
@@ -256,14 +283,46 @@ const instanceInitialState = options => ({
     ...endpointInitialState(options),
     // Add additional flags to indicate when update and delete are in progress
     updating: false,
-    deleting: false
+    deleting: false,
+    // Stores data for nested resources
+    nestedResources: {}
 });
 
 
 // Function to produce the methods for a resource instance
 const instanceMethods = (url, setState) => ({
     // Start with the endpoint methods for data fetching
-    ...endpointMethods(url, setState),
+    ...endpointMethods(
+        url,
+        setState,
+        // Use the default transform
+        undefined,
+        // Make sure nested resources are reset
+        { nestedResources: {} }
+    ),
+    // Produces a set of resource methods for the specified nested resource
+    nestedResourceMethods: (name, nestedUrl, options) => {
+        // Make a setState function that is scoped to the nested data
+        const setNestedState = transform => setState(state => {
+            // First, we need to get the previous nested state
+            // If there is no state yet, we need to initialise it
+            const prevState = state.nestedResources[name] || resourceInitialState(options);
+            // Apply the transform to get the next state
+            const nextState = transform instanceof Function ?
+                transform(prevState) :
+                transform;
+            // Update the stored nested state with the new state
+            return {
+                ...state,
+                nestedResources: {
+                    ...state.nestedResources,
+                    [name]: nextState
+                }
+            };
+        });
+        // Return a set of resource methods that are correctly scoped
+        return resourceMethods(nestedUrl, setNestedState);
+    },
     // Update the instance with new data
     update: async data => {
         // Make the update as in progress
@@ -273,6 +332,7 @@ const instanceMethods = (url, setState) => ({
             const instanceData = await apiFetch(url, { method: 'PUT', data });
             // Update the state if the update was successful
             setState(state => ({ ...state, updating: false, data: instanceData }));
+            return instanceData;
         }
         catch(error) {
             // On failure, mark the update as over before re-throwing the error
@@ -298,13 +358,15 @@ const instanceMethods = (url, setState) => ({
     },
     // Executes a named action on the instance
     executeAction: async (name, data) => {
+        const actionUrl = `${url}${name}/`;
         // Mark the instance as updating
         setState(state => ({ ...state, updating: true }));
         try {
             // Attempt to apply the action
-            const instanceData = await apiFetch(initialData._links[name], { method: 'POST', data });
+            const instanceData = await apiFetch(actionUrl, { method: 'POST', data });
             // Update the state if the action was successful
             setState(state => ({ ...state, updating: false, data: instanceData }));
+            return instanceData;
         }
         catch(error) {
             // On failure, mark the update as over before re-throwing the error
@@ -334,6 +396,55 @@ export const useInstance = (url, options) => {
  * Hook for using a nested resource from an instance.
  */
 export const useNestedResource = (instance, name, options) => {
-    const nestedUrl = instance.data._links[name];
-    return useResource(nestedUrl, options);
+    // We allow the caller to decide whether this should be a fetch point for the
+    // nested resource or just a point where the data and methods can be accessed
+    // Note that unless at least one usage in the component tree is a fetch point,
+    // the data will NEVER be loaded!
+    // Note also that this is distinct from autoFetch, which only prevents the hook
+    // from automatically fetching data on first mount, not from re-fetching when dirty
+    const { fetchPoint = true, ...resourceOptions } = options || {};
+    // Get the current nested state
+    const state = instance.nestedResources[name] || resourceInitialState(resourceOptions);
+    // Get the correctly scoped methods
+    const methods = instance.nestedResourceMethods(
+        name,
+        instance.data._links[name],
+        resourceOptions
+    );
+    // Assemble the resource by combining the state and methods
+    const resource = { ...state, ...methods };
+    // Hooks cannot be conditional, so we always have to call the fetch point hook
+    // However we can effectively disable it by making sure it never sees a dirty resource
+    useFetchPoint({ ...resource, dirty: fetchPoint && resource.dirty });
+    // Return the original state of the resource
+    return resource;
+};
+
+
+/**
+ * Hook for producing a read-only resource which is an aggregation over a nested
+ * resource for all instances of a resource.
+ */
+export const useAggregateResource = (resource, nestedResourceName) => {
+    return Object.values(resource.data).reduce(
+        (aggregate, instance) => {
+            // Get the nested resource state from the instance
+            const nestedResource = (
+                instance.nestedResources[nestedResourceName] ||
+                ({ initialised: false, fetching: false, fetchError: null, data: {} })
+            );
+            return {
+                // The aggregate resource is initialised when all the nested resources are
+                initialised: aggregate.initialised && nestedResource.initialised,
+                // The aggregate resource is fetching when one of the nested resources is
+                fetching: aggregate.fetching || nestedResource.fetching,
+                // Use the first error
+                fetchError: aggregate.fetchError || nestedResource.fetchError,
+                // Merge the data together
+                data: { ...aggregate.data, ...nestedResource.data }
+            };
+        },
+        // When there is no data, the aggregate resource is initialised when the resource is
+        { initialised: resource.initialised, fetching: false, fetchError: null, data: {} }
+    );
 };

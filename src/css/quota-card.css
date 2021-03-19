@@ -12,18 +12,3 @@
     width: 1%;
     text-align: right;
 }
-
-.quota-card .progress-bar {
-    cursor: pointer;
-}
-
-.quota-card .progress-bar.inactive {
-    opacity: 0.4;
-}
-.quota-card .progress-bar.active {
-    opacity: 1.0 !important;
-}
-
-.quota-card table tr.table-active {
-    cursor: pointer;
-}

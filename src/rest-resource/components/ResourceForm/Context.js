@@ -75,8 +75,9 @@ export const Provider = ({
     const handleSubmit = async event => {
         event.preventDefault();
         setInProgress(true);
+        let result;
         try {
-            await onSubmit(formData);
+            result = await onSubmit(formData);
         }
         catch(error) {
             // For a bad request, the content should be JSON-formatted errors
@@ -91,13 +92,13 @@ export const Provider = ({
             // Handling the event is done
             return;
         }
+        // We are no longer in progress
+        setInProgress(false);
         // On success, we want to reset the form
         resetForm();
         // Call the success handler outside the try so we don't accidentally
         // catch exceptions from the success handler
-        if( onSuccess ) onSuccess();
-        // We are no longer in progress
-        setInProgress(false);
+        if( onSuccess ) onSuccess(result);
     };
 
     // Function to handle the cancellation of the form

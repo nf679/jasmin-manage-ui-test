@@ -22,3 +22,7 @@
 .markdown > :last-child {
     margin-bottom: 0;
 }
+
+.btn:disabled {
+    cursor: not-allowed !important;
+}
