@@ -11,6 +11,8 @@ import Form from 'react-bootstrap/Form';
 import ListGroup from 'react-bootstrap/ListGroup';
 import Alert from 'react-bootstrap/Alert';
 
+import classNames from 'classnames';
+
 import { PageHeader } from 'fwtheme-react-jasmin';
 
 import { useNotifications } from 'react-bootstrap-notify';
@@ -137,7 +139,10 @@ const ProjectCard = ({ project }) => {
     const numServices = project.data.num_services || 0;
     const numRequirements = project.data.num_requirements || 0;
     return (
-        <Card className="mb-3" style={{ borderWidth: '3px' }}>
+        <Card
+            className={classNames("mb-3", { "text-muted": project.data.status === "COMPLETED" })}
+            style={{ borderWidth: '3px' }}
+        >
             <Card.Header>
                 <h5 className="mb-0">{project.data.name}</h5>
             </Card.Header>

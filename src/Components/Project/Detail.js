@@ -6,6 +6,8 @@ import Alert from 'react-bootstrap/Alert';
 import Col from 'react-bootstrap/Col';
 import Row from 'react-bootstrap/Row';
 
+import classNames from 'classnames';
+
 import { useNotifications } from 'react-bootstrap-notify';
 
 import { PageHeader } from 'fwtheme-react-jasmin';
@@ -30,7 +32,7 @@ const ProjectDetail = ({ project }) => {
     const categories = useCategories();
     return (<>
         <PageHeader>{project.data.name}</PageHeader>
-        <Row>
+        <Row className={classNames({ "text-muted": project.data.status === "COMPLETED" })}>
             {/* Use custom classes for an xxl breakpoint */}
             <Col xs={12} lg={5} xl={4} className="order-lg-1 col-xxl-3">
                 <ProjectMetaCard project={project} services={services} />

@@ -16,7 +16,7 @@ import { SpinnerWithText } from '../utils';
 const projectStatusVariants = {
     EDITABLE: 'warning',
     UNDER_REVIEW: 'info',
-    COMPLETE: 'muted'
+    COMPLETED: 'light'
 };
 
 

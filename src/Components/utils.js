@@ -24,11 +24,12 @@ const amountSuffixes = ['', 'K', 'M', 'B', 'T'];
 // If "decimalPlaces" is not given, the result is not truncated
 // A different base can also be specified if required (e.g. 1024 for GiB)
 const formatNumber = (number, maxExponent, decimalPlaces, base = 1000) => {
-    let result = number, exponent = 0;
+    let denominator = 1, exponent = 0;
     while( exponent < maxExponent && number >= Math.pow(base, exponent + 1) ) {
-        result = result / base;
+        denominator = denominator * base;
         exponent = exponent + 1;
     }
+    const result = number / denominator;
     let isTruncated = false, formattedResult = result;
     if( decimalPlaces ) {
         const factor = Math.pow(10, decimalPlaces);
