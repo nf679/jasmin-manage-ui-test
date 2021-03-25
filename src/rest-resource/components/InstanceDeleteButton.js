@@ -7,7 +7,7 @@ import Modal from 'react-bootstrap/Modal';
 // Default delete button component is a Bootstrap button
 const DefaultButtonComponent = props => (
     <Button variant="danger" {...props}>
-        <i className="fas fa-fw fa-trash" />
+        <i className="fas fa-trash" />
         <span className="sr-only">Delete</span>
     </Button>
 );
@@ -41,6 +41,7 @@ export const InstanceDeleteButton = ({
     instance,
     onSuccess,
     onError,
+    hideModalOnError = true,
     ButtonComponent = DefaultButtonComponent,
     ModalComponent = DefaultModalComponent,
     ActionsComponent = DefaultActionsComponent,
@@ -70,7 +71,8 @@ export const InstanceDeleteButton = ({
         }
         catch(error) {
             if( onError ) onError(error);
-            // Handling the event is done (leave the modal open)
+            if( hideModalOnError ) hideModal();
+            // Handling the event is done
             return;
         }
         // Call the success handler outside the try so we don't accidentally

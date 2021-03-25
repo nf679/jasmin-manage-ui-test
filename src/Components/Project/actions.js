@@ -45,6 +45,9 @@ export const useProjectUserRoles = project => {
 export const useProjectPermissions = project => {
     const projectRoles = useProjectUserRoles(project);
     return {
+        // Collaborators (including invitations) can be edited any time,
+        // but only by a project owner
+        canEditCollaborators: projectRoles.isProjectOwner,
         // The project can be edited by collaborators when in editable mode
         canEditRequirements: (
             project.data.status === "EDITABLE" &&
