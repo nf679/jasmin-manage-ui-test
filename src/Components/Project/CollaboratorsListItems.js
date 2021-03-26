@@ -7,6 +7,8 @@ import ListGroup from 'react-bootstrap/ListGroup';
 import Modal from 'react-bootstrap/Modal';
 import Row from 'react-bootstrap/Row';
 
+import { useHistory } from 'react-router-dom';
+
 import classNames from 'classnames';
 
 import moment from 'moment';
@@ -77,12 +79,22 @@ const CollaboratorDeleteButton = ({ collaborator, disabled }) => {
         `${collaborator.data.user.first_name} ${collaborator.data.user.last_name}` :
         collaborator.data.username;
 
+    // On a successful deletion of the users own collaborator record, redirect
+    // them to their projects
+    const currentUser = useCurrentUser();
+    const history = useHistory();
+    const onSuccess = () => {
+        if( collaborator.data.user.id === currentUser.data.id )
+            history.push('/projects');
+    };
+
      // Handle a delete error by producing a notification
      const handleError = error => notify(notificationFromError(error));
 
     return (
         <InstanceDeleteButton
             instance={collaborator}
+            onSuccess={onSuccess}
             onError={handleError}
             disabled={disabled}
         >
