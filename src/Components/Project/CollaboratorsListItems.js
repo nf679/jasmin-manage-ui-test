@@ -62,6 +62,9 @@ const CollaboratorRoleSelect = ({ collaborator, className, disabled, ...props })
             value={selectedOption}
             onChange={handleChange}
             isDisabled={collaborator.updating || disabled}
+            // This is required to make sure the menu goes over the
+            // invite button, which has z-index: 2
+            styles={{ menu: styles => ({ ...styles, zIndex: 3 }) }}
         />
     );
 };

@@ -22,12 +22,17 @@ const DefaultModalComponent = ({ children, ...props }) => (
 
 
 // Default actions component is a Bootstrap modal footer
-const DefaultActionsComponent = ({ inProgress, onCancel, onConfirm }) => (
+const DefaultActionsComponent = ({
+    inProgress,
+    onCancel,
+    onConfirm,
+    deleteButtonText = "Delete"
+}) => (
     <Modal.Footer>
         <Button onClick={onCancel} disabled={inProgress}>Cancel</Button>
         <Button onClick={onConfirm} variant="danger" disabled={inProgress}>
             {inProgress && <i className="fas fa-spin fa-sync-alt mr-2" />}
-            Delete
+            {deleteButtonText}
         </Button>
     </Modal.Footer>
 );
@@ -42,6 +47,7 @@ export const InstanceDeleteButton = ({
     onSuccess,
     onError,
     hideModalOnError = true,
+    deleteButtonText,
     ButtonComponent = DefaultButtonComponent,
     ModalComponent = DefaultModalComponent,
     ActionsComponent = DefaultActionsComponent,
@@ -90,6 +96,7 @@ export const InstanceDeleteButton = ({
                 inProgress={instance.deleting}
                 onCancel={hideModal}
                 onConfirm={handleConfirm}
+                deleteButtonText={deleteButtonText}
             />
         </ModalComponent>
     </>);

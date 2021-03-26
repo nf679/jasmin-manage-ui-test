@@ -31,6 +31,7 @@ const InvitationDeleteButton = ({ invitation }) => {
         <InstanceDeleteButton
             instance={invitation}
             onError={handleError}
+            deleteButtonText="Revoke"
             className="ml-2"
         >
             <Modal.Header>
