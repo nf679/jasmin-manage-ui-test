@@ -1,32 +1,24 @@
-import React, { useState } from 'react';
+import React from 'react';
 
-import { Link, useHistory } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
-import Card from 'react-bootstrap/Card';
-import Button from 'react-bootstrap/Button';
-import Modal from 'react-bootstrap/Modal';
-import Form from 'react-bootstrap/Form';
-import ListGroup from 'react-bootstrap/ListGroup';
 import Alert from 'react-bootstrap/Alert';
+import Button from 'react-bootstrap/Button';
+import ButtonGroup from 'react-bootstrap/ButtonGroup';
+import Card from 'react-bootstrap/Card';
+import Col from 'react-bootstrap/Col';
+import ListGroup from 'react-bootstrap/ListGroup';
+import Row from 'react-bootstrap/Row';
 
 import classNames from 'classnames';
 
 import { PageHeader } from 'fwtheme-react-jasmin';
 
-import { useNotifications } from 'react-bootstrap-notify';
+import { Status } from '../../rest-resource';
 
-import { Form as ResourceForm, Status } from '../../rest-resource';
+import { useProjects } from '../../api';
 
-import { useCurrentUser, useConsortia, useProjects } from '../../api';
-
-import {
-    notificationFromError,
-    sortByKey,
-    SpinnerWithText,
-    MarkdownEditor
-} from '../utils';
+import { sortByKey, SpinnerWithText } from '../utils';
 
 import {
     ProjectStatusListItem,
@@ -35,104 +27,8 @@ import {
     ProjectCreatedAtListItem
 } from './CardItems';
 
-
-const ProjectCreateButton = ({ projects }) => {
-    const notify = useNotifications();
-    const currentUser = useCurrentUser();
-    const consortia = useConsortia();
-
-    const [modalVisible, setModalVisible] = useState(false);
-    const showModal = () => setModalVisible(true);
-    const hideModal = () => setModalVisible(false);
-
-    const history = useHistory();
-
-    // When a project is created, redirect to it
-    // We don't need to hide the modal as we will be redirected
-    const handleSuccess = projectData => {
-        history.push(`/projects/${projectData.id}`, { initialData: projectData });
-    };
-
-    const handleError = error => {
-        notify(notificationFromError(error));
-        hideModal();
-    };
-
-    // This function limits the consortia that are available to select
-    const consortiumIsAllowed = consortium => currentUser.data.is_staff || consortium.data.is_public;
-    // This function formats the options
-    const formatConsortiumOption = (option, { context }) => (
-        context === 'menu' ? (
-            <>
-                <strong className="d-block">{option.data.name}</strong>
-                <small className="d-block">{option.data.description}</small>
-            </>
-        ) : (
-            option.data.name
-        )
-    );
-
-    // Mark the markdown editor control into a resource form control
-    const MarkdownEditorControl = ResourceForm.Controls.asControl(
-        MarkdownEditor,
-        evt => evt.target.value
-    );
-
-    return (<>
-        <Button onClick={showModal} size="lg" variant="success">New project</Button>
-
-        <Modal show={modalVisible} backdrop="static" keyboard={false}>
-            <ResourceForm.CreateInstanceForm
-                resource={projects}
-                onSuccess={handleSuccess}
-                onError={handleError}
-                onCancel={hideModal}
-                // Disable the form if the consortia are not initialised
-                disabled={!consortia.initialised}
-            >
-                <Modal.Header>
-                    <Modal.Title>Create a project</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form.Group controlId="name">
-                        <Form.Label>Project name</Form.Label>
-                        <Form.Control
-                            as={ResourceForm.Controls.Input}
-                            placeholder="My project"
-                            required
-                            autoComplete="off"
-                        />
-                        <ResourceForm.Controls.ErrorList />
-                    </Form.Group>
-                    <Form.Group controlId="consortium">
-                        <Form.Label>Consortium</Form.Label>
-                        <Form.Control
-                            as={ResourceForm.Controls.ResourceSelect}
-                            resource={consortia}
-                            resourceName="consortium"
-                            resourceNamePlural="consortia"
-                            required
-                            // Only show allowed consortia
-                            filterResources={consortiumIsAllowed}
-                            // Use a custom label renderer
-                            formatOptionLabel={formatConsortiumOption}
-                        />
-                        <ResourceForm.Controls.ErrorList />
-                    </Form.Group>
-                    <Form.Group controlId="description">
-                        <Form.Label>Description</Form.Label>
-                        <Form.Control as={MarkdownEditorControl} required />
-                        <ResourceForm.Controls.ErrorList />
-                    </Form.Group>
-                </Modal.Body>
-                <Modal.Footer>
-                    <ResourceForm.Controls.CancelButton>Cancel</ResourceForm.Controls.CancelButton>
-                    <ResourceForm.Controls.SubmitButton>Create</ResourceForm.Controls.SubmitButton>
-                </Modal.Footer>
-            </ResourceForm.CreateInstanceForm>
-        </Modal>
-    </>);
-};
+import { ProjectCreateButton } from './ProjectCreateButton';
+import { ProjectJoinButton } from './ProjectJoinButton';
 
 
 const ProjectCard = ({ project }) => {
@@ -193,7 +89,10 @@ const ProjectList = () => {
                         )}
                         <Col>
                             <Card className="text-center mb-3" body>
-                                <ProjectCreateButton projects={projects} />
+                                <ButtonGroup vertical>
+                                    <ProjectCreateButton projects={projects} />
+                                    <ProjectJoinButton />
+                                </ButtonGroup>
                             </Card>
                         </Col>
                     </Row>
