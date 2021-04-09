@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 
+import { useHistory } from 'react-router-dom';
+
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import Modal from 'react-bootstrap/Modal';
@@ -17,12 +19,20 @@ export const ServiceCreateButton = ({ project, ...props }) => {
     const notify = useNotifications();
     const categories = useCategories();
 
+    const history = useHistory();
+
     // We only need the create method from the services, so we don't need a fetch point
     const services = useNestedResource(project, "services", { fetchPoint: false });
 
     const [modalVisible, setModalVisible] = useState(false);
     const showModal = () => setModalVisible(true);
     const hideModal = () => setModalVisible(false);
+
+    // When a service is created, make sure we are on the services pane
+    const handleSuccess = serviceData => {
+        history.push(`/projects/${project.data.id}/services`, { scrollTo: serviceData.id });
+        hideModal();
+    };
 
     const handleError = error => {
         notify(notificationFromError(error));
@@ -53,7 +63,7 @@ export const ServiceCreateButton = ({ project, ...props }) => {
         <Modal show={modalVisible} backdrop="static" keyboard={false}>
             <ResourceForm.CreateInstanceForm
                 resource={services}
-                onSuccess={hideModal}
+                onSuccess={handleSuccess}
                 onError={handleError}
                 onCancel={hideModal}
                 // Disable the form if the categories are not initialised

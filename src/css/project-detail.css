@@ -1,0 +1,49 @@
+.markdown > :last-child {
+    margin-bottom: 0 !important;
+}
+
+.service-card {
+    border-width: 3px !important;
+    margin-bottom: 1rem !important;
+    transition: border-color 1s ease-out;
+}
+.service-card.highlight {
+    border-color: #ffac71 !important;
+    transition: border-color 0s ease-out;
+}
+
+.timeline-item-container {
+    position: relative;
+    margin-left: 40px;
+    padding: 10px 0;
+}
+.timeline-item:first-child .timeline-item-container {
+    padding-top: 0;
+}
+.timeline-item:last-child .timeline-item-container {
+    padding-bottom: 0;
+}
+.timeline-item-container::before {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    display: block;
+    width: 2px;
+    content: "";
+    background-color: rgba(0, 0, 0, 0.125);
+}
+/* Have a staggered view where the first timeline item is hanging */
+.timeline-item-content {
+    margin-left: -20px;
+}
+.timeline-item:first-child .timeline-item-content {
+    margin-left: -40px;
+}
+
+.comment .card-header {
+    padding: 0.6rem 1.25rem !important;
+}
+.comment .card-body {
+    padding: 0.75rem 1.25rem !important;
+}

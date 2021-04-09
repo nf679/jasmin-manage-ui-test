@@ -104,3 +104,21 @@ export const UpdateInstanceForm = ({
         </BaseForm>
     );
 };
+
+
+/**
+ * For for executing an action on a resource instance.
+ */
+export const InstanceActionForm = ({
+    children,
+    // The instance that the action will be executed against
+    instance,
+    // The action to execute
+    action,
+    // Additional properties that are passed to the base form
+    ...props
+}) => {
+    // On form submission, create a new instance of the specified resource using the data
+    const handleSubmit = async formData => await instance.executeAction(action, formData);
+    return <BaseForm {...props} onSubmit={handleSubmit}>{children}</BaseForm>;
+};

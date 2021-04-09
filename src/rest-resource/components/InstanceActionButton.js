@@ -13,7 +13,8 @@ const DefaultButtonComponent = ({ children, inProgress, disabled, ...props }) =>
 
 
 /**
- * Component that provides a button for executing an action on a resource instance.
+ * Component that provides a button for executing an action on a resource instance
+ * when that action requires no input data.
  */
 export const InstanceActionButton = ({
     children,

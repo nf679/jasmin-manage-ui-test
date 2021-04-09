@@ -86,10 +86,10 @@ export const useProjectPermissions = project => {
  */
 export const useProjectActions = project => {
     // Get all the project requirements by aggregating across the services
-    // However this is not a fetch point for services - we only use them once
-    // they have been loaded elsewhere in the component tree
+    // However this is not a fetch point for services or requirements - we only
+    // use them once they have been loaded elsewhere in the component tree
     const services = useNestedResource(project, "services", { fetchPoint: false });
-    const requirements = useAggregateResource(services, "requirements");
+    const requirements = useAggregateResource(services, "requirements", { fetchPoint: false });
 
     // Work out if the project has requirements with various statuses
     const hasRequirementsWithStatus = status => {

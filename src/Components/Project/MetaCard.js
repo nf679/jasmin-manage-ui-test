@@ -1,16 +1,22 @@
-import React from 'react';
+import React, { useState } from 'react';
 
+import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Card from 'react-bootstrap/Card';
+import Form from 'react-bootstrap/Form';
 import ListGroup from 'react-bootstrap/ListGroup';
-
-import ReactMarkdown from 'react-markdown';
+import Modal from 'react-bootstrap/Modal';
 
 import { useNotifications } from 'react-bootstrap-notify';
 
-import { InstanceActionButton, useNestedResource } from '../../rest-resource';
+import {
+    Form as ResourceForm,
+    InstanceActionButton,
+    useNestedResource,
+    useAggregateResource
+} from '../../rest-resource';
 
-import { notificationFromError } from '../utils';
+import { notificationFromError, MarkdownEditor } from '../utils';
 
 import {
     ProjectStatusListItem,
@@ -25,11 +31,80 @@ import { ProjectCollaboratorsLink } from './CollaboratorsLink';
 import { ServiceCreateButton } from './ServiceCreateButton';
 
 
+const ProjectActionCommentButton = ({
+    children,
+    project,
+    action,
+    onSuccess,
+    onError,
+    triggerButtonText,
+    submitButtonText = "Confirm",
+    ...props
+}) => {
+    const [modalVisible, setModalVisible] = useState(false);
+    const showModal = () => setModalVisible(true);
+    const hideModal = () => setModalVisible(false);
+
+    // These actions add comments, so we need to trigger a refresh of the comments
+    // So we need the nested resource but we don't want to be a fetch point
+    const comments = useNestedResource(project, "comments", { fetchPoint: false });
+
+    const handleSuccess = (...args) => {
+        // Trigger a refresh of the comments by marking them as dirty
+        comments.markDirty();
+        if( onSuccess ) onSuccess(...args);
+        hideModal();
+    };
+
+    const handleError = (...args) => {
+        if( onError ) onError(...args);
+        hideModal();
+    };
+
+    // Make the markdown editor control into a resource form control
+    const MarkdownEditorControl = ResourceForm.Controls.asControl(
+        MarkdownEditor,
+        evt => evt.target.value
+    );
+
+    return (<>
+        <Button {...props} onClick={showModal}>{triggerButtonText}</Button>
+
+        <Modal show={modalVisible} backdrop="static" keyboard={false}>
+            <ResourceForm.InstanceActionForm
+                instance={project}
+                action={action}
+                onSuccess={handleSuccess}
+                onError={handleError}
+                onCancel={hideModal}
+            >
+                <Modal.Header>
+                    <Modal.Title>{triggerButtonText}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    {children}
+                    <Form.Group controlId="comment">
+                        <Form.Label srOnly>Comment</Form.Label>
+                        <Form.Control as={MarkdownEditorControl} required />
+                        <ResourceForm.Controls.ErrorList />
+                    </Form.Group>
+                </Modal.Body>
+                <Modal.Footer>
+                    <ResourceForm.Controls.CancelButton>
+                        Cancel
+                    </ResourceForm.Controls.CancelButton>
+                    <ResourceForm.Controls.SubmitButton>
+                        {submitButtonText}
+                    </ResourceForm.Controls.SubmitButton>
+                </Modal.Footer>
+            </ResourceForm.InstanceActionForm>
+        </Modal>
+    </>);
+};
+
+
 export const ProjectMetaCard = ({ project }) => {
     const notify = useNotifications();
-
-    // We need the services so that we can reset them, but we don't want to be a fetch point
-    const services = useNestedResource(project, "services", { fetchPoint: false });
 
     const {
         canEditRequirements,
@@ -48,8 +123,10 @@ export const ProjectMetaCard = ({ project }) => {
     const handleError = error => notify(notificationFromError(error));
 
     // When the project is submitted for provisioning, it updates the status of the requirements
-    // So we need to force the project services to reload in order to pick up the new requirements
-    const handleSubmitForProvisioning = () => { services.reset(); }
+    // So we need to force the requirements to refresh in order to pick up the new status
+    const services = useNestedResource(project, "services", { fetchPoint: false });
+    const requirements = useAggregateResource(services, "requirements", { fetchPoint: false });
+    const handleSubmitForProvisioning = () => { requirements.markDirty(); }
 
     // Check if there is at least one button to show
     const showButtons = (
@@ -73,28 +150,36 @@ export const ProjectMetaCard = ({ project }) => {
                                     />
                                 )}
                                 {canSubmitForReview && (
-                                    <InstanceActionButton
-                                        className="mt-1"
-                                        size="lg"
-                                        instance={project}
+                                    <ProjectActionCommentButton
+                                        project={project}
                                         action="submit_for_review"
                                         onError={handleError}
+                                        triggerButtonText="Submit for review"
+                                        className="mt-1"
+                                        size="lg"
                                         disabled={!allowSubmitForReview}
                                     >
-                                        Submit for review
-                                    </InstanceActionButton>
+                                        <p className="text-center font-weight-bold">
+                                            Please provide any information that may be helpful for
+                                            the consortium manager when reviewing your project.
+                                        </p>
+                                    </ProjectActionCommentButton>
                                 )}
                                 {canRequestChanges && (
-                                    <InstanceActionButton
-                                        size="lg"
-                                        variant="danger"
-                                        instance={project}
+                                    <ProjectActionCommentButton
+                                        project={project}
                                         action="request_changes"
                                         onError={handleError}
+                                        triggerButtonText="Request changes"
+                                        size="lg"
+                                        variant="danger"
                                         disabled={!allowRequestChanges}
                                     >
-                                        Request changes
-                                    </InstanceActionButton>
+                                        <p className="text-center font-weight-bold">
+                                            Please provide some detail on why the project requirements
+                                            have been rejected and the changes that are required.
+                                        </p>
+                                    </ProjectActionCommentButton>
                                 )}
                                 {canSubmitForProvisioning && (
                                     <InstanceActionButton
@@ -112,9 +197,6 @@ export const ProjectMetaCard = ({ project }) => {
                             </ButtonGroup>
                         </ListGroup.Item>
                     )}
-                    <ListGroup.Item className="markdown">
-                        <ReactMarkdown children={project.data.description} />
-                    </ListGroup.Item>
                     <ProjectStatusListItem project={project} />
                     <ProjectConsortiumListItem project={project} />
                     <ProjectCollaboratorsListItem

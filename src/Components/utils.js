@@ -83,10 +83,11 @@ export const formatAmount = (amount, units, decimalPlaces) => {
 /**
  * Sort the data using the values produced by the key function.
  */
-export const sortByKey = (data, keyFn) => [...data].sort(
+export const sortByKey = (data, keyFn, reverse = false) => [...data].sort(
     (e1, e2) => {
         const [k1, k2] = [keyFn(e1), keyFn(e2)];
-        return (k1 > k2 ? 1 : (k1 < k2 ? -1 : 0));
+        const result = (k1 > k2 ? 1 : (k1 < k2 ? -1 : 0));
+        return reverse ? -result : result;
     }
 );
 
@@ -119,19 +120,27 @@ export const notificationFromError = (error, duration = 5000) => {
 
 
 /**
- * Hook for using the initial state from the location.
+ * Hook for using the state from the location.
  *
- * Ensures that the initial state is cleared from the browser history, otherwise it
- * stays there and gets used the next time the page is loaded, even though it might
+ * Ensures that the state is cleared from the browser history, otherwise it stays
+ * there and gets used the next time the page is loaded, even though it might
  * be out of date.
  */
-export const useInitialDataFromLocation = () => {
+export const useStateFromLocation = () => {
+    // Use a ref to track the state that we have seen
+    const stateRef = useRef(undefined);
+    // Get the current state from the location
     const { pathname, state } = useLocation();
-    const { initialData, ...newState } = state || {};
+    // When the state changes, update the stored value and disassociate it from the path
     const history = useHistory();
-    const initialDataRef = useRef(initialData);
-    useEffect(() => { history.replace(pathname, newState); }, []);
-    return initialDataRef.current;
+    useEffect(
+        () => {
+            stateRef.current = { ...stateRef.current, ...state };
+            history.replace(pathname, undefined);
+        },
+        [state]
+    );
+    return { ...stateRef.current, ...state };
 };
 
 

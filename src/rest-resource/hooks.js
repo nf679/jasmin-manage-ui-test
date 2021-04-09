@@ -422,29 +422,78 @@ export const useNestedResource = (instance, name, options) => {
 
 
 /**
- * Hook for producing a read-only resource which is an aggregation over a nested
- * resource for all instances of a resource.
+ * Hook for producing a read-only resource which is an aggregation over a nested resource
+ * for all instances of a resource.
  */
-export const useAggregateResource = (resource, nestedResourceName) => {
-    return Object.values(resource.data).reduce(
+export const useAggregateResource = (resource, name, options) => {
+    // We allow the caller to decide whether this should be a fetch point for the
+    // nested resources we are aggregating over, or just a point where the data and
+    // methods can be accessed
+    // Note that unless the resources are fetched at at least one point in the component
+    // tree, the data will NEVER be loaded!
+    // Note also that this is distinct from autoFetch, which only prevents the hook
+    // from automatically fetching data on first mount, not from re-fetching when dirty
+    const { fetchPoint = true, autoFetch = true } = options || {};
+    // Aggregate the state over the resource instances
+    const aggregateResource = Object.values(resource.data).reduce(
         (aggregate, instance) => {
             // Get the nested resource state from the instance
-            const nestedResource = (
-                instance.nestedResources[nestedResourceName] ||
-                ({ initialised: false, fetching: false, fetchError: null, data: {} })
+            const state = (
+                instance.nestedResources[name] ||
+                resourceInitialState({ autoFetch })
+            );
+            // Get the correctly scoped methods
+            const methods = instance.nestedResourceMethods(
+                name,
+                instance.data._links[name],
+                { autoFetch }
             );
             return {
                 // The aggregate resource is initialised when all the nested resources are
-                initialised: aggregate.initialised && nestedResource.initialised,
+                initialised: aggregate.initialised && state.initialised,
+                // The aggregate resource is dirty when one of the nested resources is
+                dirty: aggregate.dirty || state.dirty,
                 // The aggregate resource is fetching when one of the nested resources is
-                fetching: aggregate.fetching || nestedResource.fetching,
+                fetching: aggregate.fetching || state.fetching,
                 // Use the first error
-                fetchError: aggregate.fetchError || nestedResource.fetchError,
+                fetchError: aggregate.fetchError || state.fetchError,
                 // Merge the data together
-                data: { ...aggregate.data, ...nestedResource.data }
+                data: { ...aggregate.data, ...state.data },
+                fetch: () => {
+                    // Run the fetch for the aggregate and get the cancel function
+                    const aggregateCancel = aggregate.fetch();
+                    // If the nested resource is dirty and not currently fetching, fetch it
+                    const nestedCancel = state.dirty && !state.fetching ?
+                        methods.fetch() :
+                        // In this case there is nothing to cancel
+                        () => {};
+                    // The aggregate cancel function just runs both functions
+                    return () => { aggregateCancel(); nestedCancel(); };
+                },
+                markDirty: () => { aggregate.markDirty(); methods.markDirty(); },
+                reset: () => { aggregate.reset(); methods.reset(); }
             };
         },
-        // When there is no data, the aggregate resource is initialised when the resource is
-        { initialised: resource.initialised, fetching: false, fetchError: null, data: {} }
+        {
+            // When there is no data, the aggregate resource is initialised if the resource is
+            initialised: resource.initialised,
+            dirty: false,
+            fetching: false,
+            fetchError: null,
+            data: {},
+            // When there is no data, fetching returns a cancel function that does nothing
+            fetch: () => () => {},
+            // Marking dirty and resetting are no-ops
+            markDirty: () => {},
+            reset: () => {}
+        }
     );
+    // Hooks cannot be conditional, so we always have to call the fetch point hook
+    // However we can effectively disable it by making sure it never sees a dirty resource
+    useFetchPoint({
+        ...aggregateResource,
+        dirty: fetchPoint && aggregateResource.dirty
+    });
+    // Return the original state of the resource
+    return aggregateResource;
 };

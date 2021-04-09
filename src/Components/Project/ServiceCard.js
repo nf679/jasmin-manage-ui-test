@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import Card from 'react-bootstrap/Card';
 import Col from 'react-bootstrap/Col';
 import ListGroup from 'react-bootstrap/ListGroup';
 import Row from 'react-bootstrap/Row';
+
+import classNames from 'classnames';
 
 import { Status, useNestedResource } from '../../rest-resource';
 
@@ -72,7 +74,7 @@ const ProvisionedSummary = ({ project, service, requirements }) => {
 };
 
 
-export const ServiceCard = ({ project, service }) => {
+export const ServiceCard = ({ project, service, scrollTo = false }) => {
     const categories = useCategories();
     const resources = useResources();
     const requirements = useNestedResource(service, "requirements");
@@ -82,8 +84,28 @@ export const ServiceCard = ({ project, service }) => {
     const { canEditRequirements } = useProjectPermissions(project);
     const { allowEditRequirements } = useProjectActions(project);
 
+    // Scroll the service into view if required
+    // When the service is scrolled into view, highlight it briefly
+    const [highlighted, setHighlighted] = useState(false);
+    const ref = useRef(null);
+    useEffect(
+        () => {
+            if( ref.current && scrollTo ) {
+                ref.current.scrollIntoView({ behaviour: 'smooth' });
+                setHighlighted(true);
+                const timer = setTimeout(() => setHighlighted(false), 2000);
+                return () => clearTimeout(timer);
+            }
+        },
+        [scrollTo]
+    );
+
     return (
-        <Card className="mb-3" style={{ borderWidth: '3px' }}>
+        <Card
+            id={`service-${service.data.id}`}
+            ref={ref}
+            className={classNames("service-card", { "highlight": highlighted })}
+        >
             <Card.Header>
                 <strong>{category.data.name}</strong>
                 {" / "}
