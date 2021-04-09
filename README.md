@@ -1,3 +1,34 @@
 # jasmin-manage-ui
 
-React user interface for the JASMIN Projects Portal.
+[React](https://reactjs.org/) user interface for the JASMIN Projects Portal,
+which consumes the [JASMIN Manage API](https://github.com/cedadev/jasmin-manage).
+
+## Setting up a development environment
+
+First, make sure you have a local version of the
+[JASMIN Manage API](https://github.com/cedadev/jasmin-manage)
+running on `http://localhost:8000`, as per the instructions in the `README`.
+
+To install and run this user interface, first you will need [Node](https://nodejs.dev/) and
+[yarn](https://yarnpkg.com/) installed.
+
+Then check out the code:
+
+```sh
+git clone https://github.com/cedadev/jasmin-manage-ui.git
+cd jasmin-manage-ui
+```
+
+Install the dependencies using `yarn`:
+
+```sh
+yarn install --immutable
+```
+
+Then start the development server:
+
+```sh
+yarn start
+```
+
+This will start the JASMIN Projects Portal UI at `http://localhost:3000`.
