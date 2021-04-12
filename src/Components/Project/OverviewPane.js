@@ -38,7 +38,7 @@ const CommentTimelineItem = ({ project, comment }) => {
             <div className="timeline-item-container">
                 <Card className="timeline-item-content comment">
                     <Card.Header>
-                        <strong>{displayName}</strong> commented on {createdAt}
+                        <strong>{displayName}</strong> <em>commented on {createdAt}</em>
                     </Card.Header>
                     <Card.Body className="markdown">
                         <ReactMarkdown children={comment.data.content} />
