@@ -9,7 +9,13 @@ import moment from 'moment';
 
 import ReactMarkdown from 'react-markdown';
 
-import { Status, useNestedResource, useFetchPoint } from '../../rest-resource';
+import {
+    Status,
+    useNestedResource,
+    useAggregateResource,
+    useFetchPoint,
+    useEnsureInitialised
+} from '../../rest-resource';
 
 import { useResources } from '../../api';
 
@@ -84,27 +90,29 @@ const ProjectEvent = ({ children, item, className }) => {
 };
 
 
-const ResourceEvent = ({ children, item, ...props }) => {
+const ResourceEvent = ({ children, project, requirements, item, ...props }) => {
     const resources = useResources();
+    // Force the requirements to load
+    useEnsureInitialised(requirements);
     return (
-        <Status fetchable={resources}>
+        <Status.Many fetchables={[resources, requirements]}>
             <Status.Loading>
                 <div className="event text-muted">
                     <EventIcon icon="fa-sync-alt fa-spin" />
-                    <EventText>Loading resources...</EventText>
+                    <EventText>Loading requirements...</EventText>
                 </div>
             </Status.Loading>
             <Status.Unavailable>
                 <div className="event text-danger font-weight-bold">
                     <EventIcon icon="fa-bomb" />
-                    <EventText>Unable to load resources</EventText>
+                    <EventText>Unable to load requirements</EventText>
                 </div>
             </Status.Unavailable>
             <Status.Available>
-                {resourceData => {
-                    const resource = resourceData[item.target.resource];
-                    const amount = formatAmount(item.target.amount, resource.data.units);
-                    // Render each item with the specified renderer
+                {([resourceData, requirementData]) => {
+                    const requirement = requirementData[item.target_id];
+                    const resource = resourceData[requirement.data.resource];
+                    const amount = formatAmount(requirement.data.amount, resource.data.units);
                     return (
                         <ProjectEvent item={item} {...props}>
                             {(createdBy, createdAt) => children(
@@ -117,15 +125,15 @@ const ResourceEvent = ({ children, item, ...props }) => {
                     );
                 }}
             </Status.Available>
-        </Status>
+        </Status.Many>
     );
 };
 
 
 // Map of timeline events to a component
 const TimelineEvents = {
-    'jasmin_manage.project.created': ({ item }) => (
-        <ProjectEvent item={item}>
+    'jasmin_manage.project.created': props => (
+        <ProjectEvent {...props}>
             {(createdBy, createdAt) => (<>
                 <EventIcon icon="fa-plus" variant="info" />
                 <EventText>
@@ -136,8 +144,8 @@ const TimelineEvents = {
             </>)}
         </ProjectEvent>
     ),
-    'jasmin_manage.project.submitted_for_review': ({ item }) => (
-        <ProjectEvent item={item}>
+    'jasmin_manage.project.submitted_for_review': props => (
+        <ProjectEvent {...props}>
             {(createdBy, createdAt) => (<>
                 <EventIcon icon="fa-question" variant="primary" />
                 <EventText>
@@ -148,8 +156,8 @@ const TimelineEvents = {
             </>)}
         </ProjectEvent>
     ),
-    'jasmin_manage.project.changes_requested': ({ item }) => (
-        <ProjectEvent item={item}>
+    'jasmin_manage.project.changes_requested': props => (
+        <ProjectEvent {...props}>
             {(createdBy, createdAt) => (<>
                 <EventIcon icon="fa-exclamation" variant="danger" />
                 <EventText>
@@ -160,8 +168,8 @@ const TimelineEvents = {
             </>)}
         </ProjectEvent>
     ),
-    'jasmin_manage.project.submitted_for_provisioning': ({ item }) => (
-        <ProjectEvent item={item}>
+    'jasmin_manage.project.submitted_for_provisioning': props => (
+        <ProjectEvent {...props}>
             {(createdBy, createdAt) => (<>
                 <EventIcon icon="fa-check" variant="success" />
                 <EventText>
@@ -172,8 +180,8 @@ const TimelineEvents = {
             </>)}
         </ProjectEvent>
     ),
-    'jasmin_manage.requirement.provisioned': ({ item }) => (
-        <ResourceEvent item={item}>
+    'jasmin_manage.requirement.provisioned': props => (
+        <ResourceEvent {...props}>
              {(amount, resourceName, createdBy, createdAt) => (<>
                 <EventIcon icon="fa-layer-group" variant="secondary" />
                 <EventText>
@@ -183,8 +191,8 @@ const TimelineEvents = {
             </>)}
         </ResourceEvent>
     ),
-    'jasmin_manage.requirement.decommissioned': ({ item }) => (
-        <ResourceEvent item={item} className="text-muted">
+    'jasmin_manage.requirement.decommissioned': props => (
+        <ResourceEvent {...props} className="text-muted">
              {(amount, resourceName, createdBy, createdAt) => (<>
                 <EventIcon icon="fa-power-off" />
                 <EventText>
@@ -222,9 +230,20 @@ const getTimelineData = (commentData, eventData) => {
 
 
 const ProjectTimeline = ({ project, events }) => {
+    // Load the comments
     const comments = useNestedResource(project, "comments");
+
     // This is the fetch point for the events
     useFetchPoint(events);
+
+    // In order to render some events, we need the project services and requirements
+    // We want to fetch them once for all events, so this needs to be the fetch point
+    // However we don't want to load them if we don't need them, so don't auto-fetch
+    // This means that individual event components must force them to load using
+    // "useEnsureInitialised" if they need them
+    const services = useNestedResource(project, "services", { autoFetch: false });
+    const requirements = useAggregateResource(services, "requirements", { autoFetch: false });
+
     return (<>
         {/* If either the comments or events are loading, include an item at the top */}
         {(comments.fetching || events.fetching ) && (
@@ -250,7 +269,12 @@ const ProjectTimeline = ({ project, events }) => {
                     // Render each timeline item with the specified component
                     getTimelineData(commentData, eventData).map(item => (
                         <TimelineItem key={item.id}>
-                            <item.component project={project} item={item.data} />
+                            <item.component
+                                project={project}
+                                services={services}
+                                requirements={requirements}
+                                item={item.data}
+                            />
                         </TimelineItem>
                     ))
                 )}

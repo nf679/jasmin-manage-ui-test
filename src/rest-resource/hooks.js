@@ -434,19 +434,22 @@ export const useAggregateResource = (resource, name, options) => {
     // Note also that this is distinct from autoFetch, which only prevents the hook
     // from automatically fetching data on first mount, not from re-fetching when dirty
     const { fetchPoint = true, autoFetch = true } = options || {};
+    // In order to support markDirty when the aggregate resources potentially don't exist
+    // yet, we need to track whether the placeholder markDirty has been called
+    const [initDirty, setInitDirty] = useState(autoFetch);
     // Aggregate the state over the resource instances
     const aggregateResource = Object.values(resource.data).reduce(
         (aggregate, instance) => {
             // Get the nested resource state from the instance
             const state = (
                 instance.nestedResources[name] ||
-                resourceInitialState({ autoFetch })
+                resourceInitialState({ autoFetch: initDirty })
             );
             // Get the correctly scoped methods
             const methods = instance.nestedResourceMethods(
                 name,
                 instance.data._links[name],
-                { autoFetch }
+                { autoFetch: initDirty }
             );
             return {
                 // The aggregate resource is initialised when all the nested resources are
@@ -481,10 +484,15 @@ export const useAggregateResource = (resource, name, options) => {
             fetching: false,
             fetchError: null,
             data: {},
-            // When there is no data, fetching returns a cancel function that does nothing
+            // The placeholder fetch returns a cancel function that does nothing
             fetch: () => () => {},
-            // Marking dirty and resetting are no-ops
-            markDirty: () => {},
+            markDirty: () => {
+                // Mark the parent resource as dirty if it is not initialised
+                if( !resource.initialised ) resource.markDirty();
+                // Set the initial dirty state for resources that don't exist
+                setInitDirty(true);
+            },
+            // Reset is a no-op
             reset: () => {}
         }
     );
