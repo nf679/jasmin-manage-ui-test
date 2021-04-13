@@ -32,6 +32,7 @@
     width: 2px;
     content: "";
     background-color: rgba(0, 0, 0, 0.125);
+    margin-left: -1px;
 }
 /* Have a staggered view where the first timeline item is hanging */
 .timeline-item-content {
@@ -46,4 +47,18 @@
 }
 .comment .card-body {
     padding: 0.75rem 1.0rem !important;
+}
+
+.event {
+    display: flex;
+    align-items: center;
+}
+.event > .event-icon {
+    margin-right: 0.5rem;
+    background-color: #ffffff;
+    z-index: 2;
+    font-size: 16px;
+}
+.event > .event-text {
+    padding-top: 2px;
 }

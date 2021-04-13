@@ -103,7 +103,7 @@ const ProjectActionCommentButton = ({
 };
 
 
-export const ProjectMetaCard = ({ project }) => {
+export const ProjectMetaCard = ({ project, events }) => {
     const notify = useNotifications();
 
     const {
@@ -119,6 +119,9 @@ export const ProjectMetaCard = ({ project }) => {
         allowSubmitForProvisioning
     } = useProjectActions(project);
 
+    // When an action is successful, it will produce an event that we want to load
+    const handleSuccess = () => { events.markDirty(); };
+
     // When an action results in an error, we want to make a notification for it
     const handleError = error => notify(notificationFromError(error));
 
@@ -126,7 +129,10 @@ export const ProjectMetaCard = ({ project }) => {
     // So we need to force the requirements to refresh in order to pick up the new status
     const services = useNestedResource(project, "services", { fetchPoint: false });
     const requirements = useAggregateResource(services, "requirements", { fetchPoint: false });
-    const handleSubmitForProvisioning = () => { requirements.markDirty(); }
+    const handleSubmitForProvisioning = () => {
+        handleSuccess();
+        requirements.markDirty();
+    };
 
     // Check if there is at least one button to show
     const showButtons = (
@@ -153,6 +159,7 @@ export const ProjectMetaCard = ({ project }) => {
                                     <ProjectActionCommentButton
                                         project={project}
                                         action="submit_for_review"
+                                        onSuccess={handleSuccess}
                                         onError={handleError}
                                         triggerButtonText="Submit for review"
                                         className="mt-1"
@@ -169,6 +176,7 @@ export const ProjectMetaCard = ({ project }) => {
                                     <ProjectActionCommentButton
                                         project={project}
                                         action="request_changes"
+                                        onSuccess={handleSuccess}
                                         onError={handleError}
                                         triggerButtonText="Request changes"
                                         size="lg"
@@ -187,8 +195,8 @@ export const ProjectMetaCard = ({ project }) => {
                                         size="lg"
                                         instance={project}
                                         action="submit_for_provisioning"
-                                        onError={handleError}
                                         onSuccess={handleSubmitForProvisioning}
+                                        onError={handleError}
                                         disabled={!allowSubmitForProvisioning}
                                     >
                                         Submit for provisioning

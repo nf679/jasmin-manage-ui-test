@@ -8,7 +8,7 @@ import Form from 'react-bootstrap/Form';
 
 import { useNotifications } from 'react-bootstrap-notify';
 
-import { apiFetch } from '../../rest-resource';
+import { joinProject } from '../../api';
 
 import { notificationFromError } from '../utils';
 
@@ -36,10 +36,7 @@ export const ProjectJoinButton = () => {
         let project;
         try {
             // Attempt to join a project
-            project = await apiFetch('/api/join/', {
-                method: 'POST',
-                data: { code }
-            });
+            project = await joinProject(code);
         }
         catch(error) {
             // For a bad request, the content should be a JSON-formatted error
