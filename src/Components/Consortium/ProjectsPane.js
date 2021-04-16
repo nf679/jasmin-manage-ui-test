@@ -50,6 +50,45 @@ const ProjectCard = ({ project }) => {
     );
 };
 
+const ProjectRow = ({ project }) => {
+    const numServices = project.data.num_services || 0;
+    const numRequirements = project.data.num_requirements || 0;
+    return (
+        <Card className="mb-3" style={{ borderWidth: '1px' }}>
+            <ListGroup variant="horizontal" className="border-0">
+                <ListGroup.Item>
+                    {/* Pass the project data as state */}
+                    <LinkContainer to={{
+                        pathname: `/projects/${project.data.id}`,
+                        state: { initialData: project.data }
+                    }}>
+                        <Button variant="outline-primary">{project.data.name}</Button>
+                    </LinkContainer>
+                </ListGroup.Item>
+
+                    <ProjectStatusListItem project={project} />
+                <ListGroup.Item>
+                    Project has{" "}
+                    <strong>{numRequirements} requirement{numRequirements !== 1  ? 's' : ''}</strong> in{" "}
+                    <strong>{numServices} service{numServices !== 1  ? 's' : ''}</strong>.
+                </ListGroup.Item>
+                <ProjectCollaboratorsListItem project={project} />
+                <ProjectCreatedAtListItem project={project} />
+            </ListGroup>
+
+        </Card>
+            //<Card.Footer className="text-right">
+            //    {/* Pass the project data as state */}
+            //    <LinkContainer to={{
+            //        pathname: `/projects/${project.data.id}`,
+            //        state: { initialData: project.data }
+            //    }}>
+            //        <Button variant="outline-primary">Go to project</Button>
+            //    </LinkContainer>
+            //</Card.Footer>
+    );
+};
+
 
 const projectStatusOrdering = ["UNDER_REVIEW", "EDITABLE", "COMPLETED"];
 
@@ -77,12 +116,19 @@ const ProjectsPane = ({ projects }) => {
                         ]
                     );
                     return (
-                        <Row xs={1} sm={2} lg={3} className="row-cols-xxl-4">
+                        //<Row xs={1} sm={2} lg={3} className="row-cols-xxl-4">
+                        //    {sortedProjects.map(project => (
+                        //        <Col key={project.data.id}>
+                        //            <ProjectCard project={project} />
+                        //        </Col>
+                        //))}
+                        //</Row>
+                        <Row>
                             {sortedProjects.map(project => (
-                                <Col key={project.data.id}>
-                                    <ProjectCard project={project} />
-                                </Col>
-                            ))}
+                                <Row key={project.data.id}>
+                                    <ProjectRow project={project} />
+                                </Row>
+                        ))}
                         </Row>
                     );
                 }}
