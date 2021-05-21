@@ -50,33 +50,6 @@ const ProjectCard = ({ project }) => {
     );
 };
 
-const ProjectList = ({ project }) => {
-    const numServices = project.data.num_services || 0;
-    const numRequirements = project.data.num_requirements || 0;
-    return (
-        <ListGroup variant="horizontal" className="border-0">
-            <ListGroup.Item>
-                {/* Pass the project data as state */}
-                <LinkContainer to={{
-                    pathname: `/projects/${project.data.id}`,
-                    state: { initialData: project.data }
-                }}>
-                    <Button variant="outline-primary"><h5>{project.data.name}</h5></Button>
-                </LinkContainer>
-            </ListGroup.Item>
-
-                <ProjectStatusListItem project={project} />
-            <ListGroup.Item>
-                Project has{" "}
-                <strong>{numRequirements} requirement{numRequirements !== 1  ? 's' : ''}</strong> in{" "}
-                <strong>{numServices} service{numServices !== 1  ? 's' : ''}</strong>.
-            </ListGroup.Item>
-            <ProjectCollaboratorsListItem project={project} />
-            <ProjectCreatedAtListItem project={project} />
-        </ListGroup>
-    );
-};
-
 
 const projectStatusOrdering = ["UNDER_REVIEW", "EDITABLE", "COMPLETED"];
 
@@ -104,18 +77,11 @@ const ProjectsPane = ({ projects }) => {
                         ]
                     );
                     return (
-                        //<Row xs={1} sm={2} lg={3} className="row-cols-xxl-4">
-                        //    {sortedProjects.map(project => (
-                        //        <Col key={project.data.id}>
-                        //            <ProjectCard project={project} />
-                        //        </Col>
-                        //))}
-                        //</Row>
-                        <Row>
+                        <Row xs={1} sm={2} lg={3} className="row-cols-xxl-4">
                             {sortedProjects.map(project => (
-                                <Row key={project.data.id}>
-                                    <ProjectList project={project} />
-                                </Row>
+                                <Col key={project.data.id}>
+                                    <ProjectCard project={project} />
+                                </Col>
                         ))}
                         </Row>
                     );

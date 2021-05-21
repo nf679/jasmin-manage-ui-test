@@ -28,6 +28,7 @@ import { SpinnerWithText, notificationFromError } from '../utils';
 
 import OverviewPane from './OverviewPane';
 import ProjectsPane from './ProjectsPane';
+import ListPane from './ProjectListPane';
 
 
 const ConsortiumDetail = ({ consortium }) => {
@@ -80,6 +81,15 @@ const ConsortiumDetail = ({ consortium }) => {
                             </Nav.Link>
                         </LinkContainer>
                     </Nav.Item>
+                    <Nav.Item>
+                        <LinkContainer to={`${url}/list`}>
+                            <Nav.Link>
+                                <div className="d-flex align-items-center">
+                                    <span>Projects List</span>
+                                </div>
+                            </Nav.Link>
+                        </LinkContainer>
+                    </Nav.Item>
                 </Nav>
                 <Switch>
                     <Route exact path={path}>
@@ -87,6 +97,9 @@ const ConsortiumDetail = ({ consortium }) => {
                     </Route>
                     <Route path={`${path}/projects`}>
                         <ProjectsPane projects={projects} />
+                    </Route>
+                    <Route path={`${path}/list`}>
+                        <ListPane projects={projects} />
                     </Route>
                 </Switch>
             </Col>
