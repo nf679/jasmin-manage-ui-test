@@ -82,7 +82,7 @@ const ProjectsPane = ({ projects }) => {
                                 <Col key={project.data.id}>
                                     <ProjectCard project={project} />
                                 </Col>
-                            ))}
+                        ))}
                         </Row>
                     );
                 }}
