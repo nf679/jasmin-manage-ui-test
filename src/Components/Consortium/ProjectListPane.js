@@ -76,7 +76,5 @@ const ListPane = ({ projects }) => {
     );
 };
 
-
-                    <Button variant="outline-primary">Go to project</Button>
                
 export default ListPane;

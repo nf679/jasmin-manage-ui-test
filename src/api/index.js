@@ -59,7 +59,6 @@ export const Provider = ({ children }) => (
 // Export a hook for loading a consortium by id
 export const useConsortium = (id, options) => useInstance(`/api/consortia/${id}/`, options);
 
-
 // Export hooks for accessing projects
 // We don't treat the project list as a top-level shared resource because:
 //   1. The list, or objects within it, changes relatively often
@@ -68,6 +67,8 @@ export const useConsortium = (id, options) => useInstance(`/api/consortia/${id}/
 export const useProjects = options => useResource("/api/projects/", options);
 export const useProject = (id, options) => useInstance(`/api/projects/${id}/`, options);
 
+// Export hook for loading requirement by id
+export const useRequirement = (id, options) => useInstance(`/api/requirements/${id}/`, options);
 
 // Export a function for joining a project with an invite code
 export const joinProject = async code => apiFetch('/api/join/', { method: 'POST', data: { code } });
