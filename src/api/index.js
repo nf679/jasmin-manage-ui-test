@@ -70,8 +70,17 @@ export const useProject = (id, options) => useInstance(`/api/projects/${id}/`, o
 // Export hook for loading requirement by id
 export const useRequirement = (id, options) => useInstance(`/api/requirements/${id}/`, options);
 
+// Export hook for loading service by id
+export const useService = (id, options) => useInstance(`/api/services/${id}/`, options);
+
 // Export a function for joining a project with an invite code
 export const joinProject = async code => apiFetch('/api/join/', { method: 'POST', data: { code } });
+
+// Export hook for loading category by id
+export const useCategory = (id, options) => useInstance(`/api/categories/${id}/`, options);
+
+// Export hook for loading resource by id
+export const useResourceType = (id, options) => useInstance(`/api/resources/${id}/`, options);
 
 
 // Export a hook for using a project event stream
