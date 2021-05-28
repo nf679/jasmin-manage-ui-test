@@ -57,7 +57,9 @@ const RequirementRow = ({ requirement }) => {
     	<td></td>
     	<td>{resource.data.short_name} ({resource.data.name})</td>
     	<td>{requirement.data.amount} {resource.data.units}</td>
-    	<td>{requirement.data.location == `cloud-beta.jasmin.ac.uk` ? `MCP`: requirement.data.location == `cloud.jasmin.ac.uk` ? `VIO`: requirement.data.location}</td>
+    	<td>{requirement.data.location == `cloud-beta.jasmin.ac.uk` ? `MCP`: 
+    			requirement.data.location == `cloud.jasmin.ac.uk` ? `VIO`: 
+    			requirement.data.location}</td>
     	<td>{requirement.data.status.replace("_", " ").toLowerCase()}</td>
     	<td></td>
     	</>
