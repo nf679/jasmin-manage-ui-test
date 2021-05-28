@@ -93,7 +93,8 @@ const App = () => (
                     <AuthenticatedRoute path="/consortia/:id"><ConsortiumDetail /></AuthenticatedRoute>
                     <AuthenticatedRoute path="/projects" exact><ProjectList /></AuthenticatedRoute>
                     <AuthenticatedRoute path="/projects/:id"><ProjectDetail /></AuthenticatedRoute>
-                    <AuthenticatedRoute path="/requirement/:id"><RequirementDetail /></AuthenticatedRoute>
+                    // Below is the link to the work order for the service id
+                    <AuthenticatedRoute path="/request/:id"><RequirementDetail /></AuthenticatedRoute>
                 </Switch>
             </Container>
         </Router>
