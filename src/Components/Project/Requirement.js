@@ -38,33 +38,84 @@ import {
     sortByKey
 } from '../utils';
 
+const statusOrdering = [
+    'REQUESTED',
+    'REJECTED',
+    'APPROVED',
+    'AWAITING_PROVISIONING',
+    'PROVISIONED',
+    'DECOMMISSIONED'
+];
 
-const RequirementTable = ({ requirement }) => {
+const RequirementRow = ({ requirement }) => {
+	const resources = useResources();
+    const resource = resources.data[requirement.data.resource];
+    return(
+    	<tr>
+    	{requirement.data.status == `AWAITING_PROVISIONING` &&
+    	<>
+    	<td></td>
+    	<td>{resource.data.short_name} ({resource.data.name})</td>
+    	<td>{requirement.data.amount} {resource.data.units}</td>
+    	<td>{requirement.data.location == `cloud-beta.jasmin.ac.uk` ? `MCP`: requirement.data.location == `cloud.jasmin.ac.uk` ? `VIO`: requirement.data.location}</td>
+    	<td>{requirement.data.status.replace("_", " ").toLowerCase()}</td>
+    	<td></td>
+    	</>
+    	}
+    	</tr>
+    )
+}
+
+const RequirementsTable = ({ requirements}) => {
  	// initialise the service
-    // Get any initial data specified in the location state
-    resources = useResources();
-    const { initialData } = useStateFromLocation();
-    const resourceID = requirement.data.resource;
-	const resource = useResources.data[requirement.data.resource];
+    // Get any initial data specified in the location state   
+    
+    
+	const resources = useResources();
+    const sortedRequirements = sortByKey(
+        Object.values(requirements.data),
+        // Sort requirements by status first, then resource short name
+        // This makes sure that the requirements that require action are closest to the top
+        requirement => {
+            const resource = resources.data[requirement.data.resource];
+            const resourceName = resource.data.short_name || resource.data.name;
+            return [statusOrdering.indexOf(requirement.data.status), resourceName];
+        }
+    );                
+					
 	return (
 		<Table>
+		<thead>
+		<tr>
+    	<td></td>
+		<th> Resource </th>
+		<th> Amount </th>
+		<th> Location </th>
+		<th> Status </th>
+    	<td></td>
+		</tr>
+		</thead>
 		<tbody>
-		<td>{ requirement.data.status }</td>
-		<td>{ resource.data.name } ({ resource.data.short_name })</td>
-		<td>{ requirement.data.amount } { resource.data.units }</td>
-		
-		<td>See email</td>
-		</tbody>
-		</Table>
+		{sortedRequirements.map(requirement => (
+                    <RequirementRow requirement={requirement} />
+                ))}
+        </tbody>
+      	</Table>
     )
+    
 };
 
-const RequirementDetail = ({service, project, category}) => {
-    const collaborators = useNestedResource(project, "collaborators");
+const RequirementDetail = ({service, project, category, collaborators}) => {
+	const sortedCollaborators = sortByKey(
+        Object.values(collaborators.data),
+        // Sort requirements by status first, then resource short name
+        // This makes sure that the requirements that require action are closest to the top
+        collaborator => [collaborator.data.username]
+        );
     const requirements = useNestedResource(service, "requirements");
-
+    const resources = useResources();
     return (
-    	<Status.Many fetchables={[ requirements, collaborators ]}>
+    	<Status.Many fetchables={[ requirements, collaborators, resources ]}>
             <Status.Loading>
                 <div className="d-flex justify-content-center my-5">
                     <SpinnerWithText iconSize="lg" textSize="lg">
@@ -73,33 +124,61 @@ const RequirementDetail = ({service, project, category}) => {
                 </div>
             </Status.Loading>
             <Status.Unavailable>
-                <Row> <Col> No matching project for service id {service.data.id}</Col> </Row>
-                
+                <Status.Throw />
             </Status.Unavailable>
             <Status.Available>
-			    <PageHeader><h3>{ category.data.name } request for  { service.data.name }</h3>
+            	<>
+			    <PageHeader><h3>{ category.data.name } request for  service: { service.data.name }</h3>
 			    </PageHeader>
 			    <Row> <Col> Service Type: <strong>{category.data.name}</strong> </Col> </Row>
 			    <Row> <Col> Service Name: <strong>{service.data.name}</strong> </Col> </Row>
-			    
-				    {data =>  {         
-		                    const sortedRequirements = sortByKey(
-		                        Object.values(data),
-		                        requirement => [
-		                            requirement.data.id
-		                        ]
-		                    );  
-		                    
-		                	return (
-				                <RequirementTable requirement={requirement}/>
-		                    );
-		            }} 
+			    <Row><Col> Project: <strong>{project.data.name}</strong></Col></Row>
+			    {sortedCollaborators.map(collaborator => (
+			    <>
+			    {collaborator.data.role == `OWNER` &&
+			    <>
+			    <Row><Col>User: <strong>{collaborator.data.user.username}</strong></Col></Row>
+			    <Row><Col>Name: <strong>{collaborator.data.user.first_name} {collaborator.data.user.last_name} </strong></Col></Row>
+			    <Row><Col>Email: <strong>{collaborator.data.user.email} </strong></Col></Row>
+			    </>
+			    }
+			    </>
+			    ))}		      
+	            <Row>          
+	        		<RequirementsTable requirements={requirements} />
+	        	</Row>
+            	</>
+	        
             </Status.Available>
         </Status.Many>
     );
 };
 
-
+const RequirementCollabWrapper = ({ service, project, category }) => {
+	
+    const collaborators = useNestedResource(project, "collaborators");
+    
+	
+          
+    return (
+    	<Status fetchable={collaborators}>
+            <Status.Loading>
+                <div className="d-flex justify-content-center my-5">
+                    <SpinnerWithText iconSize="lg" textSize="lg">
+                        Loading project, category...
+                    </SpinnerWithText>
+                </div>
+            </Status.Loading>
+            <Status.Unavailable>
+                <Status.Throw />
+                
+            </Status.Unavailable>
+            <Status.Available>
+                <RequirementDetail service={service} project={project} category={category} collaborators={collaborators} />
+            </Status.Available>
+        </Status>
+    );
+};
 
 const RequirementProjectWrapper = ({ service }) => {
  	// initialise the service
@@ -125,7 +204,7 @@ const RequirementProjectWrapper = ({ service }) => {
                 
             </Status.Unavailable>
             <Status.Available>
-                <RequirementDetail service={service} project={project} category={category} />
+                <RequirementCollabWrapper service={service} project={project} category={category} />
             </Status.Available>
         </Status.Many>
     );
