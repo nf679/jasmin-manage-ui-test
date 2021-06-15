@@ -91,7 +91,6 @@ export const sortByKey = (data, keyFn, reverse = false) => [...data].sort(
     }
 );
 
-
 /**
  * Function that produces a notification from an error object.
  */

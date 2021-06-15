@@ -40,7 +40,7 @@ Status.Unavailable = ({ children }) => {
 
 /**
  * Component that throws the fetch error if present.
- *
+ * 
  * This is used to throw fetch errors during a render so that they can be caught
  * by an error boundary.
  */

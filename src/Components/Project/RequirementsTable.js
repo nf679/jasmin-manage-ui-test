@@ -87,7 +87,8 @@ const RequirementRow = ({ project, service, requirement }) => {
                         />
                     )}
                 </td>
-            )}
+            )}            
+            <td>{requirement.data.location}</td>
         </tr>
     </>);
 };
@@ -122,6 +123,7 @@ export const RequirementsTable = ({ project, service, requirements }) => {
                     <th>From</th>
                     <th>Until</th>
                     {showControlsColumn && <th></th>}
+                    <th>Location</th>                
                 </tr>
             </thead>
             <tbody>

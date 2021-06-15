@@ -15,6 +15,7 @@ import Navbar from './Navbar';
 import Home from './Home';
 import ProjectList from './Project/List';
 import ProjectDetail from './Project/Detail';
+import RequirementDetail from './Project/Requirement';
 import ConsortiumList from './Consortium/List';
 import ConsortiumDetail from './Consortium/Detail';
 
@@ -92,6 +93,8 @@ const App = () => (
                     <AuthenticatedRoute path="/consortia/:id"><ConsortiumDetail /></AuthenticatedRoute>
                     <AuthenticatedRoute path="/projects" exact><ProjectList /></AuthenticatedRoute>
                     <AuthenticatedRoute path="/projects/:id"><ProjectDetail /></AuthenticatedRoute>
+                    // Below is the link to the work order for the service id
+                    <AuthenticatedRoute path="/request/service-:id"><RequirementDetail /></AuthenticatedRoute>
                 </Switch>
             </Container>
         </Router>
