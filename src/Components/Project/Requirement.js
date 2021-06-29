@@ -156,10 +156,11 @@ const RequirementDetail = ({service, project, category, collaborators}) => {
 			    <Row><Col>Email: <strong>{collaborator.data.user.email} </strong></Col></Row>
 			    </>
 			    }
-                <Row><Col>Project Description:</Col></Row>
-			    <Row><Col> <ProjectDescription project={project} /> </Col></Row>
+                
 			    </>
-			    ))}		    
+			    ))}	
+                <Row><Col>Project Description:</Col></Row>
+			    <Row><Col> <ProjectDescription project={project} /> </Col></Row>	    
 	            <Row>          
 	        		<RequirementsTable requirements={requirements} />
 	        	</Row>
