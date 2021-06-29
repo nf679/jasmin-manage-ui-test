@@ -18,11 +18,14 @@ import ListGroup from 'react-bootstrap/ListGroup';
 
 import classNames from 'classnames';
 
+import ReactMarkdown from 'react-markdown';
+
 import { useNotifications } from 'react-bootstrap-notify';
 
 import { PageHeader } from 'fwtheme-react-jasmin';
 
 import { Status, useNestedResource} from '../../rest-resource';
+
 
 import { useRequirement, 
   		 useService,
@@ -37,6 +40,7 @@ import {
     notificationFromError,
     sortByKey
 } from '../utils';
+import { OverviewPane } from './OverviewPane';
 
 const statusOrdering = [
     'REQUESTED',
@@ -46,6 +50,14 @@ const statusOrdering = [
     'PROVISIONED',
     'DECOMMISSIONED'
 ];
+
+const ProjectDescription = ({ project }) => (
+    <Card>
+        <Card.Body className="markdown">
+            <ReactMarkdown children={project.data.description} />
+        </Card.Body>
+    </Card>
+);
 
 const RequirementRow = ({ requirement }) => {
 	const resources = useResources();
@@ -126,7 +138,7 @@ const RequirementDetail = ({service, project, category, collaborators}) => {
                 </div>
             </Status.Loading>
             <Status.Unavailable>
-                <Status.Throw />
+                <Row> <Col> No matching requirements, collaborator, resources for service id {service.data.id}</Col> </Row>
             </Status.Unavailable>
             <Status.Available>
             	<>
@@ -134,7 +146,7 @@ const RequirementDetail = ({service, project, category, collaborators}) => {
 			    </PageHeader>
 			    <Row> <Col> Service Type: <strong>{category.data.name}</strong> </Col> </Row>
 			    <Row> <Col> Service Name: <strong>{service.data.name}</strong> </Col> </Row>
-			    <Row><Col> Project: <strong>{project.data.name}</strong></Col></Row>
+                <Row><Col> Project: <strong>{project.data.name}</strong></Col></Row>
 			    {sortedCollaborators.map(collaborator => (
 			    <>
 			    {collaborator.data.role == `OWNER` &&
@@ -144,8 +156,10 @@ const RequirementDetail = ({service, project, category, collaborators}) => {
 			    <Row><Col>Email: <strong>{collaborator.data.user.email} </strong></Col></Row>
 			    </>
 			    }
+                <Row><Col>Project Description:</Col></Row>
+			    <Row><Col> <ProjectDescription project={project} /> </Col></Row>
 			    </>
-			    ))}		      
+			    ))}		    
 	            <Row>          
 	        		<RequirementsTable requirements={requirements} />
 	        	</Row>
@@ -172,7 +186,7 @@ const RequirementCollabWrapper = ({ service, project, category }) => {
                 </div>
             </Status.Loading>
             <Status.Unavailable>
-                <Status.Throw />
+                <Row> <Col> No matching collaborator for service id {service.data.id}</Col> </Row>
                 
             </Status.Unavailable>
             <Status.Available>
