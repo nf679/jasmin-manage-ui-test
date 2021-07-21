@@ -5,8 +5,10 @@ import Card from 'react-bootstrap/Card';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
+import Nav from 'react-bootstrap/Nav';
 import { useNotifications } from 'react-bootstrap-notify';
 
+import { LinkContainer } from 'react-router-bootstrap';
 import classNames from 'classnames';
 
 import moment from 'moment';
@@ -17,6 +19,7 @@ import ReactMarkdown from 'react-markdown';
 import { Form as ResourceForm } from '../../rest-resource';
 
 import { notificationFromError, MarkdownEditor } from '../utils';
+
 
 import {
     Status,
@@ -45,57 +48,15 @@ const TimelineItem = ({ children }) => (
 
 
 const ProjectDescription = ({ project }) => {
-
-    const notify = useNotifications();
-    const [modalVisible, setModalVisible] = useState(false);
-    const showModal = () => setModalVisible(true);
-    const hideModal = () => setModalVisible(false);
-
-    // When a project is edited, redirect to it
-    // We don't need to hide the modal as we will be redirected
-    const handleSuccess = projectData => {
-        history.push(`/projects/${projectData.id}`, { initialData: projectData });
-    };
-    const handleError = error => {
-        notify(notificationFromError(error));
-        hideModal();
-    };
-    // Mark the markdown editor control into a resource form control
-    const MarkdownEditorControl = ResourceForm.Controls.asControl(
-        MarkdownEditor,
-        evt => evt.target.value
-    );
     return(<>
     <Card>
         <Card.Header><strong>Project description</strong></Card.Header>
         <Card.Body className="markdown">
             <ReactMarkdown children={project.data.description} />
-            <Button onClick={showModal} size="lg" variant="success">edit</Button>
-
-                <Modal show={modalVisible} backdrop="static" keyboard={false}>
-                <ResourceForm.CreateInstanceForm
-                    resource={project}
-                    onSuccess={handleSuccess}
-                    onError={handleError}
-                    onCancel={hideModal}
-                >
-                    <Modal.Header>
-                        <Modal.Title>Edit project description</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                        
-                        <Form.Group controlId="description">
-                            <Form.Label>Description</Form.Label>
-                            <Form.Control as={MarkdownEditorControl} required />
-                            <ResourceForm.Controls.ErrorList />
-                        </Form.Group>
-                    </Modal.Body>
-                    <Modal.Footer>
-                        <ResourceForm.Controls.CancelButton>Cancel</ResourceForm.Controls.CancelButton>
-                        <ResourceForm.Controls.SubmitButton>Confirm</ResourceForm.Controls.SubmitButton>
-                    </Modal.Footer>
-                </ResourceForm.CreateInstanceForm>
-            </Modal>
+            <Nav className="justify-content-end">
+                <Nav.Link href={`/api/projects/${project.data.id}`}>Edit with API form</Nav.Link>
+                
+            </Nav>
         </Card.Body>
     </Card>
     </>
