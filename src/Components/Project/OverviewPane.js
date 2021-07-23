@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
 
+import { useHistory } from 'react-router-dom';
 import Alert from 'react-bootstrap/Alert';
 import Card from 'react-bootstrap/Card';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
-import Nav from 'react-bootstrap/Nav';
 import { useNotifications } from 'react-bootstrap-notify';
 
-import { LinkContainer } from 'react-router-bootstrap';
 import classNames from 'classnames';
 
 import moment from 'moment';
@@ -19,7 +18,6 @@ import ReactMarkdown from 'react-markdown';
 import { Form as ResourceForm } from '../../rest-resource';
 
 import { notificationFromError, MarkdownEditor } from '../utils';
-
 
 import {
     Status,
@@ -48,15 +46,55 @@ const TimelineItem = ({ children }) => (
 
 
 const ProjectDescription = ({ project }) => {
+
+    const notify = useNotifications();
+    const [modalVisible, setModalVisible] = useState(false);
+    const showModal = () => setModalVisible(true);
+    const hideModal = () => setModalVisible(false);
+
+    const history = useHistory();
+    const handleError = error => {
+        notify(notificationFromError(error));
+        hideModal();
+    };
+    // Mark the markdown editor control into a resource form control
+    const MarkdownEditorControl = ResourceForm.Controls.asControl(
+        MarkdownEditor,
+        evt => evt.target.value,
+    );
     return(<>
     <Card>
         <Card.Header><strong>Project description</strong></Card.Header>
         <Card.Body className="markdown">
             <ReactMarkdown children={project.data.description} />
-            <Nav className="justify-content-end">
-                <Nav.Link href={`/api/projects/${project.data.id}`}>Edit with API form</Nav.Link>
-                
-            </Nav>
+            <Button onClick={showModal} size="sm" variant="outline-primary" style={{float: 'right'}}>edit</Button>
+
+                <Modal show={modalVisible} backdrop="static" keyboard={false}>
+                <ResourceForm.UpdateInstanceForm
+                    instance={project}
+                    field={project.data.description}
+                    onSuccess={hideModal}
+                    onError={handleError}
+                    onCancel={hideModal}
+                >
+                    <Modal.Header>
+                        <Modal.Title>Edit project description</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        
+                        <Form.Group controlId="description">
+                            <Form.Label>Description</Form.Label>
+                            <Form.Control as={MarkdownEditorControl} required />
+
+                            <ResourceForm.Controls.ErrorList />
+                        </Form.Group>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <ResourceForm.Controls.CancelButton>Cancel</ResourceForm.Controls.CancelButton>
+                        <ResourceForm.Controls.SubmitButton>Confirm</ResourceForm.Controls.SubmitButton>
+                    </Modal.Footer>
+                </ResourceForm.UpdateInstanceForm>
+            </Modal>
         </Card.Body>
     </Card>
     </>
