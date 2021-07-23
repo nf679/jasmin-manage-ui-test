@@ -31,6 +31,8 @@ import { useResources } from '../../api';
 
 import { formatAmount, sortByKey } from '../utils';
 
+import { useProjectPermissions } from './actions';
+
 import '../../css/project-detail.css';
 
 
@@ -51,6 +53,13 @@ const ProjectDescription = ({ project }) => {
     const [modalVisible, setModalVisible] = useState(false);
     const showModal = () => setModalVisible(true);
     const hideModal = () => setModalVisible(false);
+    // Get the project permissions for description edit
+    const {
+        canEditRequirements,
+        canSubmitForReview,
+        canRequestChanges,
+        canSubmitForProvisioning
+    } = useProjectPermissions(project);
 
     const history = useHistory();
     const handleError = error => {
@@ -67,34 +76,37 @@ const ProjectDescription = ({ project }) => {
         <Card.Header><strong>Project description</strong></Card.Header>
         <Card.Body className="markdown">
             <ReactMarkdown children={project.data.description} />
-            <Button onClick={showModal} size="sm" variant="outline-primary" style={{float: 'right'}}>edit</Button>
-
+            {canSubmitForReview && (<>
+                <Button onClick={showModal} size="sm" variant="outline-primary" style={{float: 'right'}}>edit</Button>
+                
                 <Modal show={modalVisible} backdrop="static" keyboard={false}>
-                <ResourceForm.UpdateInstanceForm
-                    instance={project}
-                    field={project.data.description}
-                    onSuccess={hideModal}
-                    onError={handleError}
-                    onCancel={hideModal}
-                >
-                    <Modal.Header>
-                        <Modal.Title>Edit project description</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                        
-                        <Form.Group controlId="description">
-                            <Form.Label>Description</Form.Label>
-                            <Form.Control as={MarkdownEditorControl} required />
+                    <ResourceForm.UpdateInstanceForm
+                        instance={project}
+                        field={project.data.description}
+                        onSuccess={hideModal}
+                        onError={handleError}
+                        onCancel={hideModal}
+                    >
+                        <Modal.Header>
+                            <Modal.Title>Edit project description</Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body>
+                            
+                            <Form.Group controlId="description">
+                                <Form.Label>Description</Form.Label>
+                                <Form.Control as={MarkdownEditorControl} required />
 
-                            <ResourceForm.Controls.ErrorList />
-                        </Form.Group>
-                    </Modal.Body>
-                    <Modal.Footer>
-                        <ResourceForm.Controls.CancelButton>Cancel</ResourceForm.Controls.CancelButton>
-                        <ResourceForm.Controls.SubmitButton>Confirm</ResourceForm.Controls.SubmitButton>
-                    </Modal.Footer>
-                </ResourceForm.UpdateInstanceForm>
-            </Modal>
+                                <ResourceForm.Controls.ErrorList />
+                            </Form.Group>
+                        </Modal.Body>
+                        <Modal.Footer>
+                            <ResourceForm.Controls.CancelButton>Cancel</ResourceForm.Controls.CancelButton>
+                            <ResourceForm.Controls.SubmitButton>Confirm</ResourceForm.Controls.SubmitButton>
+                        </Modal.Footer>
+                    </ResourceForm.UpdateInstanceForm>
+                </Modal>
+                </>
+            )}
         </Card.Body>
     </Card>
     </>
