@@ -13,9 +13,9 @@ class NotFoundPage extends React.Component{
                 <Col>
                     <h1>Page Not Found</h1>
                     <div>
-                        <div className="alert alert-with-icon alert-warning">
+                        {/* <div className="alert alert-with-icon alert-warning">
                             <i className="fas fa-exclamation-circle"></i> <span>The page you are looking for does not exist</span>
-                        </div>
+                        </div> */}
                         <Alert variant={warning}>
                             The page you are looking for does not exist
                         </Alert>
