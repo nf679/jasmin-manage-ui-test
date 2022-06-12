@@ -15,7 +15,7 @@ class NotFoundPage extends React.Component{
                     <i className="fas fa-exclamation-circle"></i> <span>The page you are looking for does not exist</span>
                 </div> */}
                 <Alert variant='warning'>
-                    The page you are looking for does not exist
+                    <i className="fas fa-exclamation-circle"></i>The page you are looking for does not exist
                 </Alert>
 
                 <p>The page you requested does not exist on this server.</p>
