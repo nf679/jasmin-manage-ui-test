@@ -11,7 +11,7 @@ class NotFoundPage extends React.Component{
         return (
             <Row>
                 <Col>
-                    <h1>Page Not Found</h1>
+                    <h1 className='border-bottom mt-4 mb-3'>Page Not Found</h1>
                     <Alert variant='warning'>
                         <i className="fas fa-exclamation-circle"></i> The page you are looking for does not exist
                     </Alert>
