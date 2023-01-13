@@ -87,9 +87,7 @@ export const RequirementApproveButton = ({ project, service, requirement, ...pro
 
     const handleError = error => {
         notify(notificationFromError(error));
-        console.log('error type:', error.name, 'error title:', error.statusText);
-        console.log('error w/o json stringify:', error.json().detail);
-        console.log( 'error w/ json stringify:', error.json().detail || JSON.stringify(error.json()));
+        console.log(error)
         hideModal();
     };
 
