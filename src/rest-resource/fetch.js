@@ -48,6 +48,7 @@ const apiFetch = async (url, options) => {
     if( response.ok ) return await response.json();
     // An error response may not be JSON, so read the response as text
     const responseText = await response.text();
+    console.log('response status:', response.status, 'response text:', responseText, 'response status text:', response.statusText);
     throw new HttpError(response.status, response.statusText, responseText);
 };
 
