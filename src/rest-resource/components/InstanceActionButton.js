@@ -49,6 +49,7 @@ export const InstanceActionButton = ({
         }
         catch(error) {
             if( onError ) onError(error);
+            console.log(error)
             return; // Once the error is handled, we are done
         }
         finally {
