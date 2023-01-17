@@ -87,7 +87,6 @@ export const RequirementApproveButton = ({ project, service, requirement, ...pro
 
     const handleError = error => {
         notify(notificationFromError(error));
-        console.log(error)
         hideModal();
     };
 
