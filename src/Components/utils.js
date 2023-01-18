@@ -96,6 +96,7 @@ export const sortByKey = (data, keyFn, reverse = false) => [...data].sort(
  */
 export const notificationFromError = (error, duration = 5000) => {
     let title, message;
+    console.log(error);
     if( error.name === "HttpError" ) {
         title = error.statusText;
         // Extract the most useful information from the error for the message
