@@ -369,7 +369,6 @@ const instanceMethods = (url, setState) => ({
             return instanceData;
         }
         catch(error) {
-            console.log(error);
             // On failure, mark the update as over before re-throwing the error
             setState(state => ({ ...state, updating: false }));
             throw error;
