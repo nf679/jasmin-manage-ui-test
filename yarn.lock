@@ -7270,14 +7270,14 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"fwtheme-react-jasmin@github:cedadev/fwtheme-react-jasmin":
+"fwtheme-react-jasmin@github:cedadev/fwtheme-react-jasmin#fix-packaging":
   version: 0.1.0
-  resolution: "fwtheme-react-jasmin@https://github.com/cedadev/fwtheme-react-jasmin.git#commit=ef681d5d6ecf50719a686737daf6e9516b8aae64"
+  resolution: "fwtheme-react-jasmin@https://github.com/cedadev/fwtheme-react-jasmin.git#commit=4b6b4fab2b4774020c367c891f71dc56c4440053"
   peerDependencies:
     react: ^17.0.1
     react-bootstrap: ^1.4.0
     react-dom: ^17.0.1
-  checksum: 0b4ecaba4ef799263c01a169c5583bb19c776e9df61f6badedccf07a98b176778f7bfc68971a3da596c17142e8d90b59f219677f9630031b42c9aab943719fae
+  checksum: 1fa8c97fbc5237020b857efce9219d7e5a67903d786a793f933baf7a6a3e9afe8d966675a7740595bd8512e5cca7bec93462fb2ef094e13985d08d541ba14835
   languageName: node
   linkType: hard
 
@@ -8774,7 +8774,7 @@ fsevents@^1.2.7:
   resolution: "jasmin-manage-ui@workspace:."
   dependencies:
     classnames: ^2.2.6
-    fwtheme-react-jasmin: "github:cedadev/fwtheme-react-jasmin"
+    fwtheme-react-jasmin: "github:cedadev/fwtheme-react-jasmin#fix-packaging"
     http-proxy-middleware: ^1.0.6
     js-cookie: ^2.2.1
     moment: ^2.29.1
