@@ -18,7 +18,6 @@ import { notificationFromError } from '../utils';
 export const ServiceCreateButton = ({ project, ...props }) => {
     const notify = useNotifications();
     const categories = useCategories();
-
     const history = useHistory();
 
     // We only need the create method from the services, so we don't need a fetch point
@@ -39,6 +38,10 @@ export const ServiceCreateButton = ({ project, ...props }) => {
         hideModal();
     };
 
+    // Define a filter function to only show categories that are public
+    const categoryIsPublic = category => category.data.is_public;
+
+    // Define a function to format the category options in the dropdown
     const formatCategoryOption = (option, { context }) => (
         context === 'menu' ? (
             <>
@@ -80,6 +83,7 @@ export const ServiceCreateButton = ({ project, ...props }) => {
                             resource={categories}
                             resourceName="category"
                             resourceNamePlural="categories"
+                            filterResources={categoryIsPublic}
                             required
                             // Use a custom label renderer
                             formatOptionLabel={formatCategoryOption}
