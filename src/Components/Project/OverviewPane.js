@@ -310,8 +310,6 @@ const ProjectTimeline = ({ project, events }) => {
     // However we don't want to load them if we don't need them, so don't auto-fetch
     // This means that individual event components must force them to load using
     // "useEnsureInitialised" if they need them
-    const services = useNestedResource(project, "services", { autoFetch: false });
-    const requirements = useAggregateResource(services, "requirements", { autoFetch: false });
 
     return (<>
         {/* If either the comments or events are loading, include an item at the top */}
@@ -334,7 +332,9 @@ const ProjectTimeline = ({ project, events }) => {
                 </TimelineItem>
             </Status.Unavailable>
             <Status.Available>
-                {([commentData, eventData]) => (
+                {([commentData, eventData]) => {
+                    const services = useNestedResource(project, "services", { autoFetch: false });
+                    const requirements = useAggregateResource(services, "requirements", { autoFetch: false });
                     // Render each timeline item with the specified component
                     getTimelineData(commentData, eventData).map(item => (
                         <TimelineItem key={item.id}>
@@ -346,7 +346,7 @@ const ProjectTimeline = ({ project, events }) => {
                             />
                         </TimelineItem>
                     ))
-                )}
+                }}
             </Status.Available>
         </Status.Many>
     </>);
