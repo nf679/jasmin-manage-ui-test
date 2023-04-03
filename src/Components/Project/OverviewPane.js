@@ -336,16 +336,18 @@ const ProjectTimeline = ({ project, events }) => {
                     const services = useNestedResource(project, "services", { autoFetch: false });
                     const requirements = useAggregateResource(services, "requirements", { autoFetch: false });
                     // Render each timeline item with the specified component
-                    getTimelineData(commentData, eventData).map(item => (
-                        <TimelineItem key={item.id}>
-                            <item.component
-                                project={project}
-                                services={services}
-                                requirements={requirements}
-                                item={item.data}
-                            />
-                        </TimelineItem>
-                    ))
+                    return(<>
+                        {getTimelineData(commentData, eventData).map(item => (
+                            <TimelineItem key={item.id}>
+                                <item.component
+                                    project={project}
+                                    services={services}
+                                    requirements={requirements}
+                                    item={item.data}
+                                />
+                            </TimelineItem>
+                        ))}
+                    </>)
                 }}
             </Status.Available>
         </Status.Many>
