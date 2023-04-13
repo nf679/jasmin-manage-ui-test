@@ -28,11 +28,12 @@ export const RequirementCreateButton = ({ project, service, requirements, ...pro
     const consortia = useConsortia();
     const consortium = consortia.data[project.data.consortium];
     const quotas = useNestedResource(consortium, "quotas");
+    //console.log(useNestedResource(consortium, "quotas"));
     // Find the resources which have a quota
-    const quotaResources = [];
-    for (const j in quotas.data) {
-        quotaResources.push(quotas.data[j].data.resource)
-    }
+    //const quotaResources = [];
+    //for (const j in quotas.data) {
+    //    quotaResources.push(quotas.data[j].data.resource)
+    //}
 
     // Keep a handle on the currently selected resource
     // We use this to determine whether to show the amount/from/until fields
@@ -56,7 +57,10 @@ export const RequirementCreateButton = ({ project, service, requirements, ...pro
     // higher up the component tree
     const category = categories.data[service.data.category];
     // Define a filter function that selects only the resources for the category and that have a quota
-    const categoryResources = resource => category.data.resources.includes(resource.data.id) && quotaResources.includes(resource.data.id);
+    const categoryResources = resource => {
+        // console.log(quotaResources);
+        category.data.resources.includes(resource.data.id) //&& quotaResources.includes(resource.data.id);
+    }
 
     // Define a function to extract the label for a resource
     // Don't forget that short_name is optional!
