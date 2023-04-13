@@ -98,7 +98,6 @@ const ProjectDetail = ({ project }) => {
                             <Status.Available>
                                 {data => {
                                     const consortium = data[project.data.consortium];
-                                    console.log(consortium);
                                     const isConsortiumManager = consortium.data.manager.id === currentUser.data.id;
                                     return (<>
                                         {isUnderReview && isConsortiumManager &&
