@@ -27,7 +27,8 @@ export const RequirementCreateButton = ({ project, service, requirements, ...pro
     // Get the consortium to allow us to access the related quotas
     const consortia = useConsortia();
     const consortium = consortia.data[project.data.consortium];
-    const quotas = useNestedResource(consortium, "quotas");
+    console.log(consortium);
+    // const quotas = useNestedResource(consortium, "quotas");
     //console.log(useNestedResource(consortium, "quotas"));
     // Find the resources which have a quota
     //const quotaResources = [];
