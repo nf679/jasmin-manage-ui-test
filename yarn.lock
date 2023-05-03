@@ -6989,12 +6989,12 @@ fsevents@^1.2.7:
 
 "fwtheme-react-jasmin@github:cedadev/fwtheme-react-jasmin":
   version: 0.1.0
-  resolution: "fwtheme-react-jasmin@https://github.com/cedadev/fwtheme-react-jasmin.git#commit=ef681d5d6ecf50719a686737daf6e9516b8aae64"
+  resolution: "fwtheme-react-jasmin@https://github.com/cedadev/fwtheme-react-jasmin.git#commit=296138906161b24cb014b8587fef7f54bd8a88c9"
   peerDependencies:
     react: ^17.0.1
     react-bootstrap: ^1.4.0
     react-dom: ^17.0.1
-  checksum: ea56c17b94832e174c49e4acaa1e5b3d9117f151f9968ea83fc586522a1f1a7ac255bab3717cbfa923ef5f9bc5f6842942c9ff4a9d8f668ad9101cb170058499
+  checksum: 511d84c83cf8f066ef1674b431d23be40b89c2536460a6fb1fee8011effd0d31a3c6d6793b428ece545c6c40ef1e38b8262ee727af1748cf7a453f1a0e3d6d39
   languageName: node
   linkType: hard
 
