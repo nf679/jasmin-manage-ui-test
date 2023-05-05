@@ -4,14 +4,20 @@ import { useCurrentUser } from "../api";
 export function HelpBeacon() {
     const currentUser = useCurrentUser();
     const isAuthenticated = currentUser.isAuthenticated;
+
+    // Beacon is a JS object, first call 
+    // Beacon('init', 'your beacon id here)
     const test = Beacon();
     test("init", "a108cc24-88df-4d59-9e84-17ba328fc105");
+    // Resets the contact form by clearing all of its fields
     test("reset");
     return (
         <div>
             {isAuthenticated ? (
+                // This identifies the user
                 test('identify', { name: '{{ user.get_full_name }}', email: '{{ user.email }}' })
             ) : (
+                // Clears data from the beacon (identify data, device id, history etc)
                 test('logout')
             )
             }
