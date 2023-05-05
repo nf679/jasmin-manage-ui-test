@@ -12,6 +12,7 @@ import { Provider, useCurrentUser } from '../api';
 import { SpinnerWithText } from './utils';
 
 import Navbar from './Navbar';
+import { HelpBeacon } from './Beacon';
 import Home from './Home';
 import ProjectList from './Project/List';
 import ProjectDetail from './Project/Detail';
@@ -97,6 +98,7 @@ const App = () => (
                     <AuthenticatedRoute path="/request/service-:id"><RequirementDetail /></AuthenticatedRoute>
                 </Switch>
             </Container>
+            <HelpBeacon />
         </Router>
     </Provider>
 );
