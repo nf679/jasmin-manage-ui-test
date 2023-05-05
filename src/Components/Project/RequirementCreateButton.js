@@ -12,8 +12,7 @@ import moment from 'moment';
 import { useNotifications } from 'react-bootstrap-notify';
 
 import { Form as ResourceForm } from '../../rest-resource';
-
-import { useNestedResource } from '../../rest-resource';
+import { useNestedResource } from '../../rest-resource'; 
 
 import { useCategories, useResources, useConsortia } from '../../api';
 
@@ -24,6 +23,7 @@ export const RequirementCreateButton = ({ project, service, requirements, ...pro
     const notify = useNotifications();
     const categories = useCategories();
     const resources = useResources();
+
     // Get the consortium to allow us to access the related quotas
     const consortia = useConsortia();
     const consortium = consortia.data[project.data.consortium];
