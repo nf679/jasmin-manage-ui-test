@@ -334,7 +334,7 @@ const ProjectTimeline = ({ project, events }) => {
                 </TimelineItem>
             </Status.Unavailable>
             <Status.Available>
-                {([commentData, eventData]) => {
+                {([commentData, eventData]) => (
                     // Render each timeline item with the specified component
                     getTimelineData(commentData, eventData).map(item => (
                         <TimelineItem key={item.id}>
@@ -346,7 +346,7 @@ const ProjectTimeline = ({ project, events }) => {
                             />
                         </TimelineItem>
                     ))
-                }}
+                )}
             </Status.Available>
         </Status.Many>
     </>);
