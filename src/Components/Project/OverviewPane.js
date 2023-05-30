@@ -310,6 +310,8 @@ const ProjectTimeline = ({ project, events }) => {
     // However we don't want to load them if we don't need them, so don't auto-fetch
     // This means that individual event components must force them to load using
     // "useEnsureInitialised" if they need them
+    const services = useNestedResource(project, "services", { autoFetch: false });
+    const requirements = useAggregateResource(services, "requirements", { autoFetch: false });
 
     return (<>
         {/* If either the comments or events are loading, include an item at the top */}
@@ -333,21 +335,17 @@ const ProjectTimeline = ({ project, events }) => {
             </Status.Unavailable>
             <Status.Available>
                 {([commentData, eventData]) => {
-                    const services = useNestedResource(project, "services", { autoFetch: false });
-                    const requirements = useAggregateResource(services, "requirements", { autoFetch: false });
                     // Render each timeline item with the specified component
-                    return(<>
-                        {getTimelineData(commentData, eventData).map(item => (
-                            <TimelineItem key={item.id}>
-                                <item.component
-                                    project={project}
-                                    services={services}
-                                    requirements={requirements}
-                                    item={item.data}
-                                />
-                            </TimelineItem>
-                        ))}
-                    </>)
+                    getTimelineData(commentData, eventData).map(item => (
+                        <TimelineItem key={item.id}>
+                            <item.component
+                                project={project}
+                                services={services}
+                                requirements={requirements}
+                                item={item.data}
+                            />
+                        </TimelineItem>
+                    ))
                 }}
             </Status.Available>
         </Status.Many>
