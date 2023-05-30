@@ -21,9 +21,9 @@ import { useNotifications } from 'react-bootstrap-notify';
 
 import { PageHeader } from 'fwtheme-react-jasmin';
 
-import { Status } from '../../rest-resource';
+import { Status, useNestedResource, useAggregateResource } from '../../rest-resource';
 
-import { useProject, useProjectEvents } from '../../api';
+import { useProject, useProjectEvents, useCurrentUser, useConsortia } from '../../api';
 
 import {
     useStateFromLocation,
@@ -39,11 +39,35 @@ import { ServicesPane } from './ServicesPane';
 const ProjectDetail = ({ project }) => {
     const { pathname } = useLocation();
     const { path, url } = useRouteMatch();
+    const currentUser = useCurrentUser();
+    const consortia = useConsortia();
 
     // Construct the project events here so they can be shared between panes
     // However we only need this in order to mark the events as dirty
     // The fetch point should be where the events are actually needed
     const events = useProjectEvents(project, { fetchPoint: false });
+
+    // See if there are any Rejected requirements in the project
+    const services = useNestedResource(project, "services");
+    const requirements = useAggregateResource(services, "requirements", { fetchPoint: false });
+    var isRejected = false;
+    for (const i in requirements.data) {
+        if (requirements.data[i].data.status==="REJECTED") {
+            isRejected = true;
+        }
+    }
+
+    // See if the project is in an edible state for project members
+    var isEditable = false;
+    if (project.data.status==="EDITABLE") {
+        isEditable = true;
+    }
+
+    // See if the project is under review for consortium managers
+    var isUnderReview = false;
+    if (project.data.status==="UNDER_REVIEW") {
+        isUnderReview = true;
+    }
 
     return (<>
         <PageHeader>{project.data.name}</PageHeader>
@@ -70,6 +94,27 @@ const ProjectDetail = ({ project }) => {
                         <OverviewPane project={project} events={events} />
                     </Route>
                     <Route path={`${path}/services`}>
+                        <Status fetchable={consortia}>
+                            <Status.Available>
+                                {data => {
+                                    const consortium = data[project.data.consortium];
+                                    const isConsortiumManager = consortium.data.manager.id === currentUser.data.id;
+                                    return (<>
+                                        {isUnderReview && isConsortiumManager &&
+                                             <p>Please click either <b>Request changes</b> or <b>Submit for provisioning</b> once you have made 
+                                             decisions on all the requirements for the project.</p>
+                                        }
+                                        {isRejected && !isConsortiumManager &&
+                                             <p>Please <b>delete</b> or <b>edit</b> any rejected requirements before submitting your project for review.</p>
+                                        }
+                                        { isEditable && !isConsortiumManager &&
+                                             <p>Please ensure that you click the <b>Submit for review</b> button once you have added your 
+                                              requirements to all services.</p>
+                                        }
+                                    </>)
+                                }}
+                            </Status.Available>
+                        </Status>
                         <ServicesPane project={project} events={events} />
                     </Route>
                 </Switch>
