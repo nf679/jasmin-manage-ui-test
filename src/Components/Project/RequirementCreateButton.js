@@ -129,9 +129,10 @@ export const RequirementCreateButton = ({ project, service, requirements, ...pro
                     {/* Only show the other fields once a resource is selected */}
                     {!!selectedResource && (<>
                         <Form.Group controlId="amount">
-                            <Form.Label>Amount required</Form.Label>
                             {/* Show the units on the amount field if required */}
                             {selectedResource.data.units ? (
+                                <>
+                                <Form.Label>Amount required (please select the units)</Form.Label>
                                 <InputGroup>
                                     <Form.Control
                                         as={ResourceForm.Controls.Input}
@@ -146,7 +147,10 @@ export const RequirementCreateButton = ({ project, service, requirements, ...pro
                                         <InputGroup.Text>{selectedResource.data.units}</InputGroup.Text>
                                     </InputGroup.Append>
                                 </InputGroup>
+                                </>
                             ) : (
+                                <>
+                                <Form.Label>Amount required</Form.Label>
                                 <Form.Control
                                     as={ResourceForm.Controls.Input}
                                     type="number"
@@ -156,6 +160,7 @@ export const RequirementCreateButton = ({ project, service, requirements, ...pro
                                     required
                                     autoComplete="off"
                                 />
+                                </>
                             )}
                             <ResourceForm.Controls.ErrorList />
                         </Form.Group>
