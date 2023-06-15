@@ -78,6 +78,9 @@ export const RequirementCreateButton = ({ project, service, requirements, ...pro
     const twoYearsFromToday = moment().add(2, 'years').format("YYYY-MM-DD");
     const initialData = { start_date: today, end_date: twoYearsFromToday };
 
+    const units = ["GB", "TB"]
+    
+
     return (<>
         <div className="text-center p-2 border-top">
             <Button
@@ -144,7 +147,11 @@ export const RequirementCreateButton = ({ project, service, requirements, ...pro
                                         autoComplete="off"
                                     />
                                     <InputGroup.Append>
-                                        <InputGroup.Text>{selectedResource.data.units}</InputGroup.Text>
+                                        <Form.Control
+                                        as="select">
+                                          <option value="GB">GB</option>
+                                          <option value="TB">TB</option>
+                                        </Form.Control>
                                     </InputGroup.Append>
                                 </InputGroup>
                                 </>
