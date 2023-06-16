@@ -99,6 +99,7 @@ export const RequirementCreateButton = ({ project, service, requirements, ...pro
                 onError={handleError}
                 onCancel={hideModal}
                 initialData={initialData}
+                units={units}
             >
                 <Modal.Header>
                     <Modal.Title>Create a requirement</Modal.Title>
@@ -149,6 +150,8 @@ export const RequirementCreateButton = ({ project, service, requirements, ...pro
                                     <InputGroup.Append>
                                         <Form.Control
                                             as="select"
+                                            required
+                                            autoComplete="off"
                                             onChange={e => {
                                                 setUnits(e.target.value);
                                             }}

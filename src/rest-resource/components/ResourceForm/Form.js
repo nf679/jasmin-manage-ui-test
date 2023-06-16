@@ -30,6 +30,7 @@ const BaseForm = ({
     onCancel,
     // Initial data for the form
     initialData,
+    units,
     // Indicates if the form should be disabled
     disabled,
     // Additional properties that are passed to the form component
@@ -46,6 +47,7 @@ const BaseForm = ({
             onError={onError}
             onCancel={onCancel}
             initialData={initialData}
+            units={units}
             disabled={disabled}
         >
             <WrappedFormComponent {...formProps}>

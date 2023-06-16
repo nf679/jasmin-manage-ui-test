@@ -44,6 +44,7 @@ export const Provider = ({
     onCancel,
     // Initial data for the form
     initialData = {},
+    units,
     // Indicates if the form should be disabled
     disabled = false
 }) => {
@@ -75,6 +76,9 @@ export const Provider = ({
     const handleSubmit = async event => {
         event.preventDefault();
         setInProgress(true);
+        if (units == 'TB') {
+            formData.amount = formData.amount * 1000;
+        }
         let result;
         try {
             result = await onSubmit(formData);
