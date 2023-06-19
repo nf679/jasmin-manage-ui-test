@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 
 import {
-    Redirect,
+    Navigate,
     Route,
     Routes,
     useLocation,
@@ -139,7 +139,7 @@ const ConsortiumDetailWrapper = () => {
                 </div>
             </Status.Loading>
             <Status.Unavailable>
-                <Redirect to="/consortia" />
+                <Navigate to="/consortia" />
             </Status.Unavailable>
             <Status.Available>
                 <ConsortiumDetail consortium={consortium} />

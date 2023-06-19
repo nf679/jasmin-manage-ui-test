@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
@@ -16,7 +16,7 @@ import { notificationFromError } from '../utils';
 export const ProjectJoinButton = () => {
     const notify = useNotifications();
 
-    const history = useHistory();
+    const history = useNavigate();
 
     const [modalVisible, setModalVisible] = useState(false);
     const [code, setCode] = useState("");

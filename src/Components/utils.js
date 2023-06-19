@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-import { useHistory, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 import classNames from 'classnames';
 
@@ -132,7 +132,7 @@ export const useStateFromLocation = () => {
     // Get the current state from the location
     const { pathname, state } = useLocation();
     // When the state changes, update the stored value and disassociate it from the path
-    const history = useHistory();
+    const history = useNavigate();
     useEffect(
         () => {
             stateRef.current = { ...stateRef.current, ...state };

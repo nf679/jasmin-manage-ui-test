@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
@@ -18,7 +18,7 @@ import { notificationFromError } from '../utils';
 export const ServiceCreateButton = ({ project, ...props }) => {
     const notify = useNotifications();
     const categories = useCategories();
-    const history = useHistory();
+    const history = useNavigate();
 
     // We only need the create method from the services, so we don't need a fetch point
     const services = useNestedResource(project, "services", { fetchPoint: false });

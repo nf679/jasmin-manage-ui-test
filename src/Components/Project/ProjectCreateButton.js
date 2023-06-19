@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
@@ -24,7 +24,7 @@ export const ProjectCreateButton = ({ projects }) => {
     const showModal = () => setModalVisible(true);
     const hideModal = () => setModalVisible(false);
 
-    const history = useHistory();
+    const history = useNavigate();
 
     // When a project is created, redirect to it
     // We don't need to hide the modal as we will be redirected

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Alert from 'react-bootstrap/Alert';
 import Card from 'react-bootstrap/Card';
 import Button from 'react-bootstrap/Button';
@@ -61,7 +61,7 @@ const ProjectDescription = ({ project }) => {
         canSubmitForProvisioning
     } = useProjectPermissions(project);
 
-    const history = useHistory();
+    const history = useNavigate();
     const handleError = error => {
         notify(notificationFromError(error));
         hideModal();

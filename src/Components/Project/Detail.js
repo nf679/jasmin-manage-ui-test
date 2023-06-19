@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import {
-    Redirect,
+    Navigate,
     Route,
     Routes,
     useLocation,
@@ -154,7 +154,7 @@ const ProjectDetailWrapper = () => {
                 </div>
             </Status.Loading>
             <Status.Unavailable>
-                <Redirect to="/projects" />
+                <Navigate to="/projects" />
             </Status.Unavailable>
             <Status.Available>
                 <ProjectDetail project={project} />
