@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import {
     Redirect,
     Route,
-    Switch,
+    Routes,
     useLocation,
     useParams,
     useRouteMatch
@@ -91,7 +91,7 @@ const ConsortiumDetail = ({ consortium }) => {
                         </LinkContainer>
                     </Nav.Item>
                 </Nav>
-                <Switch>
+                <Routes>
                     <Route exact path={path}>
                         <OverviewPane quotas={quotas} />
                     </Route>
@@ -101,7 +101,7 @@ const ConsortiumDetail = ({ consortium }) => {
                     <Route path={`${path}/list`}>
                         <ListPane projects={projects} />
                     </Route>
-                </Switch>
+                </Routes>
             </Col>
         </Row>
     </>);

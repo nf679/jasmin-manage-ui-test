@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import {
     Redirect,
     Route,
-    Switch,
+    Routes,
     useLocation,
     useParams,
     useRouteMatch

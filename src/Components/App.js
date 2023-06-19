@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo } from 'react';
 
-import { BrowserRouter as Router, Route, Switch, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 
 import Alert from 'react-bootstrap/Alert';
 import Container from 'react-bootstrap/Container';
@@ -87,7 +87,7 @@ const App = () => (
             <Navbar />
             <Notifications />
             <Container fluid>
-                <Switch>
+                <Routes>
                     <Route path="/" exact><Home /></Route>
                     <AuthenticatedRoute path="/consortia" exact><ConsortiumList /></AuthenticatedRoute>
                     <AuthenticatedRoute path="/consortia/:id"><ConsortiumDetail /></AuthenticatedRoute>
@@ -95,7 +95,7 @@ const App = () => (
                     <AuthenticatedRoute path="/projects/:id"><ProjectDetail /></AuthenticatedRoute>
                     // Below is the link to the work order for the service id
                     <AuthenticatedRoute path="/request/service-:id"><RequirementDetail /></AuthenticatedRoute>
-                </Switch>
+                </Routes>
             </Container>
         </Router>
     </Provider>

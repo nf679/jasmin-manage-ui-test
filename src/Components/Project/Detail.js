@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import {
     Redirect,
     Route,
-    Switch,
+    Routes,
     useLocation,
     useParams,
     useRouteMatch
@@ -89,7 +89,7 @@ const ProjectDetail = ({ project }) => {
                         </LinkContainer>
                     </Nav.Item>
                 </Nav>
-                <Switch>
+                <Routes>
                     <Route exact path={path}>
                         <OverviewPane project={project} events={events} />
                     </Route>
@@ -117,7 +117,7 @@ const ProjectDetail = ({ project }) => {
                         </Status>
                         <ServicesPane project={project} events={events} />
                     </Route>
-                </Switch>
+                </Routes>
             </Col>
         </Row>
     </>);
