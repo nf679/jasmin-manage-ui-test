@@ -6,7 +6,7 @@ import {
     Routes,
     useLocation,
     useParams,
-    useRouteMatch
+    useMatch
 } from 'react-router-dom';
 
 import Badge from 'react-bootstrap/Badge';
@@ -38,7 +38,7 @@ const ConsortiumDetail = ({ consortium }) => {
     const quotas = useNestedResource(consortium, "quotas");
 
     const { pathname } = useLocation();
-    const { path, url } = useRouteMatch();
+    const { path, url } = useMatch();
 
     // Count the number of projects that are under review
     // If we do this before the projects have loaded, we get zero

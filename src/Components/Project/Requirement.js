@@ -6,7 +6,7 @@ import {
     Routes,
     useLocation,
     useParams,
-    useRouteMatch
+    useMatch
 } from 'react-router-dom';
 
 import Col from 'react-bootstrap/Col';

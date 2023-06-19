@@ -6,7 +6,7 @@ import {
     Routes,
     useLocation,
     useParams,
-    useRouteMatch
+    useMatch
 } from 'react-router-dom';
 
 import Col from 'react-bootstrap/Col';
@@ -38,7 +38,7 @@ import { ServicesPane } from './ServicesPane';
 
 const ProjectDetail = ({ project }) => {
     const { pathname } = useLocation();
-    const { path, url } = useRouteMatch();
+    const { path, url } = useMatch();
     const currentUser = useCurrentUser();
     const consortia = useConsortia();
 
