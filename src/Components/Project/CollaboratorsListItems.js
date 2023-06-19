@@ -82,10 +82,10 @@ const CollaboratorDeleteButton = ({ collaborator, disabled }) => {
     // On a successful deletion of the users own collaborator record, redirect
     // them to their projects
     const currentUser = useCurrentUser();
-    const history = useNavigate();
+    const navigate = useNavigate();
     const onSuccess = () => {
         if( collaborator.data.user.id === currentUser.data.id )
-            history.push('/projects');
+            navigate('/projects');
     };
 
      // Handle a delete error by producing a notification

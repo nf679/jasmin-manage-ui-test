@@ -24,12 +24,12 @@ export const ProjectCreateButton = ({ projects }) => {
     const showModal = () => setModalVisible(true);
     const hideModal = () => setModalVisible(false);
 
-    const history = useNavigate();
+    const navigate = useNavigate();
 
     // When a project is created, redirect to it
     // We don't need to hide the modal as we will be redirected
     const handleSuccess = projectData => {
-        history.push(`/projects/${projectData.id}`, { initialData: projectData });
+        navigate(`/projects/${projectData.id}`, {state: { initialData: projectData } });
     };
 
     const handleError = error => {

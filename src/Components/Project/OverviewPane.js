@@ -61,7 +61,7 @@ const ProjectDescription = ({ project }) => {
         canSubmitForProvisioning
     } = useProjectPermissions(project);
 
-    const history = useNavigate();
+    const navigate = useNavigate();
     const handleError = error => {
         notify(notificationFromError(error));
         hideModal();

@@ -132,11 +132,11 @@ export const useStateFromLocation = () => {
     // Get the current state from the location
     const { pathname, state } = useLocation();
     // When the state changes, update the stored value and disassociate it from the path
-    const history = useNavigate();
+    const navigate = useNavigate();
     useEffect(
         () => {
             stateRef.current = { ...stateRef.current, ...state };
-            history.replace(pathname, undefined);
+            navigate(pathname, { replace: true, state: undefined });
         },
         [state]
     );

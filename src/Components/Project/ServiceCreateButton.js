@@ -18,7 +18,7 @@ import { notificationFromError } from '../utils';
 export const ServiceCreateButton = ({ project, ...props }) => {
     const notify = useNotifications();
     const categories = useCategories();
-    const history = useNavigate();
+    const navigate = useNavigate();
 
     // We only need the create method from the services, so we don't need a fetch point
     const services = useNestedResource(project, "services", { fetchPoint: false });
@@ -29,7 +29,7 @@ export const ServiceCreateButton = ({ project, ...props }) => {
 
     // When a service is created, make sure we are on the services pane
     const handleSuccess = serviceData => {
-        history.push(`/projects/${project.data.id}/services`, { scrollTo: serviceData.id });
+        navigate(`/projects/${project.data.id}/services`, {state: { scrollTo: serviceData.id }} );
         hideModal();
     };
 
