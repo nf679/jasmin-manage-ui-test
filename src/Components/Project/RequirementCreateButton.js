@@ -150,6 +150,7 @@ export const RequirementCreateButton = ({ project, service, requirements, ...pro
                                     <InputGroup.Append>
                                         <Form.Control
                                             as="select"
+                                            value={units}
                                             required
                                             autoComplete="off"
                                             onChange={e => {
