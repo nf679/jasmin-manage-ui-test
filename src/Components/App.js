@@ -88,13 +88,13 @@ const App = () => (
             <Notifications />
             <Container fluid>
                 <Routes>
-                    <Route path="/" exact><Home /></Route>
-                    <AuthenticatedRoute path="/consortia" exact><ConsortiumList /></AuthenticatedRoute>
-                    <AuthenticatedRoute path="/consortia/:id"><ConsortiumDetail /></AuthenticatedRoute>
-                    <AuthenticatedRoute path="/projects" exact><ProjectList /></AuthenticatedRoute>
-                    <AuthenticatedRoute path="/projects/:id"><ProjectDetail /></AuthenticatedRoute>
+                    <Route path="/" element={<Home/>} exact />
+                    <Route path="/consortia" element={<AuthenticatedComponent><ConsortiumList /></AuthenticatedComponent>} exact />
+                    <Route path="/consortia/:id" element={<AuthenticatedComponent><ConsortiumDetail /></AuthenticatedComponent>} />
+                    <Route path="/projects" element={<AuthenticatedComponent><ProjectList /></AuthenticatedComponent>} exact />
+                    <Route path="/projects/:id" element={<AuthenticatedComponent><ProjectDetail /></AuthenticatedComponent>} />
                     // Below is the link to the work order for the service id
-                    <AuthenticatedRoute path="/request/service-:id"><RequirementDetail /></AuthenticatedRoute>
+                    <Route path="/request/service-:id" element={<AuthenticatedComponent><RequirementDetail /></AuthenticatedComponent>} />
                 </Routes>
             </Container>
         </Router>
