@@ -29,7 +29,7 @@ export const ProjectCreateButton = ({ projects }) => {
     // When a project is created, redirect to it
     // We don't need to hide the modal as we will be redirected
     const handleSuccess = projectData => {
-        navigate(`/projects/${projectData.id}`, {state: { initialData: projectData } });
+        navigate(`/projects/${projectData.id}`, { initialData: projectData } );
     };
 
     const handleError = error => {

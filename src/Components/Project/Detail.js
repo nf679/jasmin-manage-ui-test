@@ -6,7 +6,7 @@ import {
     Routes,
     useLocation,
     useParams,
-    useMatch
+    useResolvedPath
 } from 'react-router-dom';
 
 import Col from 'react-bootstrap/Col';
@@ -38,10 +38,10 @@ import { ServicesPane } from './ServicesPane';
 
 const ProjectDetail = ({ project }) => {
     const { pathname } = useLocation();
-    const { path, url } = useMatch();
     const currentUser = useCurrentUser();
     const consortia = useConsortia();
-
+    const path = useLocation().pathname
+    
     // Construct the project events here so they can be shared between panes
     // However we only need this in order to mark the events as dirty
     // The fetch point should be where the events are actually needed
@@ -79,21 +79,20 @@ const ProjectDetail = ({ project }) => {
             <Col xs={12} lg={7} xl={8} className="order-lg-0 col-xxl-9 my-3">
                 <Nav variant="tabs" className="mb-3" activeKey={pathname}>
                     <Nav.Item>
-                        <LinkContainer to={url} exact>
+                        <LinkContainer to={path} exact>
                             <Nav.Link>Overview</Nav.Link>
                         </LinkContainer>
                     </Nav.Item>
                     <Nav.Item>
-                        <LinkContainer to={`${url}/services`}>
+                        <LinkContainer to={`${path}/services`}>
                             <Nav.Link>Services</Nav.Link>
                         </LinkContainer>
                     </Nav.Item>
                 </Nav>
                 <Routes>
-                    <Route exact path={path}>
-                        <OverviewPane project={project} events={events} />
-                    </Route>
-                    <Route path={`${path}/services`}>
+                    <Route exact path={path} element={<OverviewPane project={project} events={events} />} />
+                    <Route path={"/services"} element={
+                        <>
                         <Status fetchable={consortia}>
                             <Status.Available>
                                 {data => {
@@ -116,7 +115,8 @@ const ProjectDetail = ({ project }) => {
                             </Status.Available>
                         </Status>
                         <ServicesPane project={project} events={events} />
-                    </Route>
+                        </>
+                    }/>
                 </Routes>
             </Col>
         </Row>

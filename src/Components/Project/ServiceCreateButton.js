@@ -29,7 +29,7 @@ export const ServiceCreateButton = ({ project, ...props }) => {
 
     // When a service is created, make sure we are on the services pane
     const handleSuccess = serviceData => {
-        navigate(`/projects/${project.data.id}/services`, {state: { scrollTo: serviceData.id }} );
+        navigate(`/projects/${project.data.id}/services`, { scrollTo: serviceData.id } );
         hideModal();
     };
 

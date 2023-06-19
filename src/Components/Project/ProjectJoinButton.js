@@ -50,7 +50,7 @@ export const ProjectJoinButton = () => {
         }
         // On success, redirect the user to the project they just joined
         // We don't need to set inProgress to false as we will be unmounted
-        navigate(`/projects/${project.id}`, { state: { initialData: project } });
+        navigate(`/projects/${project.id}`, { initialData: project } );
     };
 
     return (<>
