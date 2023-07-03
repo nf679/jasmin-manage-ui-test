@@ -147,6 +147,7 @@ const EventText = props => <span className="event-text" {...props} />;
 
 
 const ProjectEvent = ({ children, item, className }) => {
+    console.log(className);
     const createdBy = item.user.last_name ?
         `${item.user.first_name} ${item.user.last_name}` :
         item.user.username;
@@ -179,18 +180,29 @@ const ResourceEvent = ({ children, project, requirements, item, ...props }) => {
             </Status.Unavailable>
             <Status.Available>
                 {([resourceData, requirementData]) => {
-                    const requirement = requirementData[item.target_id];
-                    const resource = resourceData[requirement.data.resource];
-                    const amount = formatAmount(requirement.data.amount, resource.data.units);
+                    if (requirementData[item.target_id]) {
+                        console.log(item);
+                        const requirement = requirementData[item.target_id];
+                        const resource = resourceData[requirement.data.resource];
+                        const amount = formatAmount(requirement.data.amount, resource.data.units);
+                        return (
+                            <ProjectEvent item={item} {...props}>
+                                {(createdBy, createdAt) => children(
+                                    amount,
+                                    resource.data.name,
+                                    createdBy,
+                                    createdAt
+                                )}
+                            </ProjectEvent>
+                        );
+                    };
                     return (
-                        <ProjectEvent item={item} {...props}>
-                            {(createdBy, createdAt) => children(
-                                amount,
-                                resource.data.name,
-                                createdBy,
-                                createdAt
-                            )}
-                        </ProjectEvent>
+                        <div className="event">
+                            <EventIcon icon="fa-question" variant="light" />
+                            <EventText className="text-muted">
+                                Event <strong>missing</strong> on {moment(item.created_at).format('D MMMM')}
+                            </EventText>
+                        </div>
                     );
                 }}
             </Status.Available>
