@@ -196,13 +196,13 @@ const ResourceEvent = ({ children, project, requirements, item, ...props }) => {
                         );
                     };
                     return (
-                        <>
+                        <div>
                             <EventIcon icon="fa-question" variant="light" />
                             <EventText>
-                                {" "}
+                                &nbsp;&nbsp;
                                 Event <strong>missing</strong> on {moment(item.created_at).format('D MMMM')}
                             </EventText>
-                        </>
+                        </div>
                     );
                 }}
             </Status.Available>
