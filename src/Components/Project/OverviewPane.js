@@ -147,6 +147,7 @@ const EventText = props => <span className="event-text" {...props} />;
 
 
 const ProjectEvent = ({ children, item, className }) => {
+    console.log(className);
     const createdBy = item.user.last_name ?
         `${item.user.first_name} ${item.user.last_name}` :
         item.user.username;
@@ -196,10 +197,9 @@ const ResourceEvent = ({ children, project, requirements, item, ...props }) => {
                         );
                     };
                     return (
-                        <div>
+                        <div className="event">
                             <EventIcon icon="fa-question" variant="light" />
                             <EventText>
-                                &nbsp;&nbsp;
                                 Event <strong>missing</strong> on {moment(item.created_at).format('D MMMM')}
                             </EventText>
                         </div>
