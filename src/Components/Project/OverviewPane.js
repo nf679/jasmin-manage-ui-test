@@ -199,7 +199,7 @@ const ResourceEvent = ({ children, project, requirements, item, ...props }) => {
                     return (
                         <div className="event">
                             <EventIcon icon="fa-question" variant="light" />
-                            <EventText>
+                            <EventText className="text-muted">
                                 Event <strong>missing</strong> on {moment(item.created_at).format('D MMMM')}
                             </EventText>
                         </div>
