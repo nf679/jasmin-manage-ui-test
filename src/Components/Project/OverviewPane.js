@@ -179,18 +179,23 @@ const ResourceEvent = ({ children, project, requirements, item, ...props }) => {
             </Status.Unavailable>
             <Status.Available>
                 {([resourceData, requirementData]) => {
-                    const requirement = requirementData[item.target_id];
-                    const resource = resourceData[requirement.data.resource];
-                    const amount = formatAmount(requirement.data.amount, resource.data.units);
+                    if (requirementData[item.target_id]) {
+                      const requirement = requirementData[item.target_id];
+                      const resource = resourceData[requirement.data.resource];
+                      const amount = formatAmount(requirement.data.amount, resource.data.units);
+                      return (
+                          <ProjectEvent item={item} {...props}>
+                              {(createdBy, createdAt) => children(
+                                  amount,
+                                  resource.data.name,
+                                  createdBy,
+                                  createdAt
+                              )}
+                          </ProjectEvent>
+                      );
+                    };
                     return (
-                        <ProjectEvent item={item} {...props}>
-                            {(createdBy, createdAt) => children(
-                                amount,
-                                resource.data.name,
-                                createdBy,
-                                createdAt
-                            )}
-                        </ProjectEvent>
+                        <p>Missing event..</p>
                     );
                 }}
             </Status.Available>
