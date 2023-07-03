@@ -180,22 +180,29 @@ const ResourceEvent = ({ children, project, requirements, item, ...props }) => {
             <Status.Available>
                 {([resourceData, requirementData]) => {
                     if (requirementData[item.target_id]) {
-                      const requirement = requirementData[item.target_id];
-                      const resource = resourceData[requirement.data.resource];
-                      const amount = formatAmount(requirement.data.amount, resource.data.units);
-                      return (
-                          <ProjectEvent item={item} {...props}>
-                              {(createdBy, createdAt) => children(
-                                  amount,
-                                  resource.data.name,
-                                  createdBy,
-                                  createdAt
-                              )}
-                          </ProjectEvent>
-                      );
+                        console.log(item);
+                        const requirement = requirementData[item.target_id];
+                        const resource = resourceData[requirement.data.resource];
+                        const amount = formatAmount(requirement.data.amount, resource.data.units);
+                        return (
+                            <ProjectEvent item={item} {...props}>
+                                {(createdBy, createdAt) => children(
+                                    amount,
+                                    resource.data.name,
+                                    createdBy,
+                                    createdAt
+                                )}
+                            </ProjectEvent>
+                        );
                     };
                     return (
-                        <p>Missing event..</p>
+                        <>
+                            <EventIcon icon="fa-question" variant="light" />
+                            <EventText>
+                                {" "}
+                                Event <strong>missing</strong> on {moment(item.created_at).format('D MMMM')}
+                            </EventText>
+                        </>
                     );
                 }}
             </Status.Available>
