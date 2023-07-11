@@ -34,8 +34,22 @@ import ListPane from './ProjectListPane';
 const ConsortiumDetail = ({ consortium }) => {
     // We don't want to be reloading resources as the user flips between tabs
     // So load both nested resources here
+    const notify = useNotifications();
     const projects = useNestedResource(consortium, "projects");
     const quotas = useNestedResource(consortium, "quotas");
+
+    if( projects.fetchError ) {
+        return (
+            notify(notificationFromError(projects.fetchError)),
+            <Redirect to='/consortia'/>
+        );
+    }
+    if( quotas.fetchError ) {
+        return (
+            notify(notificationFromError(quotas.fetchError)),
+            <Redirect to='/consortia'/>
+        );
+    }
 
     const { pathname } = useLocation();
     const { path, url } = useRouteMatch();

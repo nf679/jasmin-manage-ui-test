@@ -9,6 +9,8 @@ import {
     useFetchPoint
 } from '../rest-resource';
 
+import { Redirect } from 'react-router-dom';
+
 
 // Create a context for the current user and export the hook
 const CurrentUser = createContextForEndpoint("/api/me/");

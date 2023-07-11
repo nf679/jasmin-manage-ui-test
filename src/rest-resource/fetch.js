@@ -1,5 +1,5 @@
 import Cookies from 'js-cookie';
-
+import { Redirect } from 'react-router-dom';
 
 class HttpError extends Error {
     constructor(status, statusText, responseText) {
@@ -42,6 +42,7 @@ const apiFetch = async (url, options) => {
         // Forward any other options that were supplied
         ...rest
     });
+    console.log("RESPONSE", response);
     // For a 204, just return
     if( response.status === 204 ) return;
     // Any other successful response should be JSON
