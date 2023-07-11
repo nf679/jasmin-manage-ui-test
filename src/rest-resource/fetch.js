@@ -1,5 +1,6 @@
 import Cookies from 'js-cookie';
 
+
 class HttpError extends Error {
     constructor(status, statusText, responseText) {
         super(statusText);
