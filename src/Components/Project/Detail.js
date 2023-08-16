@@ -41,7 +41,6 @@ const ProjectDetail = ({ project }) => {
     const currentUser = useCurrentUser();
     const consortia = useConsortia();
     const path  = useResolvedPath("").pathname
-    console.log(path);
     
     // Construct the project events here so they can be shared between panes
     // However we only need this in order to mark the events as dirty
@@ -80,7 +79,7 @@ const ProjectDetail = ({ project }) => {
             <Col xs={12} lg={7} xl={8} className="order-lg-0 col-xxl-9 my-3">
                 <Nav variant="tabs" className="mb-3" activeKey={pathname}>
                     <Nav.Item>
-                        <LinkContainer to={path} exact>
+                        <LinkContainer to={path}>
                             <Nav.Link>Overview</Nav.Link>
                         </LinkContainer>
                     </Nav.Item>

@@ -6,6 +6,7 @@ import {
     Routes,
     useLocation,
     useParams,
+    useResolvedPath,
 } from 'react-router-dom';
 
 import Badge from 'react-bootstrap/Badge';
@@ -37,7 +38,8 @@ const ConsortiumDetail = ({ consortium }) => {
     const quotas = useNestedResource(consortium, "quotas");
 
     const { pathname } = useLocation();
-    const path = pathname.pathname;
+    const path  = useResolvedPath("").pathname
+    console.log(pathname);
 
     // Count the number of projects that are under review
     // If we do this before the projects have loaded, we get zero
@@ -62,12 +64,12 @@ const ConsortiumDetail = ({ consortium }) => {
             <Col>
                 <Nav variant="tabs" className="mb-3" activeKey={pathname}>
                     <Nav.Item>
-                        <LinkContainer to={url} exact>
+                        <LinkContainer to={path}>
                             <Nav.Link>Overview</Nav.Link>
                         </LinkContainer>
                     </Nav.Item>
                     <Nav.Item>
-                        <LinkContainer to={`${url}/projects`}>
+                        <LinkContainer to={`${path}/projects`}>
                             <Nav.Link>
                                 <div className="d-flex align-items-center">
                                     <span>Projects</span>
@@ -81,7 +83,7 @@ const ConsortiumDetail = ({ consortium }) => {
                         </LinkContainer>
                     </Nav.Item>
                     <Nav.Item>
-                        <LinkContainer to={`${url}/list`}>
+                        <LinkContainer to={`${path}/list`}>
                             <Nav.Link>
                                 <div className="d-flex align-items-center">
                                     <span>Projects List</span>

@@ -90,7 +90,7 @@ const App = () => (
                 <Routes>
                     <Route exact path="/" element={<Home />} />
                     <Route exact path="/consortia" element={<AuthenticatedComponent><ConsortiumList /></AuthenticatedComponent>} />
-                    <Route path="/consortia/:id" element={<AuthenticatedComponent><ConsortiumDetail /></AuthenticatedComponent>} />
+                    <Route path="/consortia/:id/*" element={<AuthenticatedComponent><ConsortiumDetail /></AuthenticatedComponent>} />
                     <Route exact path="/projects" element={<AuthenticatedComponent><ProjectList /></AuthenticatedComponent>} />
                     <Route path="/projects/:id/*" element={<AuthenticatedComponent><ProjectDetail /></AuthenticatedComponent>} />
                 </Routes>
