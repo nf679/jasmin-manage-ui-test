@@ -79,6 +79,9 @@ export const RequirementCreateButton = ({ project, service, requirements, ...pro
     const twoYearsFromToday = moment().add(2, 'years').format("YYYY-MM-DD");
     const initialData = { start_date: today, end_date: twoYearsFromToday };
 
+    const [units, setUnits] = useState("GB");
+    
+
     return (<>
         <div className="text-center p-2 border-top">
             <Button
@@ -97,6 +100,7 @@ export const RequirementCreateButton = ({ project, service, requirements, ...pro
                 onError={handleError}
                 onCancel={hideModal}
                 initialData={initialData}
+                units={units}
             >
                 <Modal.Header>
                     <Modal.Title>Create a requirement</Modal.Title>
@@ -130,24 +134,39 @@ export const RequirementCreateButton = ({ project, service, requirements, ...pro
                     {/* Only show the other fields once a resource is selected */}
                     {!!selectedResource && (<>
                         <Form.Group controlId="amount">
-                            <Form.Label>Amount required</Form.Label>
                             {/* Show the units on the amount field if required */}
                             {selectedResource.data.units ? (
+                                <>
+                                <Form.Label>Amount required (please select the units)</Form.Label>
                                 <InputGroup>
                                     <Form.Control
                                         as={ResourceForm.Controls.Input}
                                         type="number"
                                         min="1"
                                         step="1"
-                                        placeholder={`Amount required (${selectedResource.data.units})`}
+                                        placeholder={`Amount required (${units})`}
                                         required
                                         autoComplete="off"
                                     />
                                     <InputGroup.Append>
-                                        <InputGroup.Text>{selectedResource.data.units}</InputGroup.Text>
+                                        <Form.Control
+                                            as="select"
+                                            value={units}
+                                            required
+                                            autoComplete="off"
+                                            onChange={e => {
+                                                setUnits(e.target.value);
+                                            }}
+                                        >
+                                          <option value="GB">GB</option>
+                                          <option value="TB">TB</option>
+                                        </Form.Control>
                                     </InputGroup.Append>
                                 </InputGroup>
+                                </>
                             ) : (
+                                <>
+                                <Form.Label>Amount required</Form.Label>
                                 <Form.Control
                                     as={ResourceForm.Controls.Input}
                                     type="number"
@@ -157,6 +176,7 @@ export const RequirementCreateButton = ({ project, service, requirements, ...pro
                                     required
                                     autoComplete="off"
                                 />
+                                </>
                             )}
                             <ResourceForm.Controls.ErrorList />
                         </Form.Group>

@@ -16,7 +16,7 @@ const statusIcons = {
 export const StatusIcon = ({ status, className, ...props }) => {
     const statusIcon = statusIcons[status];
     return statusIcon ?
-        <i {...props} className={classNames(statusIcon, className)} /> :
+        <i {...props} className={classNames(statusIcon, className)} data-toggle="tooltip" title={status} /> :
         null;
 };
 
