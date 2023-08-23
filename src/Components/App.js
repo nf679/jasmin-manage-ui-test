@@ -18,6 +18,7 @@ import ProjectDetail from './Project/Detail';
 import RequirementDetail from './Project/Requirement';
 import ConsortiumList from './Consortium/List';
 import ConsortiumDetail from './Consortium/Detail';
+import NotFoundPage from './NotFound';
 
 import '../css/notifications.css';
 import '../css/xxl-breakpoint.css';
@@ -93,6 +94,8 @@ const App = () => (
                     <Route path="/consortia/:id/*" element={<AuthenticatedComponent><ConsortiumDetail /></AuthenticatedComponent>} />
                     <Route exact path="/projects" element={<AuthenticatedComponent><ProjectList /></AuthenticatedComponent>} />
                     <Route path="/projects/:id/*" element={<AuthenticatedComponent><ProjectDetail /></AuthenticatedComponent>} />
+                    <Route path="/request/service-:id/*" element={<AuthenticatedComponent><RequirementDetail /></AuthenticatedComponent>} />
+                    <Route path="*"><NotFoundPage /></Route>
                 </Routes>
             </Container>
         </Router>
