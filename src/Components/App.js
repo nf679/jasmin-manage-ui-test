@@ -88,7 +88,6 @@ const App = () => (
             <Navbar />
             <Notifications />
             <Container fluid>
-<<<<<<< HEAD
                 <Routes>
                     <Route exact path="/" element={<Home />} />
                     <Route exact path="/consortia" element={<AuthenticatedComponent><ConsortiumList /></AuthenticatedComponent>} />
@@ -98,18 +97,6 @@ const App = () => (
                     <Route path="/request/service-:id/*" element={<AuthenticatedComponent><RequirementDetail /></AuthenticatedComponent>} />
                     <Route path="*"><NotFoundPage /></Route>
                 </Routes>
-=======
-                <Switch>
-                    <Route path="/" exact><Home /></Route>
-                    <AuthenticatedRoute path="/consortia" exact><ConsortiumList /></AuthenticatedRoute>
-                    <AuthenticatedRoute path="/consortia/:id"><ConsortiumDetail /></AuthenticatedRoute>
-                    <AuthenticatedRoute path="/projects" exact><ProjectList /></AuthenticatedRoute>
-                    <AuthenticatedRoute path="/projects/:id"><ProjectDetail /></AuthenticatedRoute>
-                    // Below is the link to the work order for the service id
-                    <AuthenticatedRoute path="/request/service-:id"><RequirementDetail /></AuthenticatedRoute>
-                    <Route path="*"><NotFoundPage /></Route>
-                </Switch>
->>>>>>> origin/master
             </Container>
         </Router>
     </Provider>
