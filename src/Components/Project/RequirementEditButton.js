@@ -102,7 +102,6 @@ export const RequirementEditButton = ({ project, service, requirement, ...props 
                                     autoComplete="off"
                                 />
                                 <InputGroup.Append>
-                                    console.log(resource.data.units);
                                     <InputGroup.Text>{resource.data.units}</InputGroup.Text>
                                 </InputGroup.Append>
                             </InputGroup>

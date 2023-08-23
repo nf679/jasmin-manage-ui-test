@@ -39,7 +39,6 @@ const ConsortiumDetail = ({ consortium }) => {
 
     const { pathname } = useLocation();
     const path  = useResolvedPath("").pathname
-    console.log(pathname);
 
     // Count the number of projects that are under review
     // If we do this before the projects have loaded, we get zero

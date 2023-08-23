@@ -23,7 +23,6 @@ export const RequirementCreateButton = ({ project, service, requirements, ...pro
     const notify = useNotifications();
     const categories = useCategories();
     const resources = useResources();
-    console.log(resources);
 
     // Get the consortium to allow us to access the related quotas
     const consortia = useConsortia();
