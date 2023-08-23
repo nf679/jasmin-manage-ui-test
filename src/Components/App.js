@@ -95,7 +95,7 @@ const App = () => (
                     <Route exact path="/projects" element={<AuthenticatedComponent><ProjectList /></AuthenticatedComponent>} />
                     <Route path="/projects/:id/*" element={<AuthenticatedComponent><ProjectDetail /></AuthenticatedComponent>} />
                     <Route path="/request/service-:id/*" element={<AuthenticatedComponent><RequirementDetail /></AuthenticatedComponent>} />
-                    <Route path="*"><NotFoundPage /></Route>
+                    <Route path="*"element={<NotFoundPage />} />
                 </Routes>
             </Container>
         </Router>
