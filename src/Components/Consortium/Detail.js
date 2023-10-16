@@ -28,7 +28,7 @@ import { SpinnerWithText, notificationFromError } from '../utils';
 
 import OverviewPane from './OverviewPane';
 import ProjectsPane from './ProjectsPane';
-import ListPane from './ProjectListPane';
+import { ListPane } from './ProjectListPane';
 
 
 const ConsortiumDetail = ({ consortium }) => {
@@ -102,7 +102,7 @@ const ConsortiumDetail = ({ consortium }) => {
 };
 
 
-const ConsortiumDetailWrapper = () => {
+export const ConsortiumDetailWrapper = () => {
     const notify = useNotifications();
     const consortia = useConsortia();
 
@@ -141,6 +141,3 @@ const ConsortiumDetailWrapper = () => {
         </Status>
     );
 };
-
-
-export default ConsortiumDetailWrapper;

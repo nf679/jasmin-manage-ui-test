@@ -13,11 +13,11 @@ import { SpinnerWithText } from './utils';
 
 import Navbar from './Navbar';
 import Home from './Home';
-import ProjectList from './Project/List';
-import ProjectDetail from './Project/Detail';
-import RequirementDetail from './Project/Requirement';
-import ConsortiumList from './Consortium/List';
-import ConsortiumDetail from './Consortium/Detail';
+import { ProjectList } from './Project/List';
+import { ProjectDetailWrapper as ProjectDetail} from './Project/Detail';
+import { RequirementDetailWrapper as RequirementDetail } from './Project/Requirement';
+import { ConsortiumList } from './Consortium/List';
+import { ConsortiumDetailWrapper as ConsortiumDetail } from './Consortium/Detail';
 import NotFoundPage from './NotFound';
 
 import '../css/notifications.css';

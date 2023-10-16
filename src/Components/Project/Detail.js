@@ -36,7 +36,7 @@ import { OverviewPane } from './OverviewPane';
 import { ServicesPane } from './ServicesPane';
 
 
-const ProjectDetail = ({ project }) => {
+export const ProjectDetail = ({ project }) => {
     const { pathname } = useLocation();
     const currentUser = useCurrentUser();
     const consortia = useConsortia();
@@ -124,7 +124,7 @@ const ProjectDetail = ({ project }) => {
 };
 
 
-const ProjectDetailWrapper = () => {
+export const ProjectDetailWrapper = () => {
     const notify = useNotifications();
 
     // Get the project that was specified in the params
@@ -162,6 +162,3 @@ const ProjectDetailWrapper = () => {
         </Status>
     );
 };
-
-
-export default ProjectDetailWrapper;

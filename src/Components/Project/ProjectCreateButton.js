@@ -8,7 +8,7 @@ import Form from 'react-bootstrap/Form';
 
 import { useNotifications } from 'react-bootstrap-notify';
 
-import { Form as ResourceForm } from '../../rest-resource';
+import { Form as ResourceForm } from '../../rest-resource/components/';
 
 import { useCurrentUser, useConsortia } from '../../api';
 
