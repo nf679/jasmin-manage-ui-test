@@ -122,3 +122,19 @@ export const ProjectCreatedAtListItem = ({ project }) => {
     const createdAt = moment(project.data.created_at).fromNow();
     return <ListGroup.Item>Project was created <strong>{createdAt}</strong>.</ListGroup.Item>;
 };
+
+export const ProjectTagItem = ({ tags }) => {
+    var tagkeys = tags.data;
+    if (Object.keys(tagkeys).length>0) {
+        return (
+            <div style={{display: "inline-flex"}}>
+                {Object.keys(tagkeys).map((d) => (
+                    <div>
+                        <span className="badge rounded-pill bg-light">{tagkeys[d].data.name}</span>
+                    </div>
+                ))}
+            </div>
+        );
+    }
+    return ""
+}
