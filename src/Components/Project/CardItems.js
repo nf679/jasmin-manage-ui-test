@@ -130,7 +130,7 @@ export const ProjectTagItem = ({ tags }) => {
             <div style={{display: "inline-flex"}}>
                 {Object.keys(tagkeys).map((d) => (
                     <div>
-                        <span className="badge rounded-pill bg-light">{tagkeys[d].data.name}</span>
+                        <button class="btn btn-light" type="button" style={{borderRadius: "20px", lineHeight:"1px", textAlign: "center", fontSize: "14px", display: "inline-block", margin: "0px 2px", height: "25px"}}>{tagkeys[d].data.name}</button>
                     </div>
                 ))}
             </div>
