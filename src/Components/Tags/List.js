@@ -10,21 +10,22 @@ import { LinkContainer } from 'react-router-bootstrap';
 
 import { PageHeader } from 'fwtheme-react-jasmin';
 
-import { Status } from '../../rest-resource';
+import { Status, useNestedResource } from '../../rest-resource';
 
 import { useProjects, useCurrentUser } from '../../api';
 
 import { sortByKey, SpinnerWithText, notificationFromError } from '../utils';
 
+import { ProjectTagItem, TagConsortiumItem } from '../Project/CardItems';
+
 
 const ProjectList = ({ project }) => {
-    const consortium = project.data.consortium;
-    const tags = project.data.tags;
+    const tags = useNestedResource(project, "tags");
     return (
     	<>
             <td>{project.data.name}</td> 
-            <td>{consortium}</td>
-            <td>{tags}</td>
+            <td><TagConsortiumItem project={project} /></td>
+            <td><ProjectTagItem tags={tags} /></td>
 		</>
     );
 };

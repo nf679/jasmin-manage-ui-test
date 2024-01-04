@@ -138,3 +138,26 @@ export const ProjectTagItem = ({ tags }) => {
     }
     return ""
 }
+
+export const TagConsortiumItem = ({ project }) => {
+    const consortia = useConsortia();
+    return (
+        <Status fetchable={consortia}>
+            <Status.Loading>
+                <SpinnerWithText>Loading consortia...</SpinnerWithText>
+             </Status.Loading>
+             <Status.Unavailable>
+                <span className="text-danger">
+                    <i className="fas fa-exclamation-triangle mr-2"></i>
+                    Unable to load consortia.
+                </span>
+            </Status.Unavailable>
+            <Status.Available>
+                {data => {
+                    const consortium = data[project.data.consortium];
+                    return (consortium.data.name);
+                    }}
+                </Status.Available>
+        </Status>
+    );
+}
