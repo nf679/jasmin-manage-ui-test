@@ -19,7 +19,9 @@ import { sortByKey, SpinnerWithText, notificationFromError } from '../utils';
 import { ProjectTagItem, TagConsortiumItem } from '../Project/CardItems';
 
 
+// Data for the project list
 const ProjectList = ({ project }) => {
+    // Find the tags associated with the project
     const tags = useNestedResource(project, "tags");
     return (
     	<>
@@ -30,6 +32,7 @@ const ProjectList = ({ project }) => {
     );
 };
 
+// Filter button, should be a dropdown selection
 const Filter =() => {
     const [isOpen, setIsOpen] = useState(false);
 
@@ -40,12 +43,11 @@ const Filter =() => {
     );
 };
 
+// List projects and their tags
 const TagList = () => {
     const projects = useProjects();
+    // The list should only be visible to staff and maybe consortium managers
     const currentUser = useCurrentUser();
-
-    const consortiaOptions = ['test1', 'test2'];
-    const tagOptions = ['testag1', 'testtag2'];
 
     return (<>
         <PageHeader>Tagged Projects</PageHeader>

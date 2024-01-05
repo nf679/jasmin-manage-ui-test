@@ -124,13 +124,29 @@ export const ProjectCreatedAtListItem = ({ project }) => {
 };
 
 export const ProjectTagItem = ({ tags }) => {
+    // Number corresponding to the tags
     var tagkeys = tags.data;
+    // Only return tag item if there is one
     if (Object.keys(tagkeys).length>0) {
         return (
             <div style={{display: "inline-flex"}}>
                 {Object.keys(tagkeys).map((d) => (
                     <div>
-                        <button class="btn btn-light" type="button" style={{borderRadius: "20px", lineHeight:"1px", textAlign: "center", fontSize: "14px", display: "inline-block", margin: "0px 2px", height: "25px"}}>{tagkeys[d].data.name}</button>
+                        <button 
+                            class="btn btn-light"
+                            type="button" 
+                            style={{
+                                borderRadius: "20px",
+                                lineHeight:"1px",
+                                textAlign: "center",
+                                fontSize: "14px",
+                                display: "inline-block",
+                                margin: "0px 2px",
+                                height: "25px"
+                            }}
+                        >
+                          {tagkeys[d].data.name}
+                        </button>
                     </div>
                 ))}
             </div>
@@ -140,6 +156,7 @@ export const ProjectTagItem = ({ tags }) => {
 }
 
 export const TagConsortiumItem = ({ project }) => {
+    // Map the consortia id to the consortia names
     const consortia = useConsortia();
     return (
         <Status fetchable={consortia}>

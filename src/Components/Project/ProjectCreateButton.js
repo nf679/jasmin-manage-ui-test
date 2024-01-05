@@ -57,6 +57,7 @@ export const ProjectCreateButton = ({ projects }) => {
         evt => evt.target.value
     );
 
+    // Form input for the tags
     function TagsInput() {
         const [tags, setTags] = useState([])
 
@@ -73,6 +74,7 @@ export const ProjectCreateButton = ({ projects }) => {
             e.target.value = ''
         }
 
+        // Function to remove tags when 'x' is clicked
         function  removeTag(index){
             setTags(tags.filter((el, i) => i !== index))
         }
