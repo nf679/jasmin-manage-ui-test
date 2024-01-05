@@ -92,6 +92,12 @@ export const ProjectCreateButton = ({ projects }) => {
         )
     }
 
+    // Make the tags input into a resource form control
+    const TagsInputControl = ResourceForm.Controls.asControl(
+        TagsInput,
+        evt => evt.target.value
+    );
+
     return (<>
         <Button onClick={showModal} size="lg" variant="success">Start new project</Button>
 
@@ -141,10 +147,13 @@ export const ProjectCreateButton = ({ projects }) => {
                     <Form.Group controlId="tags">
                         <Form.Label>Tags</Form.Label>
                         <Form.Control
-                            as={TagsInput}
+                            as={TagsInputControl}
                             placeholder="Press enter to add tags"
                             autoComplete="off"
                         />
+                        <p className="form-text text-muted" style={{fontSize: "12px"}}>
+                            Please enter a valid tag consisting of lowercase letters, numbers and hyphens only.
+                        </p>
                         <ResourceForm.Controls.ErrorList />
                     </Form.Group>
                 </Modal.Body>
