@@ -22,7 +22,7 @@ cd jasmin-manage-ui
 Install the dependencies using `yarn`:
 
 ```sh
-yarn install --immutable
+yarn install 
 ```
 
 Then start the development server:
@@ -32,3 +32,17 @@ yarn start
 ```
 
 This will start the JASMIN Projects Portal UI at `http://localhost:3000`.
+
+
+If you have issues installing the version of yarn in all places might need updating:
+```
+yarn set version latest
+yarn upgrade-interactive  
+```
+maybe the above in the dependancies on github and push to github, because yarn probably needs to be the same/close in all places
+
+And maybe
+```
+rm -rf node_modules 
+rm yarn.lock 
+```
