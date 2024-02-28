@@ -10,15 +10,17 @@ import { useNotifications } from 'react-bootstrap-notify';
 
 import { Form as ResourceForm } from '../../rest-resource';
 
-import { useCurrentUser, useConsortia } from '../../api';
+import { useCurrentUser, useConsortia, useTags } from '../../api';
 
-import { notificationFromError, MarkdownEditor } from '../utils';
+import { notificationFromError, MarkdownEditor, sortByKey } from '../utils';
 
 
 export const ProjectCreateButton = ({ projects }) => {
     const notify = useNotifications();
     const currentUser = useCurrentUser();
     const consortia = useConsortia();
+    const tags = useTags();
+
 
     const [modalVisible, setModalVisible] = useState(false);
     const showModal = () => setModalVisible(true);
@@ -57,40 +59,76 @@ export const ProjectCreateButton = ({ projects }) => {
         evt => evt.target.value
     );
 
+
+
     // Form input for the tags
     function TagsInput() {
-        const [tags, setTags] = useState([])
 
-        function handleKeyDown(e) {
-            // If user did not press enter key, return
-            if (e.key !== ' ') return
-            // Get the value of the input
-            const value = e.target.value
-            // If the value is empty, return
-            if (!value.trim()) return
-            // Add the value to the tags array
-            setTags([...tags, value])
-            // Clear the input
-            e.target.value = ''
-        }
-
-        // Function to remove tags when 'x' is clicked
-        function removeTag(index) {
-            setTags(tags.filter((el, i) => i !== index))
-        }
-
-        return (
-            <div className="tags-input-container">
-                {tags.map((tag, index) => (
-                    <div className="tag-item" key={index}>
-                        <span className="text">{tag}</span>
-                        <span className="close" onClick={() => removeTag(index)}>&times;</span>
-                    </div>
-                ))}
-                <input onKeyDown={handleKeyDown} type="text" className="tags-input" placeholder="Separate tags with a space" />
-            </div>
-        )
+        const tags = useTags();
+        // Sort the tags by name
+        const sortedTags = sortByKey(Object.values(tags.data),
+            tag => tag.name
+        );
+        return (<>
+            <select>
+                {sortedTags.map(tag => {
+                    return (
+                        <option>tag</option>
+                    )
+                })}
+            </select>
+        </>)
     }
+
+    //     return (<>
+
+
+    //         {data => (
+    //             <select>
+    //                 {sortByValue(Object.values(data), t => t.data.name).map(t =>
+    //                     <option key={t.data.id}><t.data.name tag={t} /></option>
+    //                 )}
+    //             </select>
+
+    //         )}
+
+
+    //     </>)
+    // }
+
+    // function TagsInput() {
+    //     const [tags, setTags] = useState([])
+
+    //     function handleKeyDown(e) {
+    //         // If user did not press enter key, return
+    //         if (e.key !== ' ') return
+    //         // Get the value of the input
+    //         const value = e.target.value
+    //         // If the value is empty, return
+    //         if (!value.trim()) return
+    //         // Add the value to the tags array
+    //         setTags([...tags, value])
+    //         // Clear the input
+    //         e.target.value = ''
+    //     }
+
+    //     // Function to remove tags when 'x' is clicked
+    //     function removeTag(index) {
+    //         setTags(tags.filter((el, i) => i !== index))
+    //     }
+
+    //     return (
+    //         <div className="tags-input-container">
+    //             {tags.map((tag, index) => (
+    //                 <div className="tag-item" key={index}>
+    //                     <span className="text">{tag}</span>
+    //                     <span className="close" onClick={() => removeTag(index)}>&times;</span>
+    //                 </div>
+    //             ))}
+    //             <input onKeyDown={handleKeyDown} type="text" className="tags-input" placeholder="Separate tags with a space" />
+    //         </div>
+    //     )
+    // }
 
     // Make the tags input into a resource form control
     const TagsInputControl = ResourceForm.Controls.asControl(
@@ -147,13 +185,14 @@ export const ProjectCreateButton = ({ projects }) => {
                     <Form.Group controlId="tags">
                         <Form.Label>Tags</Form.Label>
                         <Form.Control
-                            as={TagsInputControl}
-                            placeholder="Press enter to add tags"
-                            autoComplete="off"
+                            as={ResourceForm.Controls.ResourceSelect}
+                            resource={tags}
+                            placeholder="Add tags"
+                            autoComplete="on"
                         />
-                        <p className="form-text text-muted" style={{ fontSize: "12px" }}>
+                        {/* <p className="form-text text-muted" style={{ fontSize: "12px" }}>
                             Please enter a valid tag(s) consisting of lowercase letters, numbers, and hyphens only, separated by spaces.
-                        </p>
+                        </p> */}
                         <ResourceForm.Controls.ErrorList />
                     </Form.Group>
                 </Modal.Body>
