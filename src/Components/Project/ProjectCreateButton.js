@@ -54,6 +54,8 @@ export const ProjectCreateButton = ({ projects }) => {
 
     // This function limits the consortia that are available to select
     const consortiumIsAllowed = consortium => currentUser.data.is_staff || consortium.data.is_public;
+    // This function limits the tags to public ones only
+    const tagIsAllowed = tag => tag.data.is_public; //currentUser.data.is_staff || tag.data.is_public;
     // This function formats the options
     const formatConsortiumOption = (option, { context }) => (
         context === 'menu' ? (
@@ -186,16 +188,17 @@ export const ProjectCreateButton = ({ projects }) => {
                     <Form.Group controlId="tags">
                         <Form.Label>Tags</Form.Label>
                         <Form.Control
-                            as={ResourceForm.Controls.ResourceMultiSelectTags}
+                            as={ResourceForm.Controls.ResourceMultiSelect} // multi selection isn't actually working... but we need to pass a list to the backend
                             resource={tags}
                             placeholder="Add tags"
                             autoComplete="on"
                             resourceName="tag"
                             resourceNamePlural="tags"
                             //isMulti
-                            noValidate
+                            // Only show allowed consortia
+                            filterResources={tagIsAllowed}
                         />
-                        <Form.Control as={TagsInputNew} />
+                        {/*<Form.Control as={TagsInputNew} / disabled because we don't want users to create new tags yet>*/}
                         <ResourceForm.Controls.ErrorList />
                     </Form.Group>
                 </Modal.Body>

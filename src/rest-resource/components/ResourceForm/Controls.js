@@ -93,7 +93,6 @@ const SelectMulti = ({
     required,
     isMulti,
     className,
-    noValidate,
     getOptionLabel = option => option.label,
     getOptionValue = option => option.value,
     ...props
@@ -125,15 +124,13 @@ const SelectMulti = ({
             <ReactSelect
                 {...props}
                 options={options}
-                // value={[selectedOption]}
-                value={[options[0]]}
+                value={selectedOption}
                 onChange={handleSelectChange}
                 ref={selectRef}
                 isDisabled={disabled}
                 getOptionLabel={getOptionLabel}
                 getOptionValue={getOptionValue}
                 isMulti={isMulti}
-                noValidate={noValidate}
             />
         </div>
     );
@@ -279,15 +276,16 @@ export const ResourceSelect = ({
     return <Select {...selectProps} options={options} />;
 };
 
-export const ResourceMultiSelectTags = ({
+export const ResourceMultiSelect = ({
     resource,
     resourceName,
     resourceNamePlural = `${resourceName}s`,
+    filterResources = _ => true,
     PlaceholderComponent = DefaultPlaceholderComponent,
     ...props
 }) => {
     // Pass the available resources as the options
-    const options = Object.values(resource.data);
+    const options = Object.values(resource.data).filter(filterResources);
     //console.log(options)
     const selectProps = {
         // By default, use the name as the label and the id as the value
