@@ -85,6 +85,59 @@ const SelectWithRequired = ({
     );
 };
 
+const SelectMulti = ({
+    options,
+    value,
+    onChange,
+    disabled,
+    required,
+    isMulti,
+    className,
+    noValidate,
+    getOptionLabel = option => option.label,
+    getOptionValue = option => option.value,
+    ...props
+}) => {
+    // Store the current value as internal state
+    const [state, setState] = useState(value || '');
+    // When the value changes, use it to set the state
+    useEffect(() => { setState(value); }, [value]);
+    // Maintain a reference to the select that we will use to correctly maintain focus
+    const selectRef = useRef(null);
+    // When the select is changed, update the internal state and call the handler
+    const handleSelectChange = option => {
+        const optionValue = [getOptionValue(option)];
+        setState(optionValue);
+        onChange(optionValue);
+    };
+    // Sort the options by the label
+    // const sortedOptions = [...options].sort(
+    //     (opt1, opt2) => {
+    //         const [label1, label2] = [getOptionLabel(opt1), getOptionLabel(opt2)];
+    //         return (label1 > label2 ? 1 : (label1 < label2 ? -1 : 0));
+    //     }
+    // );
+    // Select the option that corresponds to the given value
+    const selectedOption = options.find(opt => getOptionValue(opt) === value);
+    // Render the select with a hidden text input that implements required
+    return (
+        <div className={classNames(className, 'rich-select')}>
+            <ReactSelect
+                {...props}
+                options={options}
+                // value={[selectedOption]}
+                value={[options[0]]}
+                onChange={handleSelectChange}
+                ref={selectRef}
+                isDisabled={disabled}
+                getOptionLabel={getOptionLabel}
+                getOptionValue={getOptionValue}
+                isMulti={isMulti}
+                noValidate={noValidate}
+            />
+        </div>
+    );
+};
 
 export const Control = forwardRef(
     (
@@ -177,6 +230,8 @@ export const TextArea = asControl("textarea", evt => evt.target.value);
  */
 export const Select = asControl(SelectWithRequired);
 
+export const SelectMultiControl = asControl(SelectMulti);
+
 
 // The default placeholder component
 // This shouldn't actually be responsible
@@ -228,12 +283,12 @@ export const ResourceMultiSelectTags = ({
     resource,
     resourceName,
     resourceNamePlural = `${resourceName}s`,
-    filterResources = _ => true,
     PlaceholderComponent = DefaultPlaceholderComponent,
     ...props
 }) => {
     // Pass the available resources as the options
-    const options = Object.values(resource.data).filter(filterResources);
+    const options = Object.values(resource.data);
+    //console.log(options)
     const selectProps = {
         // By default, use the name as the label and the id as the value
         getOptionLabel: option => option.data.name,
@@ -249,7 +304,7 @@ export const ResourceMultiSelectTags = ({
         ...props
     };
     // Render the select with the available options
-    return <ReactSelect isMulti {...selectProps} options={options} />;
+    return <SelectMultiControl {...selectProps} options={options} />;
 };
 
 // The default error component is an invalid Bootstrap form feedback component
