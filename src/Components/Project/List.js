@@ -43,7 +43,7 @@ const ProjectCard = ({ project }) => {
         >
             <Card.Header style={{ display: "inline-flex", justifyContent: "space-between" }}>
                 <h5 className="mb-0">{project.data.name}</h5>
-                {/*<ProjectTagItem tags={tags} />*/}
+                <ProjectTagItem tags={tags} />
             </Card.Header>
             <ListGroup variant="flush" className="border-0">
                 <ProjectStatusListItem project={project} />

@@ -9,6 +9,14 @@ import {
     useRouteMatch
 } from 'react-router-dom';
 
+import {
+    ProjectStatusListItem,
+    ProjectConsortiumListItem,
+    ProjectCollaboratorsListItem,
+    ProjectCreatedAtListItem,
+    ProjectTagItem
+} from './CardItems';
+
 import Col from 'react-bootstrap/Col';
 import Nav from 'react-bootstrap/Nav';
 import Row from 'react-bootstrap/Row';
@@ -52,25 +60,30 @@ const ProjectDetail = ({ project }) => {
     const requirements = useAggregateResource(services, "requirements", { fetchPoint: false });
     var isRejected = false;
     for (const i in requirements.data) {
-        if (requirements.data[i].data.status==="REJECTED") {
+        if (requirements.data[i].data.status === "REJECTED") {
             isRejected = true;
         }
     }
 
     // See if the project is in an edible state for project members
     var isEditable = false;
-    if (project.data.status==="EDITABLE") {
+    if (project.data.status === "EDITABLE") {
         isEditable = true;
     }
 
     // See if the project is under review for consortium managers
     var isUnderReview = false;
-    if (project.data.status==="UNDER_REVIEW") {
+    if (project.data.status === "UNDER_REVIEW") {
         isUnderReview = true;
     }
 
+    // Get the tags
+
+    const tags = useNestedResource(project, "tags")
+
     return (<>
         <PageHeader>{project.data.name}</PageHeader>
+        <ProjectTagItem tags={tags} />
         <Row className={classNames({ "text-muted": project.data.status === "COMPLETED" })}>
             {/* Use custom classes for an xxl breakpoint */}
             <Col xs={12} lg={5} xl={4} className="order-lg-1 col-xxl-3">
@@ -101,15 +114,15 @@ const ProjectDetail = ({ project }) => {
                                     const isConsortiumManager = consortium.data.manager.id === currentUser.data.id;
                                     return (<>
                                         {isUnderReview && isConsortiumManager &&
-                                             <p>Please click either <b>Request changes</b> or <b>Submit for provisioning</b> once you have made 
-                                             decisions on all the requirements for the project.</p>
+                                            <p>Please click either <b>Request changes</b> or <b>Submit for provisioning</b> once you have made
+                                                decisions on all the requirements for the project.</p>
                                         }
                                         {isRejected && !isConsortiumManager &&
-                                             <p>Please <b>delete</b> or <b>edit</b> any rejected requirements before submitting your project for review.</p>
+                                            <p>Please <b>delete</b> or <b>edit</b> any rejected requirements before submitting your project for review.</p>
                                         }
-                                        { isEditable && !isConsortiumManager &&
-                                             <p>Please ensure that you click the <b>Submit for review</b> button once you have added your 
-                                              requirements to all services.</p>
+                                        {isEditable && !isConsortiumManager &&
+                                            <p>Please ensure that you click the <b>Submit for review</b> button once you have added your
+                                                requirements to all services.</p>
                                         }
                                     </>)
                                 }}
@@ -137,7 +150,7 @@ const ProjectDetailWrapper = () => {
     // If the project failed to load, notify the user
     useEffect(
         () => {
-            if( project.fetchError ) {
+            if (project.fetchError) {
                 notify(notificationFromError(project.fetchError));
             }
         },
