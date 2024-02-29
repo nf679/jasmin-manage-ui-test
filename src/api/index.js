@@ -31,13 +31,12 @@ const withAuthentication = Provider => ({ children }) => {
 const Categories = createContextForResource("/api/categories/");
 const Consortia = createContextForResource("/api/consortia/");
 const Resources = createContextForResource("/api/resources/");
-const Tags = createContextForResource("/api/tags/")
 
 // Wrap the providers with the higher-order component for authentication
 const CategoriesProvider = withAuthentication(Categories.Provider);
 const ConsortiaProvider = withAuthentication(Consortia.Provider);
 const ResourcesProvider = withAuthentication(Resources.Provider);
-const TagsProvider = withAuthentication(Tags.Provider);
+//const TagsProvider = withAuthentication(Tags.Provider);
 
 // Export the hooks for each resource
 export const useCategories = Categories.hook;
@@ -74,6 +73,7 @@ export const useRequirement = (id, options) => useInstance(`/api/requirements/${
 
 // Export hook for accessing tags
 export const useTags = options => useResource("/api/tags/", options);
+export const useTag = (id, options) => useInstance(`/api/tag/${id}/`, options);
 
 // Export hook for loading service by id
 export const useService = (id, options) => useInstance(`/api/services/${id}/`, options);

@@ -7,6 +7,7 @@ import Form from 'react-bootstrap/Form';
 import BootstrapFormContext from 'react-bootstrap/FormContext';
 
 import ReactSelect from 'react-select';
+import CreatableSelect from 'react-select/creatable';
 
 import * as FormContext from './Context';
 import { Status } from '../Status';
@@ -73,7 +74,7 @@ const SelectWithRequired = ({
                     position: "absolute"
                 }}
                 value={state}
-                onChange={() => {/* NOOP */}}
+                onChange={() => {/* NOOP */ }}
                 // When the hidden input is focussed as part of the required validation,
                 // pass the focus onto the select
                 onFocus={() => selectRef.current.focus()}
@@ -101,7 +102,7 @@ export const Control = forwardRef(
             // Custom classes for the underlying control
             className,
             // Allow an additional onChange handler to be defined for the control
-            onChange = _ => {/* NOOP */},
+            onChange = _ => {/* NOOP */ },
             // Additional properties that are forwarded to the underlying control
             ...props
         },
@@ -223,6 +224,33 @@ export const ResourceSelect = ({
     return <Select {...selectProps} options={options} />;
 };
 
+export const ResourceMultiSelectTags = ({
+    resource,
+    resourceName,
+    resourceNamePlural = `${resourceName}s`,
+    filterResources = _ => true,
+    PlaceholderComponent = DefaultPlaceholderComponent,
+    ...props
+}) => {
+    // Pass the available resources as the options
+    const options = Object.values(resource.data).filter(filterResources);
+    const selectProps = {
+        // By default, use the name as the label and the id as the value
+        getOptionLabel: option => option.data.name,
+        getOptionValue: option => option.data.id,
+        // Use a placeholder that shows the loading status
+        placeholder: (
+            <DefaultPlaceholderComponent
+                resource={resource}
+                resourceName={resourceName}
+                resourceNamePlural={resourceNamePlural}
+            />
+        ),
+        ...props
+    };
+    // Render the select with the available options
+    return <ReactSelect isMulti {...selectProps} options={options} />;
+};
 
 // The default error component is an invalid Bootstrap form feedback component
 const DefaultErrorItemComponent = ({ children }) => (
@@ -252,7 +280,7 @@ export const ErrorList = ({
     // Extract the list of errors for the field
     const errorList = formErrors[id || idFromContext] || [];
     // If there are no errors, we are done
-    if( errorList.length < 1 ) return null;
+    if (errorList.length < 1) return null;
     // Render the errors using the specified components
     return (
         <ErrorListComponent>
