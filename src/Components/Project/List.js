@@ -41,17 +41,17 @@ const ProjectCard = ({ project }) => {
             className={classNames("mb-3", { "text-muted": project.data.status === "COMPLETED" })}
             style={{ borderWidth: '3px' }}
         >
-            <Card.Header style={{display: "inline-flex", justifyContent: "space-between"}}>
-                    <h5 className="mb-0">{project.data.name}</h5>
-                    <ProjectTagItem tags={tags} />
+            <Card.Header style={{ display: "inline-flex", justifyContent: "space-between" }}>
+                <h5 className="mb-0">{project.data.name}</h5>
+                {/*<ProjectTagItem tags={tags} />*/}
             </Card.Header>
             <ListGroup variant="flush" className="border-0">
                 <ProjectStatusListItem project={project} />
                 <ProjectConsortiumListItem project={project} />
                 <ListGroup.Item>
                     Project has{" "}
-                    <strong>{numRequirements} requirement{numRequirements !== 1  ? 's' : ''}</strong> in{" "}
-                    <strong>{numServices} service{numServices !== 1  ? 's' : ''}</strong>.
+                    <strong>{numRequirements} requirement{numRequirements !== 1 ? 's' : ''}</strong> in{" "}
+                    <strong>{numServices} service{numServices !== 1 ? 's' : ''}</strong>.
                 </ListGroup.Item>
                 <ProjectCollaboratorsListItem project={project} />
                 <ProjectCreatedAtListItem project={project} />

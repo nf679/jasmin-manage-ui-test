@@ -183,19 +183,6 @@ export const ProjectCreateButton = ({ projects }) => {
                         <Form.Control as={MarkdownEditorControl} required />
                         <ResourceForm.Controls.ErrorList />
                     </Form.Group>
-                    <Form.Group controlId="tags">
-                        <Form.Label>Tags</Form.Label>
-                        <Form.Control
-                            as={ResourceForm.Controls.ResourceMultiSelectTags}
-                            resource={tags}
-                            placeholder="Add tags"
-                            autoComplete="on"
-                            resourceName="tag"
-                            resourceNamePlural="tags"
-                        />
-                        <Form.Control as={TagsInputNew} />
-                        <ResourceForm.Controls.ErrorList />
-                    </Form.Group>
                 </Modal.Body>
                 <Modal.Footer>
                     <ResourceForm.Controls.CancelButton>Cancel</ResourceForm.Controls.CancelButton>
