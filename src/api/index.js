@@ -60,6 +60,9 @@ export const Provider = ({ children }) => (
 // Export a hook for loading a consortium by id
 export const useConsortium = (id, options) => useInstance(`/api/consortia/${id}/`, options);
 
+// Export hook for loading consortium summary
+export const useConsortiumSummary = (id, options) => useInstance(`/api/consortia/${id}/summary`, options);
+
 // Export hooks for accessing projects
 // We don't treat the project list as a top-level shared resource because:
 //   1. The list, or objects within it, changes relatively often
