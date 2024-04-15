@@ -128,10 +128,11 @@ const SummaryPane = ({ conSummary }) => {
     useEnsureInitialised(conSummary);
     const data = conSummary.data;
     console.log('condata', data.project_summaries);
+    const resources = useResources();
 
 
     return (
-        <Status fetchable={conSummary}>
+        <Status.Many fetchables={[conSummary, resources]}>
             <Status.Loading>
                 <div className="d-flex justify-content-center my-5">
                     <SpinnerWithText iconSize="lg" textSize="120%">Loading data...</SpinnerWithText>
@@ -162,16 +163,24 @@ const SummaryPane = ({ conSummary }) => {
                 }} */}
                 <>
                     <Col>
-                        <Table hover striped size='sm'>
+                        <Table striped size='sm'>
                             <thead>
                                 <th>Project</th>
                                 <th>Tags</th>
                                 <th>Collaborators</th>
-                                <th>Resource Usage</th>
+                                {Object.values(resources.data).map}
+                                <th>Resource</th>
+                                <th>Usage</th>
                             </thead>
                             <tbody>
                                 {Object.values(conSummary.data.project_summaries).map(project => (
-                                    <tr>h</tr>
+                                    <tr>
+                                        <td>{project.project_name}</td>
+                                        <td>{Object.values(project.tags).map(tag => (<Row>{tag}</Row>))}</td>
+                                        <td>{Object.values(project.collaborators).map(collab => (<Row>{collab.username}</Row>))}</td>
+                                        <td><Col>{Object.keys(project.resource_summary).map(res => (<Row>{res}</Row>))}</Col></td>
+                                        <td><Col>{Object.values(project.resource_summary).map(val => (<Row>{val}</Row>))}</Col></td>
+                                    </tr>
                                 ))}
 
                             </tbody>
@@ -183,7 +192,7 @@ const SummaryPane = ({ conSummary }) => {
 
 
             </Status.Available>
-        </Status>);
+        </Status.Many>);
 };
 
 
