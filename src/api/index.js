@@ -77,6 +77,7 @@ export const useTag = (id, options) => useInstance(`/api/tag/${id}/`, options);
 
 // Export hook for loading service by id
 export const useService = (id, options) => useInstance(`/api/services/${id}/`, options);
+export const useServices = options => useResource(`/api/services/`, options);
 
 // Export a function for joining a project with an invite code
 export const joinProject = async code => apiFetch('/api/join/', { method: 'POST', data: { code } });

@@ -33,7 +33,7 @@ Status.Loading = ({ children }) => {
  */
 Status.Unavailable = ({ children }) => {
     const { initialised, fetchError } = useStatusContext();
-    if( initialised || !fetchError ) return null;
+    if (initialised || !fetchError) return null;
     return typeof children === 'function' ? children(fetchError) : children;
 };
 
@@ -46,7 +46,7 @@ Status.Unavailable = ({ children }) => {
  */
 Status.Throw = () => {
     const { fetchError } = useStatusContext();
-    if( fetchError ) throw fetchError;
+    if (fetchError) throw fetchError;
     // If there is no error, then there is nothing to render
     return null;
 };
@@ -57,7 +57,7 @@ Status.Throw = () => {
  */
 Status.Available = ({ children }) => {
     const { initialised, data } = useStatusContext();
-    if( !initialised ) return null;
+    if (!initialised) return null;
     return typeof children === 'function' ? children(data) : children;
 };
 

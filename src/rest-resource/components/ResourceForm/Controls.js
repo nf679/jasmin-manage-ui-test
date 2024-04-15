@@ -98,7 +98,7 @@ const SelectMulti = ({
     ...props
 }) => {
     // Store the current value as internal state
-    const [state, setState] = useState(value || '');
+    const [state, setState] = useState(value);
     // When the value changes, use it to set the state
     useEffect(() => { setState(value); }, [value]);
     // Maintain a reference to the select that we will use to correctly maintain focus
@@ -117,7 +117,11 @@ const SelectMulti = ({
     //     }
     // );
     // Select the option that corresponds to the given value
-    const selectedOption = options.find(opt => getOptionValue(opt) === value);
+
+    var selectedOption = options.find(opt => getOptionValue(opt) === value);
+    if (!(selectedOption)) {
+        selectedOption = []
+    }
     // Render the select with a hidden text input that implements required
     return (
         <div className={classNames(className, 'rich-select')}>
@@ -131,6 +135,9 @@ const SelectMulti = ({
                 getOptionLabel={getOptionLabel}
                 getOptionValue={getOptionValue}
                 isMulti={isMulti}
+                required={required}
+                //defaultValue={[]}
+                isClearable
             />
         </div>
     );
