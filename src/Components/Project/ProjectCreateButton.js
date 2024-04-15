@@ -185,6 +185,7 @@ export const ProjectCreateButton = ({ projects }) => {
                         <Form.Control as={MarkdownEditorControl} required />
                         <ResourceForm.Controls.ErrorList />
                     </Form.Group>
+                    {/* disabled for now until we want users to create tags
                     <Form.Group controlId="tags">
                         <Form.Label>Tags</Form.Label>
                         <Form.Control
@@ -197,10 +198,11 @@ export const ProjectCreateButton = ({ projects }) => {
                             //isMulti
                             // Only show allowed consortia
                             filterResources={tagIsAllowed}
+                            required={false}
                         />
-                        {/*<Form.Control as={TagsInputNew} / disabled because we don't want users to create new tags yet>*/}
-                        <ResourceForm.Controls.ErrorList />
-                    </Form.Group>
+                        {/*<Form.Control as={TagsInputNew} / disabled because we don't want users to create new tags yet>
+                    <ResourceForm.Controls.ErrorList /> 
+                </Form.Group>*/}
                 </Modal.Body>
                 <Modal.Footer>
                     <ResourceForm.Controls.CancelButton>Cancel</ResourceForm.Controls.CancelButton>
