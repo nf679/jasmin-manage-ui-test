@@ -72,7 +72,7 @@ const SummaryPane = ({ conSummary }) => {
                                         <td>{project.project_name}</td>
                                         <td><>{Object.values(project.tags).map(tag => (<Row><Col>{tag}</Col></Row>))}</></td>
                                         <td>{Object.values(project.collaborators).map(collab => (<Row><Col>{collab.username}</Col></Row>))}</td>
-                                        {Object.values(project.resource_summary).map(res => (<td>{res}</td>))}
+                                        {Object.keys(project.resource_summary).map(res => (<td>{res}</td>))}
                                     </tr>
                                 ))}
                             </tbody>
