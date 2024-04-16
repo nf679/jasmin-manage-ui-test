@@ -59,8 +59,10 @@ const SummaryPane = ({ conSummary }) => {
                                     <th>Project</th>
                                     <th>Tags</th>
                                     <th>Collaborators</th>
-                                    {sortedHeaders.map(res => (<th>{res}</th>))
-                                    }
+                                    {/* {sortedHeaders.map(res => (<th>{res}</th>))
+                                    } */}
+                                    <th>Resource</th>
+                                    <th>Usage</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -69,7 +71,9 @@ const SummaryPane = ({ conSummary }) => {
                                         <td>{project.project_name}</td>
                                         <td><>{Object.values(project.tags).map(tag => (<Row><Col>{tag}</Col></Row>))}</></td>
                                         <td>{Object.values(project.collaborators).map(collab => (<Row><Col>{collab.username}</Col></Row>))}</td>
-                                        {Object.values(project.resource_summary).map(res => (<td>{res}</td>))}
+                                        {/* {Object.values(project.resource_summary).map(res => (<td>{res}</td>))} */}
+                                        <td>{sortedHeaders.map(res => (<Row><Col>{res}</Col></Row>))}</td>
+                                        <td>{Object.values(project.resource_summary).map(res => (<Row><Col>{res}</Col></Row>))}</td>
                                     </tr>
                                 ))}
                             </tbody>
