@@ -20,7 +20,10 @@ import { useNotifications } from 'react-bootstrap-notify';
 
 import { PageHeader } from 'fwtheme-react-jasmin';
 
-import { Status, useNestedResource } from '../../rest-resource';
+import {
+    Status, useNestedResource,
+    useEnsureInitialised
+} from '../../rest-resource';
 
 import { useConsortia, useConsortium, useConsortiumSummary } from '../../api';
 
@@ -31,13 +34,12 @@ import ProjectsPane from './ProjectsPane';
 import SummaryPane from './ProjectSummaryPane';
 
 
-const ConsortiumDetail = ({ consortium }) => {
+const ConsortiumDetail = ({ consortium, conSummary }) => {
     // We don't want to be reloading resources as the user flips between tabs
     // So load both nested resources here
     const notify = useNotifications();
     const projects = useNestedResource(consortium, "projects");
     const quotas = useNestedResource(consortium, "quotas");
-    const conSummary = useConsortiumSummary(consortium.data.id);
 
     if (projects.fetchError) {
         return (
@@ -130,6 +132,10 @@ const ConsortiumDetailWrapper = () => {
     // Get the consortium id from the path
     const { id: consortiumId } = useParams();
 
+    // Use the consortium id to get the summary and load at this level 
+    // to ensure its loaded if user goes stright to summary page
+    const conSummary = useConsortiumSummary(consortiumId)
+
     // Initialise the consortium, using initial data from the consortia
     const initialData = consortia.data[consortiumId]?.data;
     const consortium = useConsortium(consortiumId, { initialData });
@@ -145,7 +151,7 @@ const ConsortiumDetailWrapper = () => {
     );
 
     return (
-        <Status fetchable={consortium}>
+        <Status.Many fetchables={[consortium, conSummary]}>
             <Status.Loading>
                 <div className="d-flex justify-content-center my-5">
                     <SpinnerWithText iconSize="lg" textSize="lg">
@@ -157,9 +163,9 @@ const ConsortiumDetailWrapper = () => {
                 <Redirect to="/consortia" />
             </Status.Unavailable>
             <Status.Available>
-                <ConsortiumDetail consortium={consortium} />
+                <ConsortiumDetail consortium={consortium} conSummary={conSummary} />
             </Status.Available>
-        </Status>
+        </Status.Many>
     );
 };
 
