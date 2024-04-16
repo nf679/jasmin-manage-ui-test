@@ -27,13 +27,7 @@ const SummaryPane = ({ conSummary }) => {
     const history = useHistory();
     const location = useLocation();
     const handleError = error => history.push(location.pathname.replace('/summary', ''));
-    // Try and catch when the context isn't loaded and redirect
-    // try {
-    //     const data = conSummary.data;
-    // }
-    // catch (error) {
-    //     handleError();
-    // }
+
     const resources = useResources();
     useEnsureInitialised(resources);
     // Create a sorted list for the headers in the table
@@ -44,6 +38,7 @@ const SummaryPane = ({ conSummary }) => {
         i++
     }
     const sortedHeaders = resheaders.sort();
+
 
     return (
         <Status.Many fetchables={[conSummary, resources]}>
@@ -58,7 +53,7 @@ const SummaryPane = ({ conSummary }) => {
             <Status.Available>
                 <>
                     <Col>
-                        <Table striped size='sm'>
+                        <Table striped responsive="md" size='sm'>
                             <thead>
                                 <tr>
                                     <th>Project</th>
@@ -72,8 +67,8 @@ const SummaryPane = ({ conSummary }) => {
                                 {Object.values(conSummary.data.project_summaries).map(project => (
                                     <tr>
                                         <td>{project.project_name}</td>
-                                        <td>{Object.values(project.tags).map(tag => (<Row>{tag}</Row>))}</td>
-                                        <td>{Object.values(project.collaborators).map(collab => (<Row>{collab.username}</Row>))}</td>
+                                        <td><>{Object.values(project.tags).map(tag => (<Row><Col>{tag}</Col></Row>))}</></td>
+                                        <td>{Object.values(project.collaborators).map(collab => (<Row><Col>{collab.username}</Col></Row>))}</td>
                                         {Object.values(project.resource_summary).map(res => (<td>{res}</td>))}
                                     </tr>
                                 ))}
