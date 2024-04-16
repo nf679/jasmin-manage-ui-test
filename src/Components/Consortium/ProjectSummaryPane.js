@@ -28,20 +28,22 @@ const SummaryPane = ({ conSummary }) => {
     const location = useLocation();
     const handleError = error => history.push(location.pathname.replace('/summary', ''));
 
-    const resources = useResources();
-    useEnsureInitialised(resources);
+    // const resources = useResources();
+    // useEnsureInitialised(resources);
     // Create a sorted list for the headers in the table
-    var resheaders = [];
-    var i = 0;
-    while (i < Object.values(resources.data).length) {
-        resheaders = [...resheaders, Object.values(resources.data)[i].data.name];
-        i++
-    }
-    const sortedHeaders = resheaders.sort();
+    // var resheaders = [];
+    // var i = 0;
+    // while (i < Object.keys(conSummary.data.project_summaries[0].resource_summary).length) {
+    //     resheaders = [...resheaders, Object.values(resources.data)[i].data.name];
+    //     i++
+    // }
+    // const sortedHeaders = resheaders.sort();
+
+    // Define columns
 
 
     return (
-        <Status.Many fetchables={[conSummary, resources]}>
+        <Status fetchable={conSummary}>
             <Status.Loading>
                 <div className="d-flex justify-content-center my-5">
                     <SpinnerWithText iconSize="lg" textSize="120%">Loading data...</SpinnerWithText>
@@ -59,8 +61,9 @@ const SummaryPane = ({ conSummary }) => {
                                     <th>Project</th>
                                     <th>Tags</th>
                                     <th>Collaborators</th>
-                                    {sortedHeaders.map(res => (<th>{res}</th>))
-                                    }
+                                    {/* {sortedHeaders.map(res => (<th>{res}</th>))
+                                    } */}
+                                    {Object.keys(conSummary.data.project_summaries[0].resource_summary).map(res => (<th>{res}</th>))}
                                 </tr>
                             </thead>
                             <tbody>
@@ -77,7 +80,7 @@ const SummaryPane = ({ conSummary }) => {
                     </Col>
                 </>
             </Status.Available>
-        </Status.Many>);
+        </Status>);
 };
 
 
