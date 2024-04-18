@@ -126,7 +126,9 @@ const SummaryPane = ({ conSummary }) => {
             collabs = [...collabs, conSummary.data.project_summaries[i]['collaborators'][c]['username'] + ', '];
             c++
         }
-        collabs[c - 1] = collabs[c - 1].slice(0, -2)
+        if (collabs.length >= 1) {
+            collabs[c - 1] = collabs[c - 1].slice(0, -2)
+        }
 
         dataline['collaborators'] = collabs;
         tableData1 = [...tableData1, dataline]
