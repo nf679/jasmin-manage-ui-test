@@ -40,16 +40,16 @@ const TableHead = ({ columns, handleSorting }) => {
                     {columns.map(({ label, accessor, sortable }) => {
                         const cl = sortable
                             ? sortField === accessor && order === "asc"
-                                ? "(asc)"
+                                ? "fas fa-fw fa-sort-down"
                                 : sortField === accessor && order === "desc"
-                                    ? "(desc)"
-                                    : ""
+                                    ? "fas fa-fw fa-sort-up"
+                                    : "fas fa-fw fa-sort"
                             : "";
                         return <th
                             key={accessor}
                             onClick={sortable ? () => handleSortingChange(accessor) : null}
                         >
-                            {label + ' ' + cl}
+                            {label}  <div className={cl}></div>
                         </th>;
                     })}
                 </tr>
@@ -77,27 +77,20 @@ const TableBody = ({ tableData, columns }) => {
     )
 }
 
-const SummaryPane = ({ conSummary }) => {
-    // If there's an error, push to the main consortia page
-    const history = useHistory();
-    const location = useLocation();
-    const handleError = error => history.push(location.pathname.replace('/summary', ''));
+const SummaryPane = ({ conSummary, consortium }) => {
+    // Get the consortia id
+    const con_id = consortium.data.id;
+    console.log(con_id);
 
-
-    // const resources = useResources();
-    // useEnsureInitialised(resources);
-    // Create a sorted list for the headers in the table
-    // var resheaders = [];
-    // var i = 0;
-    // while (i < Object.keys(conSummary.data.project_summaries[0].resource_summary).length) {
-    //     resheaders = [...resheaders, Object.values(resources.data)[i].data.name];
-    //     i++
-    // }
-    // const sortedHeaders = resheaders.sort();
+    // Build the url for the json version link
+    const path = useLocation().pathname
+    console.log(location['href'])
+    const apiLocation = location['href'].replace(path, '/api' + path + '?format=json')
+    console.log(apiLocation)
 
     // Define columns
     const columnsInput = Object.keys(conSummary.data.project_summaries[0].resource_summary)
-    var columns = [{ label: 'project', accessor: 'project', sortable: true }, { label: 'tags', accessor: 'tags', sortable: true }, { label: 'collaborators', accessor: 'collaborators', sortable: true }];
+    var columns = [{ label: 'project', accessor: 'project', sortable: true }, { label: 'tags', accessor: 'tags', sortable: false }, { label: 'collaborators', accessor: 'collaborators', sortable: false }];
     var i = 0;
     while (i < Object.values(columnsInput).length) {
         columns = [...columns, { label: Object.values(columnsInput)[i], accessor: Object.values(columnsInput)[i].replaceAll(' ', '_'), sortable: true }];
@@ -181,7 +174,7 @@ const SummaryPane = ({ conSummary }) => {
             <Status.Available>
                 <>
                     <Col>
-                        <header>Resource summaries for all projects in Consortia. Column headers can be clicked on to order them.</header>
+                        <header>Resource summaries for all projects in Consortia. Column headers can be clicked on to order them. <a href={apiLocation}> Direct link to JSON.</a></header>
                         <Table striped responsive="md" size='sm' >
 
 

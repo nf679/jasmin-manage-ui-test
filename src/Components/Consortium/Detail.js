@@ -116,7 +116,7 @@ const ConsortiumDetail = ({ consortium, conSummary }) => {
                         <ProjectsPane projects={projects} />
                     </Route>
                     <Route path={`${path}/summary`}>
-                        <SummaryPane conSummary={conSummary} />
+                        <SummaryPane conSummary={conSummary} consortium={consortium} />
                     </Route>
                 </Switch>
             </Col>
