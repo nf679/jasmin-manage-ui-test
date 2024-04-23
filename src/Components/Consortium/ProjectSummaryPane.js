@@ -80,17 +80,16 @@ const TableBody = ({ tableData, columns }) => {
 const SummaryPane = ({ conSummary, consortium }) => {
     // Get the consortia id
     const con_id = consortium.data.id;
-    console.log(con_id);
 
     // Build the url for the json version link
     const path = useLocation().pathname
-    console.log(location['href'])
     const apiLocation = location['href'].replace(path, '/api' + path + '?format=json')
-    console.log(apiLocation)
+
 
     // Define columns
     const columnsInput = Object.keys(conSummary.data.project_summaries[0].resource_summary)
     var columns = [{ label: 'project', accessor: 'project', sortable: true }, { label: 'tags', accessor: 'tags', sortable: false }, { label: 'collaborators', accessor: 'collaborators', sortable: false }];
+    const dont_sum_columns = ['project', 'tags', 'collaborators']; // this is needed because we try to summ all the fields
     var i = 0;
     while (i < Object.values(columnsInput).length) {
         columns = [...columns, { label: Object.values(columnsInput)[i], accessor: Object.values(columnsInput)[i].replaceAll(' ', '_'), sortable: true }];
@@ -132,6 +131,34 @@ const SummaryPane = ({ conSummary, consortium }) => {
             r++
         }
         i++
+    }
+
+    var filteredColumns = [];
+    // Remove columns with no data
+    var c = 0;
+    while (c < Object.values(columns).length) {
+        // Check whether there's any data in the column
+        const column_name = Object.values(columns)[c]['accessor'];
+        // If its in the defined list
+        if (dont_sum_columns.includes(column_name)) {
+            filteredColumns = [...filteredColumns, Object.values(columns)[c]]
+
+        }
+        else {
+            // Loop through the respective data column and 
+            // sum the column - if its zero then there's no data
+            var d = 0;
+            var column_sum = 0;
+            while (d < Object.values(tableData1).length) {
+                column_sum += Object.values(tableData1)[d][column_name]
+                d++
+            }
+            // If the sum is not zero, then add the column
+            if (column_sum > 0) {
+                filteredColumns = [...filteredColumns, Object.values(columns)[c]]
+            }
+        }
+        c++
     }
 
     // Handle the sorting of data
@@ -178,8 +205,8 @@ const SummaryPane = ({ conSummary, consortium }) => {
                         <Table striped responsive="md" size='sm' >
 
 
-                            <TableHead columns={columns} handleSorting={handleSorting} />
-                            <TableBody tableData={tableData} columns={columns} />
+                            <TableHead columns={filteredColumns} handleSorting={handleSorting} />
+                            <TableBody tableData={tableData} columns={filteredColumns} />
                         </Table>
                     </Col>
                 </>
