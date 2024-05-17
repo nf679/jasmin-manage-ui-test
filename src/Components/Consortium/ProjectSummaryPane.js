@@ -165,14 +165,6 @@ const SummaryPane = ({ conSummary, consortium }) => {
     // Handle the sorting of data
     const [tableData, setTableData] = useState(tableData1);
 
-    const handleSortingChange = (accessor) => {
-        const sortOrder =
-            accessor === sortField && order === "asc" ? "desc" : "asc";
-        setSortField(accessor);
-        setOrder(sortOrder);
-        handleSorting(accessor, sortOrder);
-    };
-
     const handleSorting = (sortField, sortOrder) => {
         if (sortField) {
             const sorted = [...tableData].sort((a, b) => {

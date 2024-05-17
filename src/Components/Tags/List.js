@@ -13,7 +13,7 @@ import { PageHeader } from 'fwtheme-react-jasmin';
 
 import { Status, useNestedResource } from '../../rest-resource';
 
-import { useProjects, useResources, useCurrentUser, useProjectsSummary, useTags } from '../../api';
+import { useProjects, useResources, useCurrentUser, useProjectsSummary, useTags, useConsortia } from '../../api';
 
 import { sortByKey, SpinnerWithText, notificationFromError } from '../utils';
 
@@ -22,30 +22,31 @@ import { ProjectTagItem, TagConsortiumItem } from '../Project/CardItems';
 const TableHead = ({ columns, handleSorting }) => {
     const [sortField, setSortField] = useState("");
     const [order, setOrder] = useState("asc");
-    const handleSortingChange = (accessor) => {
-        const sortOrder =
-            accessor === sortField && order === "asc" ? "desc" : "asc";
-        setSortField(accessor);
-        setOrder(sortOrder);
-        handleSorting(accessor, sortOrder);
-    };
+    // const handleSortingChange = (accessor) => {
+    //     const sortOrder =
+    //         accessor === sortField && order === "asc" ? "desc" : "asc";
+    //     setSortField(accessor);
+    //     setOrder(sortOrder);
+    //     handleSorting(accessor, sortOrder);
+    // };
     return (
         <>
             <thead>
                 <tr>
                     {columns.map(({ label, accessor, sortable }) => {
-                        const cl = sortable
-                            ? sortField === accessor && order === "asc"
-                                ? "fas fa-fw fa-sort-down"
-                                : sortField === accessor && order === "desc"
-                                    ? "fas fa-fw fa-sort-up"
-                                    : "fas fa-fw fa-sort"
-                            : "";
+                        // const cl = sortable
+                        //     ? sortField === accessor && order === "asc"
+                        //         ? "fas fa-fw fa-sort-down"
+                        //         : sortField === accessor && order === "desc"
+                        //             ? "fas fa-fw fa-sort-up"
+                        //             : "fas fa-fw fa-sort"
+                        //     : "";
                         return <th
-                            key={accessor}
-                            onClick={sortable ? () => handleSortingChange(accessor) : null}
+                            // key={accessor}
+                            // onClick={sortable ? () => handleSortingChange(accessor) : null}
                         >
-                            {label}  <div className={cl}></div>
+                            {label}  
+                            {/* <div className={cl}></div> */}
                         </th>;
                     })}
                 </tr>
@@ -101,24 +102,30 @@ const Filter =() => {
     );
 };
 
-const TagList = ({projectsSummary, resources, tagData}) => {
+const TagList = ({projectsSummary, resources, tagData, consortium}) => {
     //Define columns
-    var columns = [{ label: 'Project', accessor: 'project', sortable: true }, { label: 'Tags', accessor: 'tags', sortable: false }];
-    const dont_sum_columns = ['project', 'tags']; // this is needed because we try to summ all the fields
+    var columns = [{ label: 'Project', accessor: 'project', sortable: true }, { label: 'Tags', accessor: 'tags', sortable: false }, { label: 'Consortium', accessor: 'consortium', sortable: true}];
+    const dont_sum_columns = ['project', 'tags', 'consortium']; // this is needed because we try to summ all the fields
     var i = 0;
     while (i < Object.values(resources.data).length) {
         columns = [...columns, { label: Object.values(resources.data)[i].data['name'], accessor: Object.values(resources.data)[i].data['name'].replaceAll(' ', '_'), sortable: true }];
         i++
     }
     // Tag dropdown
-    // Add all option to tags
-    const [tagSelect, setTag] = useState([]);
-    const handleChange = (event) => {
+    const [tagSelect, setTag] = useState("All Tags");
+    const handleChangeTag = (event) => {
 
         setTag(event.target.value);
     
-    };
+    };    
+    // Consortium dropdown
+    const [conSelect, setCon] = useState("All Consortia");
+    const handleChangeCon = (event) => {
+
+        setCon(event.target.value);
     
+    };    
+
 
     var tableData1 = [];
     var i = 0;
@@ -127,6 +134,7 @@ const TagList = ({projectsSummary, resources, tagData}) => {
         var project = Object.values(projectsSummary.data)[i].data
         var dataline = {};
         dataline['project'] = project['name']
+        dataline['consortium'] = project['consortium']
         var t = 0;
         var tags = [];
         while (t < project['tags'].length) {
@@ -144,17 +152,19 @@ const TagList = ({projectsSummary, resources, tagData}) => {
 
             r++
         }
-        console.log('tag selected', tagSelect);
-        console.log('tags', tags)
-        if (tagSelect == "All Tags") {
+        // Only include the data row if the tag is selected in the drop down
+        if (tagSelect == "All Tags" && conSelect == "All Consortia") {
             tableData1 = [...tableData1, dataline]
+        }       
+        else if (tagSelect == "All Tags" && conSelect == project['consortium']){
+            tableData1 = [...tableData1, dataline]            
+        } 
+        else if ((tags.includes(tagSelect) || tags.includes(tagSelect+', ')) && conSelect == project['consortium']){
+            tableData1 = [...tableData1, dataline]            
         }
-        else if (tags.includes(tagSelect) || tags.includes(tagSelect+', ')){
-            tableData1 = [...tableData1, dataline]
-        }
-        else if (tagSelect.length == 0){
-            tableData1 = [...tableData1, dataline]
-        }
+        else if ((tags.includes(tagSelect) || tags.includes(tagSelect+', ')) && conSelect == "All Consortia"){            
+            tableData1 = [...tableData1, dataline]            
+        }        
         i++
     }
 
@@ -185,45 +195,56 @@ const TagList = ({projectsSummary, resources, tagData}) => {
         }
         c++
     }
+    // Sort by project name
 
+
+    // Sorting isn't working with the filter
     // Handle the sorting of data
-    // var [tableData, setTableData] = useState(tableData1);
-    // console.log('tableData', tableData)
+    const [tableData, setTableData] = useState(tableData1);
+    console.log('tableData', tableData)
 
-    // const handleSortingChange = (accessor) => {
-    //     const sortOrder =
-    //         accessor === sortField && order === "asc" ? "desc" : "asc";
-    //     setSortField(accessor);
-    //     setOrder(sortOrder);
-    //     handleSorting(accessor, sortOrder);
-    // };
-
-    // const handleSorting = (sortField, sortOrder) => {
-    //     if (sortField) {
-    //         const sorted = [...tableData].sort((a, b) => {
-    //             if (a[sortField] === null) return 1;
-    //             if (b[sortField] === null) return -1;
-    //             if (a[sortField] === null && b[sortField] === null) return 0;
-    //             return (
-    //                 a[sortField].toString().localeCompare(b[sortField].toString(), "en", {
-    //                     numeric: true,
-    //                 }) * (sortOrder === "asc" ? 1 : -1)
-    //             );
-    //         });
-    //         setTableData(sorted);
-    //     }
-    // };
-
+    const handleSorting = (sortField, sortOrder) => {
+        if (sortField) {
+            const sorted = [...tableData].sort((a, b) => {
+                if (a[sortField] === null) return 1;
+                if (b[sortField] === null) return -1;
+                if (a[sortField] === null && b[sortField] === null) return 0;
+                return (
+                    a[sortField].toString().localeCompare(b[sortField].toString(), "en", {
+                        numeric: true,
+                    }) * (sortOrder === "asc" ? 1 : -1)
+                );
+            });
+            setTableData(sorted);
+        }
+    };
     
     return (
     <Col>
-        <select value={tagSelect} onChange={handleChange}>
-            <option>All Tags</option>
-            {Object.values(tagData.data).map(tag => (
-                <option>{tag.data.name}</option>
-            ))}
-        </select>
+        <Row>
+            <Col></Col>
+            <Col>
+                <select value={tagSelect} onChange={handleChangeTag}>
+                <option>All Tags</option>
+                {Object.values(tagData.data).map(tag => (
+                    <option>{tag.data.name}</option>
+                ))}
+            </select>
+            </Col>
+            <Col>
+                <select value={conSelect} onChange={handleChangeCon}>
+                <option>All Consortia</option>
+                <option>None</option>
+                {Object.values(consortium.data).map(con => (
+                    <option>{con.data.name}</option>
+                ))}
+            </select>
+            </Col>
+            <Col></Col>
+        </Row>
+        
         <Table striped responsive="md" size='sm' >
+            {/* Filtering isn't working... <TableHead columns={filteredColumns}   handleSorting={handleSorting} /> */}
             <TableHead columns={filteredColumns}  />
             <TableBody tableData={tableData1} columns={filteredColumns} />
         </Table>
@@ -365,11 +386,12 @@ const TagPage = () => {
     const projectsSummary = useProjectsSummary();
     const resources = useResources();
     const tags = useTags();
+    const consortium = useConsortia();
     
 
     return (<>
         <PageHeader>Projects List</PageHeader>
-        <Status.Many fetchables={[projectsSummary, resources, tags]}>
+        <Status.Many fetchables={[projectsSummary, resources, tags, consortium]}>
             <Status.Loading>
                 <div className="d-flex justify-content-center my-5">
                     <SpinnerWithText iconSize="lg" textSize="120%">Loading projects...</SpinnerWithText>
@@ -380,7 +402,7 @@ const TagPage = () => {
             </Status.Unavailable>
             <Status.Available>
                 
-                <TagList projectsSummary={projectsSummary} resources={resources} tagData={tags}/>
+                <TagList projectsSummary={projectsSummary} resources={resources} tagData={tags} consortium={consortium}/>
             </Status.Available>
         </Status.Many>
     </>);
