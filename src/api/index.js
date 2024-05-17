@@ -63,6 +63,9 @@ export const useConsortium = (id, options) => useInstance(`/api/consortia/${id}/
 // Export hook for loading consortium summary
 export const useConsortiumSummary = (id, options) => useInstance(`/api/consortia/${id}/summary`, options);
 
+// Export hook for loading consortium summary
+export const useProjectsSummary =  options => useResource(`/api/projects?summary=true`, options);
+
 // Export hooks for accessing projects
 // We don't treat the project list as a top-level shared resource because:
 //   1. The list, or objects within it, changes relatively often

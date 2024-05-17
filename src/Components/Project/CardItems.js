@@ -2,6 +2,8 @@ import React from 'react';
 
 import ListGroup from 'react-bootstrap/ListGroup';
 
+import Badge from 'react-bootstrap/Badge';
+
 import { Link } from 'react-router-dom';
 
 import moment from 'moment';
@@ -129,10 +131,11 @@ export const ProjectTagItem = ({ tags }) => {
     // Only return tag item if there is one
     if (Object.keys(tagkeys).length>0) {
         return (
+            <ListGroup.Item>
             <div style={{display: "inline-flex"}}>
-                {Object.keys(tagkeys).map((d) => (
+                Tags:&nbsp;&nbsp;{Object.keys(tagkeys).map((d) => (
                     <div>
-                        <button 
+                        {/* <button
                             class="btn btn-light"
                             type="button" 
                             style={{
@@ -144,12 +147,15 @@ export const ProjectTagItem = ({ tags }) => {
                                 margin: "0px 2px",
                                 height: "25px"
                             }}
-                        >
+                        > {tagkeys[d].data.name} </button> */}
+                        {/* <Badge >
                           {tagkeys[d].data.name}
-                        </button>
+                        </Badge> */}
+                        <b><font size="3">{tagkeys[d].data.name}&nbsp;&nbsp;</font></b>
                     </div>
                 ))}
             </div>
+            </ListGroup.Item>
         );
     }
     return ""

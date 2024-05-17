@@ -18,6 +18,7 @@ import {
     ProjectCreatedAtListItem,
     ProjectTagItem
 } from '../Project/CardItems';
+import { ListGroupItem } from 'react-bootstrap';
 
 
 const ProjectCard = ({ project }) => {
@@ -28,7 +29,8 @@ const ProjectCard = ({ project }) => {
         <Card className="mb-3" style={{ borderWidth: '3px' }}>
             <Card.Header>
                 <h5 className="mb-0">{project.data.name}</h5>
-                <ProjectTagItem tags={tags} />
+                
+                
             </Card.Header>
             <ListGroup variant="flush" className="border-0">
                 <ProjectStatusListItem project={project} />
@@ -39,6 +41,8 @@ const ProjectCard = ({ project }) => {
                 </ListGroup.Item>
                 <ProjectCollaboratorsListItem project={project} />
                 <ProjectCreatedAtListItem project={project} />
+                {/* <ListGroup.Item><font size="3">Tags: </font><><ProjectTagItem tags={tags} /></></ListGroup.Item> */}
+                <ProjectTagItem tags={tags} />
             </ListGroup>
             <Card.Footer className="text-right">
                 {/* Pass the project data as state */}

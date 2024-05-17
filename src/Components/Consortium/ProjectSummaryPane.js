@@ -88,7 +88,7 @@ const SummaryPane = ({ conSummary, consortium }) => {
 
     // Define columns
     const columnsInput = Object.keys(conSummary.data.project_summaries[0].resource_summary)
-    var columns = [{ label: 'project', accessor: 'project', sortable: true }, { label: 'tags', accessor: 'tags', sortable: false }, { label: 'collaborators', accessor: 'collaborators', sortable: false }];
+    var columns = [{ label: 'Project', accessor: 'project', sortable: true }, { label: 'Tags', accessor: 'tags', sortable: false }, { label: 'Collaborators', accessor: 'collaborators', sortable: false }];
     const dont_sum_columns = ['project', 'tags', 'collaborators']; // this is needed because we try to summ all the fields
     var i = 0;
     while (i < Object.values(columnsInput).length) {
@@ -123,13 +123,14 @@ const SummaryPane = ({ conSummary, consortium }) => {
         }
 
         dataline['collaborators'] = collabs;
-        tableData1 = [...tableData1, dataline]
         var r = 0;
         while (r < Object.values(conSummary.data.project_summaries[i]['resource_summary']).length) {
             dataline[Object.keys(conSummary.data.project_summaries[i]['resource_summary'])[r].replaceAll(' ', '_')] = Object.values(conSummary.data.project_summaries[i]['resource_summary'])[r]
 
             r++
         }
+
+        tableData1 = [...tableData1, dataline]
         i++
     }
 
