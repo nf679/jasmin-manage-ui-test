@@ -218,7 +218,6 @@ const TagList = ({projectsSummary, resources, tagData, consortium}) => {
             <Col>
                 <select value={conSelect} onChange={handleChangeCon}>
                 <option>All Consortia</option>
-                <option>None</option>
                 {Object.values(consortium.data).map(con => (
                     <option>{con.data.name}</option>
                 ))}
@@ -229,142 +228,12 @@ const TagList = ({projectsSummary, resources, tagData, consortium}) => {
         
         <Table striped responsive="md" size='sm' >
             <TableHead columns={filteredColumns}   handleSorting={handleSorting} />
-            {/* <TableHead columns={filteredColumns}  /> */}
             <TableBody tableData={tableData} columns={filteredColumns} rowVisible={rowVisible}/>
         </Table>
     </Col>
     )
 }
 
-// // List projects and their tags
-// const TagListOLD = () => {
-//     const projects = useProjects();
-//     const resources = useResources();
-//     // The list should only be visible to staff and maybe consortium managers
-//     const currentUser = useCurrentUser();
-//     console.log('all projects', projects);
-    
-
-//     // Define columns
-//     //const columnsInput = Object.keys(resources.data.project_summaries[0].resource_summary)
-//     var columns = [{ label: 'Project', accessor: 'project', sortable: true }, { label: 'Tags', accessor: 'tags', sortable: false }, { label: 'Collaborators', accessor: 'collaborators', sortable: false }];
-//     const dont_sum_columns = ['project', 'tags', 'collaborators']; // this is needed because we try to summ all the fields
-//     var i = 0;
-//     while (i < Object.values(resources.data).length) {
-//         columns = [...columns, { label: Object.values(resources.data)[i].data['name'], accessor: Object.values(resources.data)[i].data['name'].replaceAll(' ', '_'), sortable: true }];
-//         i++
-//     }
-//     var tableData1 = [];
-//     var i = 0;
-
-//     // PLAN: extend the projects portal API to create a summary for each project like 
-//     // wiht the con sumamry, but on the all prjects page (so it can be callable above this leevel), 
-//     // then use this object to create table data...
-
-//     // Create table data
-//     while (i < Object.values(projects.data).length) {
-//         var project = Object.values(projects.data)[i]
-//         var dataline = {};
-//         dataline['project'] = project.data['name']
-//         var t = 0;
-//         var tags = [];
-//         while (t <  project.data['tags'].length) {
-//             tags = [...tags,  project.data['tags'][t] + ', ']
-//             t++;
-//         }
-//         if (tags.length >= 1) {
-//             tags[t - 1] = tags[t - 1].slice(0, -2)
-//         }
-//         dataline['tags'] = tags
-//         var collabs = [];
-//         var c = 0;
-        
-//         console.log('project', project);
-//         //var collaborators = useNestedResource(project, "collaborators", { fetchPoint: false });
-//         // while (c < Object.values(conSummary.data.project_summaries[i]['collaborators']).length) {
-//         //     collabs = [...collabs, conSummary.data.project_summaries[i]['collaborators'][c]['username'] + ', '];
-//         //     c++
-//         // }
-//         // if (collabs.length >= 1) {
-//         //     collabs[c - 1] = collabs[c - 1].slice(0, -2)
-//         // }
-
-//         // dataline['collaborators'] = collabs;
-//         // var r = 0;
-//         // while (r < Object.values(conSummary.data.project_summaries[i]['resource_summary']).length) {
-//         //     dataline[Object.keys(conSummary.data.project_summaries[i]['resource_summary'])[r].replaceAll(' ', '_')] = Object.values(conSummary.data.project_summaries[i]['resource_summary'])[r]
-
-//         //     r++
-//         // }
-//         console.log('dataline', dataline)
-//         tableData1 = [...tableData1, dataline]
-//         i++
-//     }
-    
-//     // Handle the sorting of data
-//     const [tableData, setTableData] = useState(tableData1);
-//     console.log(tableData)
-
-//     return(<>
-//                 {/* {data => {
-//                     // Sort the projects  by name
-//                     const sortedProjects = sortByKey(
-//                         Object.values(data),
-//                         project => [
-//                             project.data.name
-//                         ]
-//                     );
-//                     return (
-                        
-//                         <Row>
-//                             <Col md={10}>
-//                             <Table hover striped size="sm">
-//                         	    <thead> <th>Project</th> <th>Consortium</th> <th>Tags</th>
-//     						    </thead>
-//     						    <tbody>
-//                             	    {sortedProjects.map(project => (
-//                             	        <LinkContainer to={{
-// 					                        pathname: `/projects/${project.data.id}`,
-// 					                        state: { initialData: project.data }
-// 					                    }}>
-// 	                                	    <tr key={project.data.name}>
-// 	                                    	    <ProjectList project={project} />
-// 	                                	    </tr>
-//                                 	    </LinkContainer>
-//                         		    ))}
-//     						    </tbody>
-//                             </Table>
-//                             </Col>
-//                             <Col>
-//                                 <Card className="mb-3" style={{ borderWidth: '3px' }}>
-//                                     <Card.Header>
-//                                          <h5 className="mb-0">Filter Projects</h5>
-//                                     </Card.Header>
-//                                     <ListGroup variant="flush" className="border-0">
-//                                         <ListGroupItem>
-//                                             <h6>Filter by consortium</h6>
-//                                             <Filter />
-//                                         </ListGroupItem>
-//                                         <ListGroupItem><h6>Filter by tag</h6></ListGroupItem>
-//                                     </ListGroup>
-//                                 </Card>
-//                             </Col>
-//                         </Row>
-//                     );
-//                 }} */}
-//                  <>
-//                     <Col>
-//                         {/* <header>Resource summaries for all projects in Consortia. Column headers can be clicked on to order them. <a href={apiLocation}> Direct link to JSON.</a></header> */}
-//                         <Table striped responsive="md" size='sm' >
-
-
-//                             <TableHead columns={columns} />
-//                             <TableBody tableData={tableData} columns={columns} />
-//                         </Table>
-//                     </Col>
-//                 </>
-//             </>);
-// };
 
 const TagPage = () => {
     const projectsSummary = useProjectsSummary();

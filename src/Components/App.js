@@ -18,7 +18,7 @@ import ProjectDetail from './Project/Detail';
 import RequirementDetail from './Project/Requirement';
 import ConsortiumList from './Consortium/List';
 import ConsortiumDetail from './Consortium/Detail';
-import TagList from './Tags/List';
+import AllProjects from './AllProjects/List';
 import NotFoundPage from './NotFound';
 
 import '../css/notifications.css';
@@ -95,8 +95,8 @@ const App = () => (
                     <AuthenticatedRoute path="/consortia/:id"><ConsortiumDetail /></AuthenticatedRoute>
                     <AuthenticatedRoute path="/projects" exact><ProjectList /></AuthenticatedRoute>
                     <AuthenticatedRoute path="/projects/:id"><ProjectDetail /></AuthenticatedRoute>
-                    <AuthenticatedRoute path="/tags" exact><TagList /></AuthenticatedRoute>
-                    // Below is the link to the work order for the service id
+                    <AuthenticatedRoute path="/all_projects" exact><AllProjects /></AuthenticatedRoute>
+                    {/* Below is the link to the work order for the service id */}
                     <AuthenticatedRoute path="/request/service-:id"><RequirementDetail /></AuthenticatedRoute>
                     <Route path="*"><NotFoundPage /></Route>
                 </Switch>
