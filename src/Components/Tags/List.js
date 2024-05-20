@@ -22,31 +22,31 @@ import { ProjectTagItem, TagConsortiumItem } from '../Project/CardItems';
 const TableHead = ({ columns, handleSorting }) => {
     const [sortField, setSortField] = useState("");
     const [order, setOrder] = useState("asc");
-    // const handleSortingChange = (accessor) => {
-    //     const sortOrder =
-    //         accessor === sortField && order === "asc" ? "desc" : "asc";
-    //     setSortField(accessor);
-    //     setOrder(sortOrder);
-    //     handleSorting(accessor, sortOrder);
-    // };
+    const handleSortingChange = (accessor) => {
+        const sortOrder =
+            accessor === sortField && order === "asc" ? "desc" : "asc";
+        setSortField(accessor);
+        setOrder(sortOrder);
+        handleSorting(accessor, sortOrder);
+    };
     return (
         <>
             <thead>
                 <tr>
                     {columns.map(({ label, accessor, sortable }) => {
-                        // const cl = sortable
-                        //     ? sortField === accessor && order === "asc"
-                        //         ? "fas fa-fw fa-sort-down"
-                        //         : sortField === accessor && order === "desc"
-                        //             ? "fas fa-fw fa-sort-up"
-                        //             : "fas fa-fw fa-sort"
-                        //     : "";
+                        const cl = sortable
+                            ? sortField === accessor && order === "asc"
+                                ? "fas fa-fw fa-sort-down"
+                                : sortField === accessor && order === "desc"
+                                    ? "fas fa-fw fa-sort-up"
+                                    : "fas fa-fw fa-sort"
+                            : "";
                         return <th
-                            // key={accessor}
-                            // onClick={sortable ? () => handleSortingChange(accessor) : null}
+                            key={accessor}
+                            onClick={sortable ? () => handleSortingChange(accessor) : null}
                         >
                             {label}  
-                            {/* <div className={cl}></div> */}
+                            <div className={cl}></div>
                         </th>;
                     })}
                 </tr>
@@ -55,11 +55,11 @@ const TableHead = ({ columns, handleSorting }) => {
     )
 }
 
-const TableBody = ({ tableData, columns }) => {
+const TableBody = ({ tableData, columns, rowVisible }) => {
     return (
         <>
             <tbody>
-                {tableData.map((data) => {
+                {tableData.map((data) => { if (rowVisible[data.id]){
                     return (
                         <tr key={data.id}>
                             {columns.map(({ accessor }) => {
@@ -67,47 +67,21 @@ const TableBody = ({ tableData, columns }) => {
                                 return <td key={accessor}>{tData}</td>;
                             })}
                         </tr>
-                    );
+                    );}
                 })}
             </tbody>
         </>
     )
 }
 
-// Data for the project list
-const ProjectList = ({ project }) => {
-    // Find the tags associated with the project
-    const tags = useNestedResource(project, "tags");
-    // Number corresponding to the tags
-    var tagkeys = tags.data;
-    return (
-    	<>
-            <td>{project.data.name}</td> 
-            <td><TagConsortiumItem project={project} /></td>
-            <td>{Object.keys(tagkeys).map((d) => (<>{tagkeys[d].data.name}&nbsp;&nbsp;</>
-                    
-                ))}</td>
-		</>
-    );
-};
-
-// Filter button, should be a dropdown selection
-const Filter =() => {
-    const [isOpen, setIsOpen] = useState(false);
-
-    return (
-        <div>
-            <button>Filter</button>
-        </div>
-    );
-};
 
 const TagList = ({projectsSummary, resources, tagData, consortium}) => {
     //Define columns
-    var columns = [{ label: 'Project', accessor: 'project', sortable: true }, { label: 'Tags', accessor: 'tags', sortable: false }, { label: 'Consortium', accessor: 'consortium', sortable: true}];
+    var columns = [ { label: 'Project', accessor: 'project', sortable: true }, { label: 'Tags', accessor: 'tags', sortable: false }, { label: 'Consortium', accessor: 'consortium', sortable: true}];
     const dont_sum_columns = ['project', 'tags', 'consortium']; // this is needed because we try to summ all the fields
     var i = 0;
     while (i < Object.values(resources.data).length) {
+        
         columns = [...columns, { label: Object.values(resources.data)[i].data['name'], accessor: Object.values(resources.data)[i].data['name'].replaceAll(' ', '_'), sortable: true }];
         i++
     }
@@ -128,11 +102,17 @@ const TagList = ({projectsSummary, resources, tagData, consortium}) => {
 
 
     var tableData1 = [];
+    // Create an object to track whether we want to row visible depending on the filters
+    var rowVisible = {};
     var i = 0;
     // Create table data
     while (i < Object.keys(projectsSummary.data).length) {
+        // Add a row id to map between the visible row list, with the the data row in the table so we can hide rows with the drop downs
+
+        // build the data for the table
         var project = Object.values(projectsSummary.data)[i].data
         var dataline = {};
+        dataline['id'] = i;
         dataline['project'] = project['name']
         dataline['consortium'] = project['consortium']
         var t = 0;
@@ -152,19 +132,24 @@ const TagList = ({projectsSummary, resources, tagData, consortium}) => {
 
             r++
         }
-        // Only include the data row if the tag is selected in the drop down
+        // Only include the data row if the tag and con is selected in the drop down
         if (tagSelect == "All Tags" && conSelect == "All Consortia") {
-            tableData1 = [...tableData1, dataline]
+            rowVisible[i] = true;
         }       
         else if (tagSelect == "All Tags" && conSelect == project['consortium']){
-            tableData1 = [...tableData1, dataline]            
+            rowVisible[i] = true;       
         } 
         else if ((tags.includes(tagSelect) || tags.includes(tagSelect+', ')) && conSelect == project['consortium']){
-            tableData1 = [...tableData1, dataline]            
+            rowVisible[i] = true;        
         }
         else if ((tags.includes(tagSelect) || tags.includes(tagSelect+', ')) && conSelect == "All Consortia"){            
-            tableData1 = [...tableData1, dataline]            
+            rowVisible[i] = true;            
         }        
+        else{
+            rowVisible[i] = false;
+        }
+        // Update the list of data for the table
+        tableData1 = [...tableData1, dataline];
         i++
     }
 
@@ -201,7 +186,6 @@ const TagList = ({projectsSummary, resources, tagData, consortium}) => {
     // Sorting isn't working with the filter
     // Handle the sorting of data
     const [tableData, setTableData] = useState(tableData1);
-    console.log('tableData', tableData)
 
     const handleSorting = (sortField, sortOrder) => {
         if (sortField) {
@@ -244,9 +228,9 @@ const TagList = ({projectsSummary, resources, tagData, consortium}) => {
         </Row>
         
         <Table striped responsive="md" size='sm' >
-            {/* Filtering isn't working... <TableHead columns={filteredColumns}   handleSorting={handleSorting} /> */}
-            <TableHead columns={filteredColumns}  />
-            <TableBody tableData={tableData1} columns={filteredColumns} />
+            <TableHead columns={filteredColumns}   handleSorting={handleSorting} />
+            {/* <TableHead columns={filteredColumns}  /> */}
+            <TableBody tableData={tableData} columns={filteredColumns} rowVisible={rowVisible}/>
         </Table>
     </Col>
     )
