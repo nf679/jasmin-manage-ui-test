@@ -3,7 +3,7 @@ import React, {useState} from 'react';
 
 import Alert from 'react-bootstrap/Alert';
 
-import { Col, Row, Card, ListGroup, ListGroupItem } from 'react-bootstrap';
+import { Col, Row, DropdownButton, Dropdown, Card, ListGroup, ListGroupItem } from 'react-bootstrap';
 
 import Table from 'react-bootstrap/Table';
 
@@ -77,7 +77,7 @@ const TableBody = ({ tableData, columns, rowVisible }) => {
 
 const TagList = ({projectsSummary, resources, tagData, consortium}) => {
     //Define columns
-    var columns = [ { label: 'Project', accessor: 'project', sortable: true }, { label: 'Tags', accessor: 'tags', sortable: false }, { label: 'Consortium', accessor: 'consortium', sortable: true}];
+    var columns = [ { label: 'Project', accessor: 'project', sortable: true }, { label: 'Consortium', accessor: 'consortium', sortable: true}, { label: 'Tags', accessor: 'tags', sortable: false }, ];
     const dont_sum_columns = ['project', 'tags', 'consortium']; // this is needed because we try to summ all the fields
     var i = 0;
     while (i < Object.values(resources.data).length) {
@@ -87,18 +87,14 @@ const TagList = ({projectsSummary, resources, tagData, consortium}) => {
     }
     // Tag dropdown
     const [tagSelect, setTag] = useState("All Tags");
-    const handleChangeTag = (event) => {
-
-        setTag(event.target.value);
-    
-    };    
+    const handleSelectTag = (e) => {
+        setTag(e)
+    }
     // Consortium dropdown
     const [conSelect, setCon] = useState("All Consortia");
-    const handleChangeCon = (event) => {
-
-        setCon(event.target.value);
-    
-    };    
+    const handleSelectCon = (e) => {
+        setCon(e)
+    }
 
 
     var tableData1 = [];
@@ -183,7 +179,6 @@ const TagList = ({projectsSummary, resources, tagData, consortium}) => {
     // Sort by project name
 
 
-    // Sorting isn't working with the filter
     // Handle the sorting of data
     const [tableData, setTableData] = useState(tableData1);
 
@@ -202,35 +197,44 @@ const TagList = ({projectsSummary, resources, tagData, consortium}) => {
             setTableData(sorted);
         }
     };
+
     
-    return (
-    <Col>
+    return (<>
+    <Col>  
+        <p>View of all projects, including filters for tags and consortia. Some columns can be sorted.</p>
         <Row>
+            
+            <Col>
+                <DropdownButton title={tagSelect} value={tagSelect} onSelect={handleSelectTag}>
+                    <Dropdown.Item eventKey="All Tags">All Tags</Dropdown.Item>
+                    {Object.values(tagData.data).map(tag => (
+                        <Dropdown.Item eventKey={tag.data.name}>{tag.data.name}</Dropdown.Item>
+                    ))}
+                </DropdownButton>
+            </Col>
+            <Col>
+                <DropdownButton title={conSelect} value={conSelect} onSelect={handleSelectCon}>
+                    <Dropdown.Item eventKey="All Consortia">All Consortia</Dropdown.Item>
+                    {Object.values(consortium.data).map(con => (
+                        <Dropdown.Item eventKey={con.data.name}>{con.data.name}</Dropdown.Item>
+                    ))}
+                </DropdownButton>
+            </Col>
             <Col></Col>
-            <Col>
-                <select value={tagSelect} onChange={handleChangeTag}>
-                <option>All Tags</option>
-                {Object.values(tagData.data).map(tag => (
-                    <option>{tag.data.name}</option>
-                ))}
-            </select>
-            </Col>
-            <Col>
-                <select value={conSelect} onChange={handleChangeCon}>
-                <option>All Consortia</option>
-                {Object.values(consortium.data).map(con => (
-                    <option>{con.data.name}</option>
-                ))}
-            </select>
-            </Col>
+            <Col></Col>
+            <Col></Col>
+            <Col></Col>
+            <Col></Col>
+            <Col></Col>
             <Col></Col>
         </Row>
-        
+        <p></p>
         <Table striped responsive="md" size='sm' >
             <TableHead columns={filteredColumns}   handleSorting={handleSorting} />
             <TableBody tableData={tableData} columns={filteredColumns} rowVisible={rowVisible}/>
         </Table>
     </Col>
+    </>
     )
 }
 
