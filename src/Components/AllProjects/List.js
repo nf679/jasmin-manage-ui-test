@@ -197,7 +197,8 @@ const TagList = ({projectsSummary, resources, tagData, consortium}) => {
             setTableData(sorted);
         }
     };
-
+    const conDropDownData = Object.values(consortium.data).map(c => c.data.name).sort()
+    const tagDropDownData = Object.values(tagData.data).map(t => t.data.name).sort()
     
     return (<>
     <Col>  
@@ -207,16 +208,16 @@ const TagList = ({projectsSummary, resources, tagData, consortium}) => {
             <Col>
                 <DropdownButton title={tagSelect} value={tagSelect} onSelect={handleSelectTag}>
                     <Dropdown.Item eventKey="All Tags">All Tags</Dropdown.Item>
-                    {Object.values(tagData.data).map(tag => (
-                        <Dropdown.Item eventKey={tag.data.name}>{tag.data.name}</Dropdown.Item>
+                    {tagDropDownData.map(tag => (
+                        <Dropdown.Item eventKey={tag}>{tag}</Dropdown.Item>
                     ))}
                 </DropdownButton>
             </Col>
             <Col>
                 <DropdownButton title={conSelect} value={conSelect} onSelect={handleSelectCon}>
                     <Dropdown.Item eventKey="All Consortia">All Consortia</Dropdown.Item>
-                    {Object.values(consortium.data).map(con => (
-                        <Dropdown.Item eventKey={con.data.name}>{con.data.name}</Dropdown.Item>
+                    {conDropDownData.map(con => (
+                        <Dropdown.Item eventKey={con}>{con}</Dropdown.Item>
                     ))}
                 </DropdownButton>
             </Col>
