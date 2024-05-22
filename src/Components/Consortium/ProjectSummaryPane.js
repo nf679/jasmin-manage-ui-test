@@ -40,9 +40,9 @@ const TableHead = ({ columns, handleSorting }) => {
                     {columns.map(({ label, accessor, sortable }) => {
                         const cl = sortable
                             ? sortField === accessor && order === "asc"
-                                ? "fas fa-fw fa-sort-down"
+                                ? "fas fa-fw fa-sort-up"
                                 : sortField === accessor && order === "desc"
-                                    ? "fas fa-fw fa-sort-up"
+                                    ? "fas fa-fw fa-sort-down"
                                     : "fas fa-fw fa-sort"
                             : "";
                         return <th
