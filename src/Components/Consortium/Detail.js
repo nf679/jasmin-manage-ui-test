@@ -25,7 +25,7 @@ import {
     useEnsureInitialised
 } from '../../rest-resource';
 
-import { useConsortia, useConsortium, useConsortiumSummary } from '../../api';
+import { useConsortia, useConsortium, useConsortiumSummary, useTags } from '../../api';
 
 import { SpinnerWithText, notificationFromError } from '../utils';
 
@@ -34,7 +34,7 @@ import ProjectsPane from './ProjectsPane';
 import SummaryPane from './ProjectSummaryPane';
 
 
-const ConsortiumDetail = ({ consortium, conSummary }) => {
+const ConsortiumDetail = ({ consortium, conSummary, tagData }) => {
     // We don't want to be reloading resources as the user flips between tabs
     // So load both nested resources here
     const notify = useNotifications();
@@ -116,7 +116,7 @@ const ConsortiumDetail = ({ consortium, conSummary }) => {
                         <ProjectsPane projects={projects} />
                     </Route>
                     <Route path={`${path}/summary`}>
-                        <SummaryPane conSummary={conSummary} consortium={consortium} />
+                        <SummaryPane conSummary={conSummary} consortium={consortium} tagData={tagData}/>
                     </Route>
                 </Switch>
             </Col>
@@ -128,6 +128,7 @@ const ConsortiumDetail = ({ consortium, conSummary }) => {
 const ConsortiumDetailWrapper = () => {
     const notify = useNotifications();
     const consortia = useConsortia();
+    const tags = useTags();
 
     // Get the consortium id from the path
     const { id: consortiumId } = useParams();
@@ -151,7 +152,7 @@ const ConsortiumDetailWrapper = () => {
     );
 
     return (
-        <Status.Many fetchables={[consortium, conSummary]}>
+        <Status.Many fetchables={[consortium, conSummary, tags]}>
             <Status.Loading>
                 <div className="d-flex justify-content-center my-5">
                     <SpinnerWithText iconSize="lg" textSize="lg">
@@ -163,7 +164,7 @@ const ConsortiumDetailWrapper = () => {
                 <Redirect to="/consortia" />
             </Status.Unavailable>
             <Status.Available>
-                <ConsortiumDetail consortium={consortium} conSummary={conSummary} />
+                <ConsortiumDetail consortium={consortium} conSummary={conSummary} tagData={tags}/>
             </Status.Available>
         </Status.Many>
     );

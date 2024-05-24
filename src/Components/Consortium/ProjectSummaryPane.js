@@ -4,6 +4,7 @@ import Col from 'react-bootstrap/Col';
 import Button from 'react-bootstrap/Button';
 import Table from 'react-bootstrap/Table';
 import { useState } from "react";
+import {DropdownButton, Dropdown} from 'react-bootstrap';
 
 import classNames from 'classnames';
 
@@ -58,11 +59,12 @@ const TableHead = ({ columns, handleSorting }) => {
     )
 }
 
-const TableBody = ({ tableData, columns }) => {
+const TableBody = ({ tableData, columns, rowVisible }) => {
     return (
         <>
             <tbody>
-                {tableData.map((data) => {
+                {tableData.map((data) => { 
+                    if (rowVisible[data.id]){
                     return (
                         <tr key={data.id}>
                             {columns.map(({ accessor }) => {
@@ -70,14 +72,14 @@ const TableBody = ({ tableData, columns }) => {
                                 return <td key={accessor}>{tData}</td>;
                             })}
                         </tr>
-                    );
+                    );}
                 })}
             </tbody>
         </>
     )
 }
 
-const SummaryPane = ({ conSummary, consortium }) => {
+const SummaryPane = ({ conSummary, consortium, tagData }) => {
     // Get the consortia id
     const con_id = consortium.data.id;
 
@@ -96,11 +98,21 @@ const SummaryPane = ({ conSummary, consortium }) => {
         i++
     }
 
+    // Tag dropdown
+    const [tagSelect, setTag] = useState("All Tags");
+    const handleSelectTag = (e) => {
+        setTag(e)
+    }
+
     var tableData1 = [];
     var i = 0;
     // Create table data
+
+    // Create an object to track whether we want to row visible depending on the filters
+    var rowVisible = {};
     while (i < Object.keys(conSummary.data.project_summaries).length) {
         var dataline = {};
+        dataline['id'] = i;
         dataline['project'] = conSummary.data.project_summaries[i]['project_name']
         var t = 0;
         var tags = [];
@@ -131,6 +143,16 @@ const SummaryPane = ({ conSummary, consortium }) => {
         }
 
         tableData1 = [...tableData1, dataline]
+
+        if (tagSelect == "All Tags") {
+            rowVisible[i] = true;
+        }       
+        else if (tags.includes(tagSelect) || tags.includes(tagSelect+', ')){
+            rowVisible[i] = true;        
+        }
+        else{
+            rowVisible[i] = false;
+        }
         i++
     }
 
@@ -181,6 +203,9 @@ const SummaryPane = ({ conSummary, consortium }) => {
         }
     };
 
+    // Sort the values of the tags for the drop down
+    const tagDropDownData = Object.values(tagData.data).map(t => t.data.name).sort()
+
     return (
         <Status fetchable={conSummary}>
             <Status.Loading>
@@ -194,12 +219,18 @@ const SummaryPane = ({ conSummary, consortium }) => {
             <Status.Available>
                 <>
                     <Col>
-                        <header>Resource summaries for all projects in Consortia. Column headers can be clicked on to order them. <a href={apiLocation}> Direct link to JSON.</a></header>
+                        <header>Resource summaries for all projects in Consortia. Column headers can be clicked on to order them, and tags can be filtered.<a href={apiLocation}> Direct link to JSON.</a></header>
+                        <DropdownButton title={tagSelect} value={tagSelect} onSelect={handleSelectTag}>
+                            <Dropdown.Item eventKey="All Tags">All Tags</Dropdown.Item>
+                            {tagDropDownData.map(tag => (
+                                <Dropdown.Item eventKey={tag}>{tag}</Dropdown.Item>
+                            ))}
+                        </DropdownButton>
                         <Table striped responsive="md" size='sm' >
 
 
                             <TableHead columns={filteredColumns} handleSorting={handleSorting} />
-                            <TableBody tableData={tableData} columns={filteredColumns} />
+                            <TableBody tableData={tableData} columns={filteredColumns} rowVisible={rowVisible}/>
                         </Table>
                     </Col>
                 </>

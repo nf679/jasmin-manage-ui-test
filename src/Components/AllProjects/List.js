@@ -197,6 +197,7 @@ const TagList = ({projectsSummary, resources, tagData, consortium}) => {
             setTableData(sorted);
         }
     };
+    // sort the values of the drop downs
     const conDropDownData = Object.values(consortium.data).map(c => c.data.name).sort()
     const tagDropDownData = Object.values(tagData.data).map(t => t.data.name).sort()
     
