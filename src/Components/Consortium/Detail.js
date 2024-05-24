@@ -151,7 +151,7 @@ const ConsortiumDetailWrapper = () => {
     );
 
     return (
-        <Status.Many fetchables={[consortium, conSummary, tags]}>
+        <Status.Many fetchables={[consortium, conSummary]}>
             <Status.Loading>
                 <div className="d-flex justify-content-center my-5">
                     <SpinnerWithText iconSize="lg" textSize="lg">
