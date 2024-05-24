@@ -79,7 +79,7 @@ const TableBody = ({ tableData, columns, rowVisible }) => {
     )
 }
 
-const SummaryPane = ({ conSummary, consortium, tagData }) => {
+const SummaryPane = ({ conSummary, consortium }) => {
     // Get the consortia id
     const con_id = consortium.data.id;
 
@@ -107,9 +107,10 @@ const SummaryPane = ({ conSummary, consortium, tagData }) => {
     var tableData1 = [];
     var i = 0;
     // Create table data
-
     // Create an object to track whether we want to row visible depending on the filters
     var rowVisible = {};
+    // Create set to keep track of what tags are being used so we can create a dropdown with only those
+    var tagsSet = new Set([]);
     while (i < Object.keys(conSummary.data.project_summaries).length) {
         var dataline = {};
         dataline['id'] = i;
@@ -118,6 +119,7 @@ const SummaryPane = ({ conSummary, consortium, tagData }) => {
         var tags = [];
         while (t < conSummary.data.project_summaries[i]['tags'].length) {
             tags = [...tags, conSummary.data.project_summaries[i]['tags'][t] + ', ']
+            tagsSet.add(conSummary.data.project_summaries[i]['tags'][t])
             t++;
         }
         if (tags.length >= 1) {
@@ -204,7 +206,9 @@ const SummaryPane = ({ conSummary, consortium, tagData }) => {
     };
 
     // Sort the values of the tags for the drop down
-    const tagDropDownData = Object.values(tagData.data).map(t => t.data.name).sort()
+    console.log(tagsSet)
+    const tagData = Array.from(tagsSet);
+    const tagDropDownData = tagData.sort();
 
     return (
         <Status fetchable={conSummary}>
