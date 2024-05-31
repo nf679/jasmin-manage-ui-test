@@ -14,7 +14,7 @@ import classNames from 'classnames';
 
 import { PageHeader } from 'fwtheme-react-jasmin';
 
-import { Status } from '../../rest-resource';
+import { Status, useNestedResource } from '../../rest-resource';
 
 import { useProjects } from '../../api';
 
@@ -24,7 +24,8 @@ import {
     ProjectStatusListItem,
     ProjectConsortiumListItem,
     ProjectCollaboratorsListItem,
-    ProjectCreatedAtListItem
+    ProjectCreatedAtListItem,
+    ProjectTagItem
 } from './CardItems';
 
 import { ProjectCreateButton } from './ProjectCreateButton';
@@ -34,21 +35,23 @@ import { ProjectJoinButton } from './ProjectJoinButton';
 const ProjectCard = ({ project }) => {
     const numServices = project.data.num_services || 0;
     const numRequirements = project.data.num_requirements || 0;
+    const tags = useNestedResource(project, "tags")
     return (
         <Card
             className={classNames("mb-3", { "text-muted": project.data.status === "COMPLETED" })}
             style={{ borderWidth: '3px' }}
         >
-            <Card.Header>
+            <Card.Header style={{ display: "inline-flex", justifyContent: "space-between" }}>
                 <h5 className="mb-0">{project.data.name}</h5>
+                {/* disabled until we want users to be able to see tags <ProjectTagItem tags={tags} />*/}
             </Card.Header>
             <ListGroup variant="flush" className="border-0">
                 <ProjectStatusListItem project={project} />
                 <ProjectConsortiumListItem project={project} />
                 <ListGroup.Item>
                     Project has{" "}
-                    <strong>{numRequirements} requirement{numRequirements !== 1  ? 's' : ''}</strong> in{" "}
-                    <strong>{numServices} service{numServices !== 1  ? 's' : ''}</strong>.
+                    <strong>{numRequirements} requirement{numRequirements !== 1 ? 's' : ''}</strong> in{" "}
+                    <strong>{numServices} service{numServices !== 1 ? 's' : ''}</strong>.
                 </ListGroup.Item>
                 <ProjectCollaboratorsListItem project={project} />
                 <ProjectCreatedAtListItem project={project} />

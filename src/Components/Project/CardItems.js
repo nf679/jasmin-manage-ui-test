@@ -2,6 +2,8 @@ import React from 'react';
 
 import ListGroup from 'react-bootstrap/ListGroup';
 
+import Badge from 'react-bootstrap/Badge';
+
 import { Link } from 'react-router-dom';
 
 import moment from 'moment';
@@ -122,3 +124,63 @@ export const ProjectCreatedAtListItem = ({ project }) => {
     const createdAt = moment(project.data.created_at).fromNow();
     return <ListGroup.Item>Project was created <strong>{createdAt}</strong>.</ListGroup.Item>;
 };
+
+export const ProjectTagItem = ({ tags }) => {
+    // Number corresponding to the tags
+    var tagkeys = tags.data;
+    // Only return tag item if there is one
+    if (Object.keys(tagkeys).length>0) {
+        return (
+            <ListGroup.Item>
+            <div style={{display: "inline-flex"}}>
+                Tags:&nbsp;&nbsp;{Object.keys(tagkeys).map((d) => (
+                    <div>
+                        {/* <button
+                            class="btn btn-light"
+                            type="button" 
+                            style={{
+                                borderRadius: "20px",
+                                lineHeight:"1px",
+                                textAlign: "center",
+                                fontSize: "14px",
+                                display: "inline-block",
+                                margin: "0px 2px",
+                                height: "25px"
+                            }}
+                        > {tagkeys[d].data.name} </button> */}
+                        {/* <Badge >
+                          {tagkeys[d].data.name}
+                        </Badge> */}
+                        <b><font size="3">{tagkeys[d].data.name}&nbsp;&nbsp;</font></b>
+                    </div>
+                ))}
+            </div>
+            </ListGroup.Item>
+        );
+    }
+    return ""
+}
+
+export const TagConsortiumItem = ({ project }) => {
+    // Map the consortia id to the consortia names
+    const consortia = useConsortia();
+    return (
+        <Status fetchable={consortia}>
+            <Status.Loading>
+                <SpinnerWithText>Loading consortia...</SpinnerWithText>
+             </Status.Loading>
+             <Status.Unavailable>
+                <span className="text-danger">
+                    <i className="fas fa-exclamation-triangle mr-2"></i>
+                    Unable to load consortia.
+                </span>
+            </Status.Unavailable>
+            <Status.Available>
+                {data => {
+                    const consortium = data[project.data.consortium];
+                    return (consortium.data.name);
+                    }}
+                </Status.Available>
+        </Status>
+    );
+}

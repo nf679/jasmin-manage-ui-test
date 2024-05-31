@@ -36,6 +36,7 @@ const Resources = createContextForResource("/api/resources/");
 const CategoriesProvider = withAuthentication(Categories.Provider);
 const ConsortiaProvider = withAuthentication(Consortia.Provider);
 const ResourcesProvider = withAuthentication(Resources.Provider);
+//const TagsProvider = withAuthentication(Tags.Provider);
 
 // Export the hooks for each resource
 export const useCategories = Categories.hook;
@@ -59,6 +60,12 @@ export const Provider = ({ children }) => (
 // Export a hook for loading a consortium by id
 export const useConsortium = (id, options) => useInstance(`/api/consortia/${id}/`, options);
 
+// Export hook for loading consortium summary
+export const useConsortiumSummary = (id, options) => useInstance(`/api/consortia/${id}/summary`, options);
+
+// Export hook for loading consortium summary
+export const useProjectsSummary =  options => useResource(`/api/projects?summary=true`, options);
+
 // Export hooks for accessing projects
 // We don't treat the project list as a top-level shared resource because:
 //   1. The list, or objects within it, changes relatively often
@@ -70,8 +77,13 @@ export const useProject = (id, options) => useInstance(`/api/projects/${id}/`, o
 // Export hook for loading requirement by id
 export const useRequirement = (id, options) => useInstance(`/api/requirements/${id}/`, options);
 
+// Export hook for accessing tags
+export const useTags = options => useResource("/api/tags/", options);
+export const useTag = (id, options) => useInstance(`/api/tag/${id}/`, options);
+
 // Export hook for loading service by id
 export const useService = (id, options) => useInstance(`/api/services/${id}/`, options);
+export const useServices = options => useResource(`/api/services/`, options);
 
 // Export a function for joining a project with an invite code
 export const joinProject = async code => apiFetch('/api/join/', { method: 'POST', data: { code } });
@@ -109,7 +121,7 @@ export const useProjectEvents = (project, options) => {
             const url = new URL(eventsUrl);
             // If there is a most recent event, use its time for the since parameter
             const event = data.find(_ => true);
-            if( event ) url.searchParams.append("since", event.created_at);
+            if (event) url.searchParams.append("since", event.created_at);
             // Mark the fetch as in progress
             setFetching(true);
             // In order to prevent state updates after a component has been unmounted,
@@ -131,7 +143,7 @@ export const useProjectEvents = (project, options) => {
                 .catch(error => {
                     // If the error is an abort error, it is because the component that
                     // owns the data has been unmounted so don't update the state
-                    if( error.name === "AbortError" ) return;
+                    if (error.name === "AbortError") return;
                     setFetching(false);
                     setDirty(false);
                     setFetchError(error);

@@ -7,6 +7,7 @@ import Form from 'react-bootstrap/Form';
 import BootstrapFormContext from 'react-bootstrap/FormContext';
 
 import ReactSelect from 'react-select';
+import CreatableSelect from 'react-select/creatable';
 
 import * as FormContext from './Context';
 import { Status } from '../Status';
@@ -73,7 +74,7 @@ const SelectWithRequired = ({
                     position: "absolute"
                 }}
                 value={state}
-                onChange={() => {/* NOOP */}}
+                onChange={() => {/* NOOP */ }}
                 // When the hidden input is focussed as part of the required validation,
                 // pass the focus onto the select
                 onFocus={() => selectRef.current.focus()}
@@ -84,6 +85,63 @@ const SelectWithRequired = ({
     );
 };
 
+const SelectMulti = ({
+    options,
+    value,
+    onChange,
+    disabled,
+    required,
+    isMulti,
+    className,
+    getOptionLabel = option => option.label,
+    getOptionValue = option => option.value,
+    ...props
+}) => {
+    // Store the current value as internal state
+    const [state, setState] = useState(value);
+    // When the value changes, use it to set the state
+    useEffect(() => { setState(value); }, [value]);
+    // Maintain a reference to the select that we will use to correctly maintain focus
+    const selectRef = useRef(null);
+    // When the select is changed, update the internal state and call the handler
+    const handleSelectChange = option => {
+        const optionValue = [getOptionValue(option)];
+        setState(optionValue);
+        onChange(optionValue);
+    };
+    // Sort the options by the label
+    // const sortedOptions = [...options].sort(
+    //     (opt1, opt2) => {
+    //         const [label1, label2] = [getOptionLabel(opt1), getOptionLabel(opt2)];
+    //         return (label1 > label2 ? 1 : (label1 < label2 ? -1 : 0));
+    //     }
+    // );
+    // Select the option that corresponds to the given value
+
+    var selectedOption = options.find(opt => getOptionValue(opt) === value);
+    if (!(selectedOption)) {
+        selectedOption = []
+    }
+    // Render the select with a hidden text input that implements required
+    return (
+        <div className={classNames(className, 'rich-select')}>
+            <ReactSelect
+                {...props}
+                options={options}
+                value={selectedOption}
+                onChange={handleSelectChange}
+                ref={selectRef}
+                isDisabled={disabled}
+                getOptionLabel={getOptionLabel}
+                getOptionValue={getOptionValue}
+                isMulti={isMulti}
+                required={required}
+                //defaultValue={[]}
+                isClearable
+            />
+        </div>
+    );
+};
 
 export const Control = forwardRef(
     (
@@ -101,7 +159,7 @@ export const Control = forwardRef(
             // Custom classes for the underlying control
             className,
             // Allow an additional onChange handler to be defined for the control
-            onChange = _ => {/* NOOP */},
+            onChange = _ => {/* NOOP */ },
             // Additional properties that are forwarded to the underlying control
             ...props
         },
@@ -176,6 +234,8 @@ export const TextArea = asControl("textarea", evt => evt.target.value);
  */
 export const Select = asControl(SelectWithRequired);
 
+export const SelectMultiControl = asControl(SelectMulti);
+
 
 // The default placeholder component
 // This shouldn't actually be responsible
@@ -223,6 +283,34 @@ export const ResourceSelect = ({
     return <Select {...selectProps} options={options} />;
 };
 
+export const ResourceMultiSelect = ({
+    resource,
+    resourceName,
+    resourceNamePlural = `${resourceName}s`,
+    filterResources = _ => true,
+    PlaceholderComponent = DefaultPlaceholderComponent,
+    ...props
+}) => {
+    // Pass the available resources as the options
+    const options = Object.values(resource.data).filter(filterResources);
+    //console.log(options)
+    const selectProps = {
+        // By default, use the name as the label and the id as the value
+        getOptionLabel: option => option.data.name,
+        getOptionValue: option => option.data.id,
+        // Use a placeholder that shows the loading status
+        placeholder: (
+            <DefaultPlaceholderComponent
+                resource={resource}
+                resourceName={resourceName}
+                resourceNamePlural={resourceNamePlural}
+            />
+        ),
+        ...props
+    };
+    // Render the select with the available options
+    return <SelectMultiControl {...selectProps} options={options} />;
+};
 
 // The default error component is an invalid Bootstrap form feedback component
 const DefaultErrorItemComponent = ({ children }) => (
@@ -252,7 +340,7 @@ export const ErrorList = ({
     // Extract the list of errors for the field
     const errorList = formErrors[id || idFromContext] || [];
     // If there are no errors, we are done
-    if( errorList.length < 1 ) return null;
+    if (errorList.length < 1) return null;
     // Render the errors using the specified components
     return (
         <ErrorListComponent>

@@ -26,6 +26,9 @@ const ManageNavBar = () => {
                     <LinkContainer to="/consortia">
                         <Nav.Link>Consortia</Nav.Link>
                     </LinkContainer>
+                    <LinkContainer to="/all_projects">
+                        <Nav.Link>All Projects</Nav.Link>
+                    </LinkContainer>
                 </Nav>
                 {currentUser.initialised && (
                     // If the user is being impersonated, set a UI hint to indicate that

@@ -14,7 +14,7 @@ const backendUrl = process.env.PROXY_BACKEND_URL || 'http://localhost:8000';
 
 const proxy = createProxyMiddleware(
     // Proxy the prefixes used by the Django backend
-    ['/admin', '/api', '/assets', '/auth'],
+    ['/admin', '/api', '/assets', '/auth', '/__debug__'],
     {
         target: backendUrl,
         changeOrigin: true,

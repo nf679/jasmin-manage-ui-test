@@ -20,34 +20,37 @@ import { useNotifications } from 'react-bootstrap-notify';
 
 import { PageHeader } from 'fwtheme-react-jasmin';
 
-import { Status, useNestedResource } from '../../rest-resource';
+import {
+    Status, useNestedResource,
+    useEnsureInitialised
+} from '../../rest-resource';
 
-import { useConsortia, useConsortium } from '../../api';
+import { useConsortia, useConsortium, useConsortiumSummary} from '../../api';
 
 import { SpinnerWithText, notificationFromError } from '../utils';
 
 import OverviewPane from './OverviewPane';
 import ProjectsPane from './ProjectsPane';
-import ListPane from './ProjectListPane';
+import SummaryPane from './ProjectSummaryPane';
 
 
-const ConsortiumDetail = ({ consortium }) => {
+const ConsortiumDetail = ({ consortium, conSummary }) => {
     // We don't want to be reloading resources as the user flips between tabs
     // So load both nested resources here
     const notify = useNotifications();
     const projects = useNestedResource(consortium, "projects");
     const quotas = useNestedResource(consortium, "quotas");
 
-    if( projects.fetchError ) {
+    if (projects.fetchError) {
         return (
             notify(notificationFromError(projects.fetchError)),
-            <Redirect to='/consortia'/>
+            <Redirect to='/consortia' />
         );
     }
-    if( quotas.fetchError ) {
+    if (quotas.fetchError) {
         return (
             notify(notificationFromError(quotas.fetchError)),
-            <Redirect to='/consortia'/>
+            <Redirect to='/consortia' />
         );
     }
 
@@ -96,10 +99,10 @@ const ConsortiumDetail = ({ consortium }) => {
                         </LinkContainer>
                     </Nav.Item>
                     <Nav.Item>
-                        <LinkContainer to={`${url}/list`}>
+                        <LinkContainer to={`${url}/summary`}>
                             <Nav.Link>
                                 <div className="d-flex align-items-center">
-                                    <span>Projects List</span>
+                                    <span>Projects Summary</span>
                                 </div>
                             </Nav.Link>
                         </LinkContainer>
@@ -112,8 +115,8 @@ const ConsortiumDetail = ({ consortium }) => {
                     <Route path={`${path}/projects`}>
                         <ProjectsPane projects={projects} />
                     </Route>
-                    <Route path={`${path}/list`}>
-                        <ListPane projects={projects} />
+                    <Route path={`${path}/summary`}>
+                        <SummaryPane conSummary={conSummary} consortium={consortium}/>
                     </Route>
                 </Switch>
             </Col>
@@ -129,6 +132,10 @@ const ConsortiumDetailWrapper = () => {
     // Get the consortium id from the path
     const { id: consortiumId } = useParams();
 
+    // Use the consortium id to get the summary and load at this level 
+    // to ensure its loaded if user goes stright to summary page
+    const conSummary = useConsortiumSummary(consortiumId)
+
     // Initialise the consortium, using initial data from the consortia
     const initialData = consortia.data[consortiumId]?.data;
     const consortium = useConsortium(consortiumId, { initialData });
@@ -136,7 +143,7 @@ const ConsortiumDetailWrapper = () => {
     // If the project failed to load, notify the user
     useEffect(
         () => {
-            if( consortium.fetchError ) {
+            if (consortium.fetchError) {
                 notify(notificationFromError(consortium.fetchError));
             }
         },
@@ -144,7 +151,7 @@ const ConsortiumDetailWrapper = () => {
     );
 
     return (
-        <Status fetchable={consortium}>
+        <Status.Many fetchables={[consortium, conSummary]}>
             <Status.Loading>
                 <div className="d-flex justify-content-center my-5">
                     <SpinnerWithText iconSize="lg" textSize="lg">
@@ -156,9 +163,9 @@ const ConsortiumDetailWrapper = () => {
                 <Redirect to="/consortia" />
             </Status.Unavailable>
             <Status.Available>
-                <ConsortiumDetail consortium={consortium} />
+                <ConsortiumDetail consortium={consortium} conSummary={conSummary}/>
             </Status.Available>
-        </Status>
+        </Status.Many>
     );
 };
 

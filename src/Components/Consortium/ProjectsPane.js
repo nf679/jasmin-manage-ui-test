@@ -8,34 +8,41 @@ import Row from 'react-bootstrap/Row';
 
 import { LinkContainer } from 'react-router-bootstrap';
 
-import { Status } from '../../rest-resource';
+import { Status, useNestedResource } from '../../rest-resource';
 
 import { SpinnerWithText, sortByKey } from '../utils';
 
 import {
     ProjectStatusListItem,
     ProjectCollaboratorsListItem,
-    ProjectCreatedAtListItem
+    ProjectCreatedAtListItem,
+    ProjectTagItem
 } from '../Project/CardItems';
+import { ListGroupItem } from 'react-bootstrap';
 
 
 const ProjectCard = ({ project }) => {
     const numServices = project.data.num_services || 0;
     const numRequirements = project.data.num_requirements || 0;
+    const tags = useNestedResource(project, "tags")
     return (
         <Card className="mb-3" style={{ borderWidth: '3px' }}>
             <Card.Header>
                 <h5 className="mb-0">{project.data.name}</h5>
+                
+                
             </Card.Header>
             <ListGroup variant="flush" className="border-0">
                 <ProjectStatusListItem project={project} />
                 <ListGroup.Item>
                     Project has{" "}
-                    <strong>{numRequirements} requirement{numRequirements !== 1  ? 's' : ''}</strong> in{" "}
-                    <strong>{numServices} service{numServices !== 1  ? 's' : ''}</strong>.
+                    <strong>{numRequirements} requirement{numRequirements !== 1 ? 's' : ''}</strong> in{" "}
+                    <strong>{numServices} service{numServices !== 1 ? 's' : ''}</strong>.
                 </ListGroup.Item>
                 <ProjectCollaboratorsListItem project={project} />
                 <ProjectCreatedAtListItem project={project} />
+                {/* <ListGroup.Item><font size="3">Tags: </font><><ProjectTagItem tags={tags} /></></ListGroup.Item> */}
+                <ProjectTagItem tags={tags} />
             </ListGroup>
             <Card.Footer className="text-right">
                 {/* Pass the project data as state */}
@@ -82,7 +89,7 @@ const ProjectsPane = ({ projects }) => {
                                 <Col key={project.data.id}>
                                     <ProjectCard project={project} />
                                 </Col>
-                        ))}
+                            ))}
                         </Row>
                     );
                 }}
