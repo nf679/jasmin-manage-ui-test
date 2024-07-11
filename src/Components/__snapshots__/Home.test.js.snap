@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`renders the JASMIN Projects Portal Homepage correctly 1`] = `
+exports[`Home Component matches the snapshot 1`] = `
 <div
   className="row"
 >
