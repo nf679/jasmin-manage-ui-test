@@ -30,11 +30,11 @@ describe('Home Component', () => {
         );
 
         // Expect there to be some text saying 'JASMIN Projects Portal' in the page
-        expect(screen.getByText('JASMIN Projects Portal')).toBeInTheDocument();
+        expect(screen.getByText('JASMIN Projects Portal')).toBeVisible();
         // Expect there to be some text saying 'Welcome to the ...' in the page
-        expect(screen.getByText('Welcome to the JASMIN Projects Portal.')).toBeInTheDocument();
+        expect(screen.getByText('Welcome to the JASMIN Projects Portal.')).toBeVisible();
         // Expect there to be some text saying 'Using this portal, you...' in the page
-        expect(screen.getByText('Using this portal, you can request JASMIN resources for your project and track their status.')).toBeInTheDocument();
+        expect(screen.getByText('Using this portal, you can request JASMIN resources for your project and track their status.')).toBeVisible();
     });
 
     // Test that the button works properly
@@ -47,7 +47,7 @@ describe('Home Component', () => {
 
         // Check that the button is on the screen
         const manageProjectsButton = screen.getByRole('link', { name: /Manage my projects/i });
-        expect(manageProjectsButton).toBeInTheDocument();
+        expect(manageProjectsButton).toBeVisible();
 
     });
 });
