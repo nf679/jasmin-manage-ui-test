@@ -4,7 +4,6 @@ import NotFound from './NotFound';
 
 it('Renders the page correctly', () => {
     const { getByText, getByRole } = render(<NotFound />);
-//    const { getByRole } = render(<NotFound />);
 
     const mainHeading = getByText('Page Not Found');
     const alertIcon = getByRole('ROLE', {name: "NAME"});
