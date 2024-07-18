@@ -63,6 +63,7 @@ const TableHead = ({ columns, handleSorting }) => {
 const TableBody = ({ tableData, columns, rowVisible }) => {
     // Event to launch pop up when clicking on a row
     const rowDetails = (rowIndex) => {
+
         console.log(`clicked on row with index: ${rowIndex}`);
         
     }
@@ -82,7 +83,7 @@ const TableBody = ({ tableData, columns, rowVisible }) => {
                                 return <td key={accessor}>{tData}</td>;
                             })}
                             {/* <td><Button onClick={rowDetails}>details</Button></td> */}
-                            <td><Button href={location['href'].replace(path, '/projects/'+data.proj_id)}>Details</Button></td>
+                            <td><Button href={location['href'].replace(path, '/projects/'+data.proj_id)} target="_blank">Details</Button></td>
                         </tr>
                     );}
                 })}
