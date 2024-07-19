@@ -15,6 +15,7 @@
     "@testing-library/dom": "^10.3.1",
     "@testing-library/jest-dom": "^6.4.6",
     "@testing-library/react": "^12.1.5",
+    "@vanilla-extract/jest-transform": "^1.1.7",
     "classnames": "^2.3.2",
     "fwtheme-react-jasmin": "github:cedadev/fwtheme-react-jasmin#fix-packaging",
     "js-cookie": "^2.2.1",
