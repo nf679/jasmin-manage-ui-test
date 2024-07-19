@@ -6,7 +6,7 @@ it('Renders the page correctly', () => {
     const { getByText, getByRole } = render(<NotFound />);
 
     const mainHeading = getByText('Page Not Found');
-    const alertIcon = getByRole('ROLE', {name: "NAME"});
+    const alertIcon = getByRole('alert', {name: ''});
     const alertMessage = getByText(/The page you are looking for does not exist/i);
 
     expect(mainHeading).toBeInTheDocument();
