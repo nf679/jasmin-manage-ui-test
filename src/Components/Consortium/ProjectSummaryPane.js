@@ -53,6 +53,7 @@ const TableHead = ({ columns, handleSorting }) => {
                             {label}  <div className={cl}></div>
                         </th>;
                     })}
+                    <th></th>
                 </tr>
             </thead>
         </>
@@ -60,6 +61,16 @@ const TableHead = ({ columns, handleSorting }) => {
 }
 
 const TableBody = ({ tableData, columns, rowVisible }) => {
+    // Event to launch pop up when clicking on a row
+    const rowDetails = (rowIndex) => {
+
+        console.log(`clicked on row with index: ${rowIndex}`);
+        
+    }
+
+    //const handleClick = () ==> rowDetails();
+    const path = useLocation().pathname
+
     return (
         <>
             <tbody>
@@ -71,6 +82,8 @@ const TableBody = ({ tableData, columns, rowVisible }) => {
                                 const tData = data[accessor] ? data[accessor] : "—";
                                 return <td key={accessor}>{tData}</td>;
                             })}
+                            {/* <td><Button onClick={rowDetails}>details</Button></td> */}
+                            <td><Button href={location['href'].replace(path, '/projects/'+data.proj_id)} target="_blank">Details</Button></td>
                         </tr>
                     );}
                 })}
@@ -87,16 +100,21 @@ const SummaryPane = ({ conSummary, consortium }) => {
     const path = useLocation().pathname
     const apiLocation = location['href'].replace(path, '/api' + path + '?format=json')
 
+    console.log(conSummary)
 
     // Define columns
     const columnsInput = Object.keys(conSummary.data.project_summaries[0].resource_summary)
     var columns = [{ label: 'Project', accessor: 'project', sortable: true }, { label: 'Tags', accessor: 'tags', sortable: false }, { label: 'Collaborators', accessor: 'collaborators', sortable: false }];
-    const dont_sum_columns = ['project', 'tags', 'collaborators']; // this is needed because we try to summ all the fields
+    const dont_sum_columns = ['project', 'tags', 'collaborators', 'earliest', 'latest']; // this is needed because we try to summ all the fields
     var i = 0;
     while (i < Object.values(columnsInput).length) {
         columns = [...columns, { label: Object.values(columnsInput)[i], accessor: Object.values(columnsInput)[i].replaceAll(' ', '_'), sortable: true }];
         i++
     }
+    // Add the end date columns
+    columns = [...columns, { label: 'Earliest End Date', accessor: 'earliest', sortable: true }, { label: 'Latest End Date', accessor: 'latest', sortable: true }]
+
+    console.log(columns)
 
     // Tag dropdown
     const [tagSelect, setTag] = useState("All Tags");
@@ -115,6 +133,7 @@ const SummaryPane = ({ conSummary, consortium }) => {
         var dataline = {};
         dataline['id'] = i;
         dataline['project'] = conSummary.data.project_summaries[i]['project_name']
+        dataline['proj_id'] = conSummary.data.project_summaries[i]['id']
         var t = 0;
         var tags = [];
         while (t < conSummary.data.project_summaries[i]['tags'].length) {
@@ -143,6 +162,10 @@ const SummaryPane = ({ conSummary, consortium }) => {
 
             r++
         }
+
+        dataline['latest'] = conSummary.data.project_summaries[i]['requirement_end_dates']['latest']
+        dataline['earliest'] = conSummary.data.project_summaries[i]['requirement_end_dates']['earliest']
+
 
         tableData1 = [...tableData1, dataline]
 
@@ -206,9 +229,10 @@ const SummaryPane = ({ conSummary, consortium }) => {
     };
 
     // Sort the values of the tags for the drop down
-    console.log(tagsSet)
     const tagData = Array.from(tagsSet);
     const tagDropDownData = tagData.sort();
+
+
 
     return (
         <Status fetchable={conSummary}>
@@ -223,14 +247,17 @@ const SummaryPane = ({ conSummary, consortium }) => {
             <Status.Available>
                 <>
                     <Col>
-                        <header>Resource summaries for all projects in Consortia. Column headers can be clicked on to order them, and tags can be filtered.<a href={apiLocation}> Direct link to JSON.</a></header>
+                        <p>Resource summaries for all projects in Consortia. <a href={apiLocation}> Direct link to JSON.</a>
+                        </p>
+                        <p>Earliest and latest end dates denote the earliest and latest end dates for requirements in that project.</p>
+                        <p>Column headers can be clicked on to order them, and tags can be filtered.</p>
                         <DropdownButton title={tagSelect} value={tagSelect} onSelect={handleSelectTag}>
                             <Dropdown.Item eventKey="All Tags">All Tags</Dropdown.Item>
                             {tagDropDownData.map(tag => (
                                 <Dropdown.Item eventKey={tag}>{tag}</Dropdown.Item>
                             ))}
                         </DropdownButton>
-                        <Table striped responsive="md" size='sm' >
+                        <Table striped responsive="md" size='sm'>
 
 
                             <TableHead columns={filteredColumns} handleSorting={handleSorting} />
