@@ -20,5 +20,9 @@ jobs:
       - name: Run Jest tests
         run: yarn test
 
-      - name: Upload coverage to Coveralls
-        run: cat ./coverage/lcov.info | yarn coveralls
+      - name: Create coverage badge
+        uses: tj-actions/badge@v1.8
+        with:
+          label: coverage
+          value: ${{ steps.test.outputs.coverage }}
+          status: ${{ steps.test.outputs.status }}
