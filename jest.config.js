@@ -9,4 +9,6 @@ module.exports = {
     '^.+\\.jsx?$': 'babel-jest', // javascript and react files
     '\\.css(.ts)?$': './cssTransformer.js', // css files
   },
+  collectCoverage: true,
+  coverageReporters: ['lcov', 'text'],
 };

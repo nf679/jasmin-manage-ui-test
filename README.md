@@ -1,7 +1,7 @@
 # jasmin-manage-ui
 
 ![CI](https://github.com/nf679/jasmin-manage-ui-test/actions/workflows/main.yml/badge.svg)
-
+![Coverage Status](https://coveralls.io/repos/github/nf679/jasmin-manage-ui-test/badge.svg)
 
 [React](https://reactjs.org/) user interface for the JASMIN Projects Portal,
 which consumes the [JASMIN Manage API](https://github.com/cedadev/jasmin-manage).

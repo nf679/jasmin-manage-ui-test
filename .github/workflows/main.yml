@@ -19,3 +19,6 @@ jobs:
 
       - name: Run Jest tests
         run: yarn test
+
+      - name: Upload coverage to Coveralls
+        run: cat ./coverage/lcov/info | yarn coveralls
