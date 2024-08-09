@@ -21,4 +21,4 @@ jobs:
         run: yarn test
 
       - name: Upload coverage to Coveralls
-        run: cat ./coverage/lcov/info | yarn coveralls
+        run: cat ./coverage/lcov.info | yarn coveralls
