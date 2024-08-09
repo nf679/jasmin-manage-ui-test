@@ -1,6 +1,6 @@
 # jasmin-manage-ui
 
-![CI](https://github.com/nf679/jasmin-manage-ui-test/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/nf679/jasmin-manage-ui-test/actions/workflows/main.yml/badge.svg)
 
 
 [React](https://reactjs.org/) user interface for the JASMIN Projects Portal,
