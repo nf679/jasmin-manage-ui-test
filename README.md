@@ -46,3 +46,8 @@ And maybe
 rm -rf node_modules 
 rm yarn.lock 
 ```
+
+To run tests locally, use:
+```sh
+yarn test
+```
