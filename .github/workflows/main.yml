@@ -2,8 +2,9 @@ name: Run Tests
 
 on:
   pull_request:
-      branches:
-        - main
+  push:
+    branches:
+      - "master"
 
 jobs:
   test:
@@ -11,15 +12,17 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '14'
+        uses: actions/checkout@v4
 
       - name: Install dependencies
         run: yarn install
 
       - name: Run Jest tests
         run: yarn test
+
+      - name: Create coverage badge
+        uses: tj-actions/badge@v1.8
+        with:
+          label: coverage
+          value: ${{ steps.test.outputs.coverage }}
+          status: ${{ steps.test.outputs.status }}
