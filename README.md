@@ -51,5 +51,3 @@ To run tests locally, use:
 ```sh
 yarn test
 ```
-
-arb change ...
